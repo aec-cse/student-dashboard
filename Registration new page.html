@@ -1,0 +1,170 @@
+<html>
+<head>
+    <title>Internship Registration Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        form {
+            max-width: 700px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"] {
+            width: 100%;
+            padding: 6px;
+            margin-top: 4px;
+        }
+        textarea {
+            width: 100%;
+            padding: 6px;
+        }
+        .section {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Anusaya Trading and IT Solutions</h1>
+<h2>Internship Registration Form</h2>
+
+<form>
+    <div class="section">
+        <h3>Student Personal Information</h3>
+        <label>Full Name:</label>
+        <input type="text" name="fullname">
+
+        <label>Date of Birth:</label>
+        <input type="date" name="dob">
+
+        <label>Gender:</label>
+        <input type="radio" name="gender" value="Male"> Male
+        <input type="radio" name="gender" value="Female"> Female
+        <input type="radio" name="gender" value="Other"> Other
+
+        <label>Email:</label>
+        <input type="email" name="email">
+
+        <label>Contact Number:</label>
+        <input type="text" name="contact">
+
+        <label>Current Address:</label>
+        <textarea name="address" rows="2"></textarea>
+
+        <label>PIN:</label>
+        <input type="text" name="pin">
+    </div>
+
+    <div class="section">
+        <h3>Academic Details</h3>
+        <label>College/University Name:</label>
+        <input type="text" name="college">
+
+        <label>Degree Program:</label>
+        <input type="checkbox" name="degree" value="BE"> BE
+        <input type="checkbox" name="degree" value="B.Tech"> B.Tech
+        <input type="checkbox" name="degree" value="MCA"> MCA
+        <input type="checkbox" name="degree" value="Other"> Other
+
+        <label>Branch/Specialization:</label>
+        <input type="text" name="branch">
+
+        <label>Current Semester:</label>
+        <input type="text" name="semester">
+
+        <label>Aggregate Percentage/CGPA:</label>
+        <input type="text" name="cgpa">
+
+        <label>Expected Year of Graduation:</label>
+        <input type="text" name="graduation">
+
+        <label>Do you have any active backlogs?</label>
+        <input type="radio" name="backlogs" value="Yes"> Yes
+        <input type="radio" name="backlogs" value="No"> No
+
+        <label>If Yes, how many?</label>
+        <input type="text" name="backlog_count">
+    </div>
+
+    <div class="section">
+        <h3>Technical Skills</h3>
+        <label>Programming Languages:</label>
+        <input type="text" name="languages">
+
+
+        <label>Tools/Software:</label>
+        <input type="text" name="tools">
+
+        <label>Areas of Interest:</label>
+        <input type="text" name="interests">
+
+    </div>
+
+    <div class="section">
+        <h3>Internship Preferences</h3>
+        <label>Preferred Start Date:</label>
+        <input type="date" name="Starting Date">
+
+        <label>Duration Available For Internship:</label>
+        <input type="checkbox" name="degree" value="3 Months"> 3 Months
+        <input type="checkbox" name="degree" value="6 Months"> 6 Months
+        <input type="checkbox" name="degree" value="12 Months"> 12 Months
+        <input type="checkbox" name="degree" value="Other"> Other
+
+        <label> Preferred Domain:</label>
+        <input type="checkbox" name="degree" value="Web Developement"> Web Developement
+        <input type="checkbox" name="degree" value="Mobile App Developement"> Mobile App Developement
+        <input type="checkbox" name="degree" value="Data Analysis"> Data Analysis
+        <input type="checkbox" name="degree" value="Networking"> Networking
+        <input type="checkbox" name="degree" value="Other"> Other
+       
+    </div>
+
+    <div class="section">
+        <h3>Additional Information</h3>
+        <label>Why do you want to join this internship ?</label>
+        <input type="text" name="languages">
+
+        <label>Do you have any prior Internship Experience ?
+        <input type="radio" name="degree" value="Yes"> Yes
+        <input type="radio" name="degree" value="No"> No  If yes, please provide details(Company,Duration,Role):</label>
+        <input type="text" name="tools">
+
+        <label> How did you hear about us ?</label>
+        <input type="checkbox" name="degree" value="College"> College
+        <input type="checkbox" name="degree" value="Friend/Family"> Friend/Family
+        <input type="checkbox" name="degree" value="Social Media"> Social Media
+        <input type="checkbox" name="degree" value="Other"> Other
+
+    </div>
+
+    <div class="section">
+        <h3>Documents Checklist</h3>
+
+        <input type="checkbox" name="degree" value="Copy of college ID card"> Copy of college ID card
+        <input type="checkbox" name="degree" value="Updated Resume/CV"> Updated Resume/CV
+        <input type="checkbox" name="degree" value="Latest Grade Sheet/Marksheet"> Latest Grade Sheet/Marksheet
+
+    </div>
+
+
+    <div style="margin-top: 20px; text-align: center;">
+        <button type="submit">Submit</button>
+    </div>
+
+</form>
+
+</body>
+</html>
