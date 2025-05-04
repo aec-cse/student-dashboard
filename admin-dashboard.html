@@ -1,1 +1,242 @@
-admin
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: #4083c7;
+    }
+    .dashboard {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #091538;
+      color: #fff;
+      display: flex;admin
+      flex-direction: column;
+      padding: 20px;
+    }
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .sidebar a {
+      text-decoration: none;
+      color: #ccc;
+      padding: 10px 15px;
+      margin: 5px 0;
+      border-radius: 5px;
+      display: block;
+      cursor: pointer;
+    }
+    .sidebar a:hover {
+      background-color: #214e7a;
+      color: #fff;
+    }
+    .main-content {
+      flex-grow: 1;
+      background-color: hsla(212, 75%, 51%, 0.74);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .header {
+      background-color: #6c757d;
+      color: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    /* Dashboard Section */
+    .dashboard-content {
+      display: block;
+    }
+    .dashboard-content .content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+    }
+    .card p {
+      margin: 0;
+      color: #6c757d;
+    }
+    /* Main Content Section */
+    .general-content {
+      display: none;
+    }
+    .unique-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .info-box {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .grid-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }
+    .grid-item {
+      background-color: #e9ecef;
+      border-radius: 5px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+    }
+    .grid-item:hover {
+      background-color: #6c757d;
+      color: white;
+      cursor: pointer;
+      transform: translateY(-5px);
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Welcome Admin</h2>
+      <a onclick="loadContent('dashboard')">Dashboard</a>
+      <a onclick="loadContent('user-management')">User Management</a>
+      <a onclick="loadContent('settings')">Settings</a>
+      <a onclick="loadContent('reports')">Reports</a>
+      <a onclick="loadContent('logout')">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Dashboard Content -->
+      <div id="dashboard-content" class="dashboard-content">
+        <div class="header">Admin Dashboard</div>
+        <div class="content">
+          <div class="card">
+            <h3>Manage Users</h3>
+          </div>
+          <div class="card">
+            <h3>Active Sessions</h3>
+          </div>
+          <div class="card">
+            <h3>Add Courses</h3>
+          </div>
+          <div class="card">
+            <h3>Reports Generated</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- General Content -->
+      <div id="main-content" class="general-content">
+        <div class="header">Main Content</div>
+        <div class="unique-layout">
+          <div class="info-box">
+            <h3>Section Title</h3>
+            <p>Details or description for this section.</p>
+          </div>
+          <div class="grid-layout">
+            <div class="grid-item">Item 1</div>
+            <div class="grid-item">Item 2</div>
+            <div class="grid-item">Item 3</div>
+            <div class="grid-item">Item 4</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function loadContent(page) {
+      const dashboardContent = document.getElementById('dashboard-content');
+      const mainContent = document.getElementById('main-content');
+
+      if (page === 'dashboard') {
+        dashboardContent.style.display = 'block';
+        mainContent.style.display = 'none';
+      } else {
+        dashboardContent.style.display = 'none';
+        mainContent.style.display = 'block';
+
+        let html = '';
+        switch (page) {
+          case 'user-management':
+            html = `
+              <div class="info-box">
+                <h3>User Management</h3>
+                <p>Manage users here. Add, update, or delete users.</p>
+              </div>
+              <div class="grid-layout">
+                <div class="grid-item">User 1</div>
+                <div class="grid-item">User 2</div>
+                <div class="grid-item">User 3</div>
+                <div class="grid-item">User 4</div>
+              </div>
+            `;
+            break;
+          case 'settings':
+            html = `
+              <div class="info-box">
+                <h3>Settings</h3>
+                <p>Update your application settings here.</p>
+              </div>
+            `;
+            break;
+          case 'reports':
+            html = `
+              <div class="info-box">
+                <h3>Reports</h3>
+                <p>Generate and view reports in this section.</p>
+              </div>
+              <div class="grid-layout">
+                <div class="grid-item">Report 1</div>
+                <div class="grid-item">Report 2</div>
+                <div class="grid-item">Report 3</div>
+              </div>
+            `;
+            break;
+          case 'logout':
+            html = `
+              <div class="info-box">
+                <h3>Logout</h3>
+                <p>You have been logged out successfully. Have a great day!</p>
+              </div>
+            `;
+            break;
+          default:
+            html = `<p>Page not found!</p>`;
+            break;
+        }
+
+        mainContent.innerHTML = html;
+      }
+    }
+  </script>
+</body>
+</html>
+    
