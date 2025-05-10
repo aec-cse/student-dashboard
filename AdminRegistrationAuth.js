@@ -79,7 +79,7 @@ submit.addEventListener("click", function (event) {
     .then(() => {
       showStatus("User registered successfully!", true);
       setTimeout(() => {
-        window.location.href = "login.html";
+        window.location.href = "AdminLogin.html";
       }, 1000);
     })
     .catch((error) => {
