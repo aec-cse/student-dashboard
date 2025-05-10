@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log("Student details saved to Firestore");
 
                 // Redirect to dashboard or login page after successful registration
-                window.location.href = 'student-dashboard.html';
+                window.location.href = 'studentlogin.html';
 
                 registrationForm.reset();
 
