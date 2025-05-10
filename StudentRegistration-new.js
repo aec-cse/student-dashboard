@@ -2,12 +2,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // IMPORTANT: Replace with your Firebase project's configuration object
     const firebaseConfig = {
-        apiKey: "AIzaSyCc8lRuA4Gm6pyVheG2s0ta_RbJog4SFhg",
-        authDomain: "test-a60bc.firebaseapp.com",
-        projectId: "test-a60bc",
-        storageBucket: "test-a60bc.firebasestorage.app",
-        messagingSenderId: "873136509647",
-        appId: "1:873136509647:web:695df40ae55c8dfed19dba"
+        apiKey: "AIzaSyA1RR9d31qkKdBsbH02NBMEydIuqmLgOwA",
+        authDomain: "student-login-system-47e0a.firebaseapp.com",
+        projectId: "student-login-system-47e0a",
+        storageBucket: "student-login-system-47e0a.firebasestorage.app",
+        messagingSenderId: "497762887092",
+        appId: "1:497762887092:web:1484a822eff9e2b121fee1"
       };
 
     let auth;
