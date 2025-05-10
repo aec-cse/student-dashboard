@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
 // Firebase config
@@ -15,7 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const database = getDatabase(app);
+const db = getFirestore(app); // Firestore initialized here
 
 const submit = document.querySelector("button[type='submit']");
 const statusDiv = document.getElementById("firebaseStatus");
@@ -62,7 +62,7 @@ submit.addEventListener("click", function (event) {
     .then((userCredential) => {
       const user = userCredential.user;
 
-      return set(ref(database, 'users/' + user.uid), {
+      return setDoc(doc(db, "users", user.uid), {
         fullName,
         email,
         phone,
@@ -72,7 +72,8 @@ submit.addEventListener("click", function (event) {
         country,
         city,
         region,
-        postalCode
+        postalCode,
+        createdAt: new Date()
       });
     })
     .then(() => {
