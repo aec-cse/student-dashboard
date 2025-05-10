@@ -48,7 +48,7 @@ loginBtn.addEventListener("click", (event) => {
     .then(() => {
       showStatus("Login successful!", true);
       setTimeout(() => {
-        window.location.href = "dashboard.html"; // Redirect all users to a common dashboard
+        window.location.href = "admin-dashboard.html"; // Redirect all users to a common dashboard
       }, 1000);
     })
     .catch((error) => {
