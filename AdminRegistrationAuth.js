@@ -1,16 +1,15 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-// Your web app's Firebase configuration
+// Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyA1RR9d31qkKdBsbH02NBMEydIuqmLgOwA",
-  authDomain: "student-login-system-47e0a.firebaseapp.com",
-  projectId: "student-login-system-47e0a",
-  storageBucket: "student-login-system-47e0a.firebasestorage.app",
-  messagingSenderId: "497762887092",
-  appId: "1:497762887092:web:1484a822eff9e2b121fee1"
+  apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
+  authDomain: "admin-af1fc.firebaseapp.com",
+  projectId: "admin-af1fc",
+  storageBucket: "admin-af1fc.firebasestorage.app",
+  messagingSenderId: "1042593739824",
+  appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
 };
 
 // Initialize Firebase
@@ -18,31 +17,52 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-// Register button
 const submit = document.querySelector("button[type='submit']");
+const statusDiv = document.getElementById("firebaseStatus");
+
+function showStatus(message, success = false) {
+  if (!statusDiv) {
+    alert(message);
+    return;
+  }
+
+  statusDiv.classList.remove("hidden", "text-red-700", "text-green-700", "bg-red-100", "bg-green-100");
+  statusDiv.textContent = message;
+
+  if (success) {
+    statusDiv.classList.add("text-green-700", "bg-green-100");
+  } else {
+    statusDiv.classList.add("text-red-700", "bg-red-100");
+  }
+}
+
 submit.addEventListener("click", function (event) {
   event.preventDefault();
 
-  // Input values
-  const fullName = document.getElementById("fullName").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const phone = document.getElementById("phone").value;
-  const birthdate = document.getElementById("birthdate").value;
+  // Collect form values
+  const fullName = document.getElementById("fullName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const birthdate = document.getElementById("birthdate").value.trim();
   const gender = document.querySelector("input[name='gender']:checked")?.value || "Not specified";
-  const address = document.getElementById("address").value;
-  const country = document.getElementById("country").value;
-  const city = document.getElementById("city").value;
-  const region = document.getElementById("region").value;
-  const postalCode = document.getElementById("postalCode").value;
+  const address = document.getElementById("address").value.trim();
+  const country = document.getElementById("country").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const region = document.getElementById("region").value.trim();
+  const postalCode = document.getElementById("postalCode").value.trim();
 
-  // Create user
+  // Basic validation
+  if (!fullName || !email || !password || !phone || !birthdate || !address || !country || !city || !region || !postalCode) {
+    showStatus("Please fill out all required fields.");
+    return;
+  }
+
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const user = userCredential.user;
 
-      // Save extra user info in Realtime Database
-      set(ref(database, 'users/' + user.uid), {
+      return set(ref(database, 'users/' + user.uid), {
         fullName,
         email,
         phone,
@@ -54,11 +74,15 @@ submit.addEventListener("click", function (event) {
         region,
         postalCode
       });
-
-      alert("User registered successfully!");
-      window.location.href = "login.html"; // Redirect to login or dashboard
+    })
+    .then(() => {
+      showStatus("User registered successfully!", true);
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1000);
     })
     .catch((error) => {
-      alert(error.message);
+      console.error(error);
+      showStatus("Registration failed: " + error.message);
     });
 });
