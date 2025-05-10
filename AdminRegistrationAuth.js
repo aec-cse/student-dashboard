@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
 // Your web app's Firebase configuration
@@ -16,31 +16,49 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const database = getDatabase(app);
 
-//register button
-const submit = document.getElementById("submit");
+// Register button
+const submit = document.querySelector("button[type='submit']");
 submit.addEventListener("click", function (event) {
   event.preventDefault();
 
-  //inputs
-  const firstName = document.getElementById("firstName");
-  const lastName = document.getElementById("lastName");
-  const contactNo = document.getElementById("contactNo");
-  const dob = document.getElementById("dob");
-  const address = document.getElementById("address");
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
+  // Input values
+  const fullName = document.getElementById("fullName").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const phone = document.getElementById("phone").value;
+  const birthdate = document.getElementById("birthdate").value;
+  const gender = document.querySelector("input[name='gender']:checked")?.value || "Not specified";
+  const address = document.getElementById("address").value;
+  const country = document.getElementById("country").value;
+  const city = document.getElementById("city").value;
+  const region = document.getElementById("region").value;
+  const postalCode = document.getElementById("postalCode").value;
 
-  createUserWithEmailAndPassword(auth, email.value, password.value)
+  // Create user
+  createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-      // Signed up 
       const user = userCredential.user;
-      // ...
+
+      // Save extra user info in Realtime Database
+      set(ref(database, 'users/' + user.uid), {
+        fullName,
+        email,
+        phone,
+        birthdate,
+        gender,
+        address,
+        country,
+        city,
+        region,
+        postalCode
+      });
+
+      alert("User registered successfully!");
+      window.location.href = "login.html"; // Redirect to login or dashboard
     })
     .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      alert(errorMessage);
-      // ..
+      alert(error.message);
     });
 });
