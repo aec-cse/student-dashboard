@@ -1,85 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Registration PAGE</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="AdminRegistration.css" />
-    <script type="module" src="AdminRegistrationAuth.js" defer></script>
-  </head>
-  <body>
-    <section class="container">
-      <header>Registration Form</header>
-      <form action="login.html" class="form">
-        <div class="input-box">
-          <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" placeholder="Enter full name" required />
-        </div>
-        
-        <div class="input-box">
-          <label for="email">Email ID</label>
-          <input type="email" id="email" placeholder="Enter email address" required />
-        </div>
 
-        <div class="input-box">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter Password" required />
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Registration PAGE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="css/AdminRegistration.css" />
+  <script type="module" src="js/AdminRegistrationAuth.js" defer></script>
+</head>
 
+<body>
+  <section class="container">
+    <header>Registration Form</header>
+    <form action="login.html" class="form">
+      <div class="input-box">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" placeholder="Enter full name" required />
+      </div>
+
+      <div class="input-box">
+        <label for="email">Email ID</label>
+        <input type="email" id="email" placeholder="Enter email address" required />
+      </div>
+
+      <div class="input-box">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter Password" required />
+      </div>
+
+      <div class="column">
+        <div class="input-box">
+          <label for="phone">Phone Number</label>
+          <input type="number" id="phone" placeholder="Enter phone number" required />
+        </div>
+        <div class="input-box">
+          <label for="birthdate">Birth Date</label>
+          <input type="date" id="birthdate" placeholder="Enter birth date" required />
+        </div>
+      </div>
+
+      <div class="gender-box">
+        <h3>Gender</h3>
+        <div class="gender-option">
+          <div class="gender">
+            <input type="radio" id="genderMale" name="gender" value="male" />
+            <label for="genderMale">Male</label>
+          </div>
+          <div class="gender">
+            <input type="radio" id="genderFemale" name="gender" value="female" />
+            <label for="genderFemale">Female</label>
+          </div>
+          <div class="gender">
+            <input type="radio" id="genderOther" name="gender" value="other" />
+            <label for="genderOther">Prefer not to say</label>
+          </div>
+        </div>
+      </div>
+      <div id="firebaseStatus" class="hidden p-2 rounded-lg text-sm mt-4"></div>
+
+      <div class="input-box address">
+        <label for="address">Address</label>
+        <input type="text" id="address" placeholder="Enter street address" required />
         <div class="column">
-          <div class="input-box">
-            <label for="phone">Phone Number</label>
-            <input type="number" id="phone" placeholder="Enter phone number" required />
+          <div class="select-box">
+            <select id="country" required>
+              <option hidden>Country</option>
+              <option>America</option>
+              <option>Japan</option>
+              <option>India</option>
+              <option>Nepal</option>
+            </select>
           </div>
-          <div class="input-box">
-            <label for="birthdate">Birth Date</label>
-            <input type="date" id="birthdate" placeholder="Enter birth date" required />
-          </div>
+          <input type="text" id="city" placeholder="Enter your city" required />
         </div>
-
-        <div class="gender-box">
-          <h3>Gender</h3>
-          <div class="gender-option">
-            <div class="gender">
-              <input type="radio" id="genderMale" name="gender" value="male" />
-              <label for="genderMale">Male</label>
-            </div>
-            <div class="gender">
-              <input type="radio" id="genderFemale" name="gender" value="female" />
-              <label for="genderFemale">Female</label>
-            </div>
-            <div class="gender">
-              <input type="radio" id="genderOther" name="gender" value="other" />
-              <label for="genderOther">Prefer not to say</label>
-            </div>
-          </div>
+        <div class="column">
+          <input type="text" id="region" placeholder="Enter your region" required />
+          <input type="number" id="postalCode" placeholder="Enter postal code" required />
         </div>
-<div id="firebaseStatus" class="hidden p-2 rounded-lg text-sm mt-4"></div>
+      </div>
 
-        <div class="input-box address">
-          <label for="address">Address</label>
-          <input type="text" id="address" placeholder="Enter street address" required />
-          <div class="column">
-            <div class="select-box">
-              <select id="country" required>
-                <option hidden>Country</option>
-                <option>America</option>
-                <option>Japan</option>
-                <option>India</option>
-                <option>Nepal</option>
-              </select>
-            </div>
-            <input type="text" id="city" placeholder="Enter your city" required />
-          </div>
-          <div class="column">
-            <input type="text" id="region" placeholder="Enter your region" required />
-            <input type="number" id="postalCode" placeholder="Enter postal code" required />
-          </div>
-        </div>
+      <button type="submit" id="adminReg">Submit</button>
+    </form>
+  </section>
+</body>
 
-        <button type="submit" id="adminReg">Submit</button>
-      </form>
-    </section>
-  </body>
 </html>
