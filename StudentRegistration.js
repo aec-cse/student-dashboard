@@ -112,6 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 showFirebaseStatus("Student details saved to Firestore!", true, true);
                 console.log("Student details saved to Firestore");
 
+                // Redirect to login page after successful registration
+                window.location.href = 'Studentlogin.html';
+
                 registrationForm.reset();
 
             } catch (error) {

@@ -98,10 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 showFirebaseStatus(`Login successful! Welcome, ${user.email}`, true);
                 console.log("User logged in:", user);
 
-                // Optionally, redirect to a dashboard or home page after a short delay
-                // setTimeout(() => {
-                //    window.location.href = 'dashboard.html'; // Example redirect
-                // }, 1500); // Delay for 1.5 seconds to allow user to see success message
+                // Redirect to student dashboard after successful login
+                window.location.href = 'student-dashboard.html';
 
                 loginForm.reset(); // Clear the form fields after successful login
 
