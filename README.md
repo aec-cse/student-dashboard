@@ -79,18 +79,8 @@ student-dashboard/
    - Enable Authentication and Firestore
    - Add Firebase configuration
    - Set up security rules
-3. Open `homepage.html` in your browser
+3. Open `homepage.html` with live server in your browser
 
-#### PHP/MySQL Setup
-1. Clone the repository
-2. Set up local server environment
-3. Configure database:
-   - Create MySQL database
-   - Import schema
-   - Update connection details
-4. Place files in server directory
-5. Start Apache and MySQL services
-6. Access via `http://localhost/student-dashboard`
 
 ## Security Features
 
@@ -114,12 +104,6 @@ student-dashboard/
 - Error handling
 - Responsive design
 - Cross-browser compatibility
-
-## Team Information
-
-* [Your Name(s) - Internship ID(s)]
-  * Example: Gauri Ambuskar - ATITS-2025-APR-115
-  * Example: Pravin Takle - ATITS-2025-APR-125
 
 ## Project Notes
 
