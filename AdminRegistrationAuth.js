@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
   authDomain: "admin-af1fc.firebaseapp.com",
   projectId: "admin-af1fc",
-  storageBucket: "admin-af1fc.firebasestorage.app",
+  storageBucket: "admin-af1fc.appspot.com",
   messagingSenderId: "1042593739824",
   appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
 };
@@ -15,8 +15,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app); // Firestore initialized here
+const db = getFirestore(app);
 
+// Select elements
 const submit = document.querySelector("button[type='submit']");
 const statusDiv = document.getElementById("firebaseStatus");
 
@@ -58,11 +59,13 @@ submit.addEventListener("click", function (event) {
     return;
   }
 
+  // Register user and store data
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const user = userCredential.user;
 
       return setDoc(doc(db, "users", user.uid), {
+        uid: user.uid, // Explicitly storing UID in document
         fullName,
         email,
         phone,
