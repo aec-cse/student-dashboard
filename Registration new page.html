@@ -6,6 +6,12 @@
             font-family: Arial, sans-serif;
             margin: 40px;
         }
+  .container {
+    width: 700px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
         h1, h2 {
             text-align: center;
         }
@@ -21,149 +27,170 @@
         input[type="text"],
         input[type="email"],
         input[type="date"],
-        input[type="number"] {
+        input[type="number"],
+        textarea {
             width: 100%;
             padding: 6px;
             margin-top: 4px;
         }
-        textarea {
-            width: 100%;
-            padding: 6px;
-        }
         .section {
             margin-top: 20px;
         }
+
+    input[type="checkbox"]{
+    accent-color:#1d4ed8;
+    }
+
+    input[type="radio"]{
+    accent-color:#1d4ed8;
+    }
+
+    header {
+    background: linear-gradient(to right, #0f172a, #1d4ed8);
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+    }
+
+
+    button {
+    background-color: #1d4ed8;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
     </style>
 </head>
 <body>
+<div class="container">
+<header>
+    <h1><i class="fas fa-graduation-cap"></i> Anusaya Trading and IT Solutions</h1>
+    </header>
+    <h2><p class="subtitle">Internship Registration Form</p></h2>
 
-<h1>Anusaya Trading and IT Solutions</h1>
-<h2>Internship Registration Form</h2>
 
 <form>
     <div class="section">
         <h3><u>Student Personal Information</u></h3>
-        <label>Full Name:</label>
-        <input type="text" name="fullname">
+        <label for="fullname">Full Name:</label>
+        <input type="text" id="fullname" name="fullname">
 
-        <label>Date of Birth:</label>
-        <input type="date" name="dob">
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob">
 
         <label>Gender:</label>
-        <input type="radio" name="gender" value="Male"> Male
-        <input type="radio" name="gender" value="Female"> Female
-        <input type="radio" name="gender" value="Other"> Other
+        <input type="radio" id="gender_male" name="gender" value="Male">  Male
+        <input type="radio" id="gender_female" name="gender" value="Female">  Female
+        <input type="radio" id="gender_other" name="gender" value="Other">  Other
 
-        <label>Email:</label>
-        <input type="email" name="email">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email">
 
-        <label>Contact Number:</label>
-        <input type="text" name="contact">
+        <label for="contact">Contact Number:</label>
+        <input type="text" id="contact" name="contact">
 
-        <label>Current Address:</label>
-        <textarea name="address" rows="2"></textarea>
+        <label for="address">Current Address:</label>
+        <textarea id="address" name="address" rows="2"></textarea>
 
-        <label>PIN:</label>
-        <input type="text" name="pin">
+        <label for="pin">PIN:</label>
+        <input type="text" id="pin" name="pin">
     </div>
 
     <div class="section">
         <h3><u>Academic Details</u></h3>
-        <label>College/University Name:</label>
-        <input type="text" name="college">
+        <label for="college">College/University Name:</label>
+        <input type="text" id="college" name="college">
 
         <label>Degree Program:</label>
-        <input type="checkbox" name="degree" value="BE"> BE
-        <input type="checkbox" name="degree" value="B.Tech"> B.Tech
-        <input type="checkbox" name="degree" value="MCA"> MCA
-        <input type="checkbox" name="degree" value="Other"> Other
+        <input type="checkbox" id="degree_be" name="degree_program[]" value="BE"> BE
+        <input type="checkbox" id="degree_btech" name="degree_program[]" value="B.Tech"> B.Tech
+        <input type="checkbox" id="degree_mca" name="degree_program[]" value="MCA"> MCA
+        <input type="checkbox" id="degree_other" name="degree_program[]" value="Other">  Other
 
-        <label>Branch/Specialization:</label>
-        <input type="text" name="branch">
+        <label for="branch">Branch/Specialization:</label>
+        <input type="text" id="branch" name="branch">
 
-        <label>Current Semester:</label>
-        <input type="text" name="semester">
+        <label for="semester">Current Semester:</label>
+        <input type="text" id="semester" name="semester">
 
-        <label>Aggregate Percentage/CGPA:</label>
-        <input type="text" name="cgpa">
+        <label for="cgpa">Aggregate Percentage/CGPA:</label>
+        <input type="text" id="cgpa" name="cgpa">
 
-        <label>Expected Year of Graduation:</label>
-        <input type="text" name="graduation">
+        <label for="graduation">Expected Year of Graduation:</label>
+        <input type="text" id="graduation" name="graduation">
 
         <label>Do you have any active backlogs?</label>
-        <input type="radio" name="backlogs" value="Yes"> Yes
-        <input type="radio" name="backlogs" value="No"> No
+        <input type="radio" id="backlogs_yes" name="backlogs" value="Yes"> Yes
+        <input type="radio" id="backlogs_no" name="backlogs" value="No"> No
 
-        <label>If Yes, how many?</label>
-        <input type="text" name="backlog_count">
+        <label for="backlog_count">If Yes, how many?</label>
+        <input type="text" id="backlog_count" name="backlog_count">
     </div>
 
     <div class="section">
         <h3><u>Technical Skills</u></h3>
-        <label>Programming Languages:</label>
-        <input type="text" name="languages">
+        <label for="languages">Programming Languages:</label>
+        <input type="text" id="languages" name="languages">
 
+        <label for="tools">Tools/Software:</label>
+        <input type="text" id="tools" name="tools">
 
-        <label>Tools/Software:</label>
-        <input type="text" name="tools">
-
-        <label>Areas of Interest:</label>
-        <input type="text" name="interests">
-
+        <label for="interests">Areas of Interest:</label>
+        <input type="text" id="interests" name="interests">
     </div>
 
     <div class="section">
         <h3><u>Internship Preferences</u></h3>
-        <label>Preferred Start Date:</label>
-        <input type="date" name="Starting Date">
+        <label for="start_date">Preferred Start Date:</label>
+        <input type="date" id="start_date" name="start_date">
 
         <label>Duration Available For Internship:</label>
-        <input type="checkbox" name="degree" value="3 Months"> 3 Months
-        <input type="checkbox" name="degree" value="6 Months"> 6 Months
-        <input type="checkbox" name="degree" value="12 Months"> 12 Months
-        <input type="checkbox" name="degree" value="Other"> Other
+        <input type="checkbox" id="duration_3" name="duration[]" value="3 Months"> 3 Months
+        <input type="checkbox" id="duration_6" name="duration[]" value="6 Months"> 6 Months
+        <input type="checkbox" id="duration_12" name="duration[]" value="12 Months"> 12 Months
+        <input type="checkbox" id="duration_other" name="duration[]" value="Other"> Others
 
-        <label> Preferred Domain:</label>
-        <input type="checkbox" name="degree" value="Web Developement"> Web Developement
-        <input type="checkbox" name="degree" value="Mobile App Developement"> Mobile App Developement
-        <input type="checkbox" name="degree" value="Data Analysis"> Data Analysis
-        <input type="checkbox" name="degree" value="Networking"> Networking
-        <input type="checkbox" name="degree" value="Other"> Other
-       
+        <label>Preferred Domain:</label>
+        <input type="checkbox" id="domain_web" name="preferred_domain[]" value="Web Development"> Web Development
+        <input type="checkbox" id="domain_mobile" name="preferred_domain[]" value="Mobile App Development">Mobile App Development
+        <input type="checkbox" id="domain_data" name="preferred_domain[]" value="Data Analysis"> Data Analysis
+        <input type="checkbox" id="domain_networking" name="preferred_domain[]" value="Networking"> Networking
+        <input type="checkbox" id="domain_other" name="preferred_domain[]" value="Other"> Other 
     </div>
 
     <div class="section">
         <h3><u>Additional Information</u></h3>
-        <label>Why do you want to join this internship ?</label>
-        <input type="text" name="languages">
+        <label for="internship_reason">Why do you want to join this internship?</label>
+        <input type="text" id="internship_reason" name="internship_reason">
 
-        <label>Do you have any prior Internship Experience ?
-        <input type="radio" name="degree" value="Yes"> Yes
-        <input type="radio" name="degree" value="No"> No  If yes, please provide details(Company,Duration,Role):</label>
-        <input type="text" name="tools">
+        <label>Do you have any prior Internship Experience?</label>
+        <input type="radio" id="exp_yes" name="prior_experience" value="Yes"> Yes
+        <input type="radio" id="exp_no" name="prior_experience" value="No"> No
 
-        <label> How did you hear about us ?</label>
-        <input type="checkbox" name="degree" value="College"> College
-        <input type="checkbox" name="degree" value="Friend/Family"> Friend/Family
-        <input type="checkbox" name="degree" value="Social Media"> Social Media
-        <input type="checkbox" name="degree" value="Other"> Other
+        <label for="experience_details">If yes, please provide details (Company, Duration, Role):</label>
+        <input type="text" id="experience_details" name="experience_details">
 
+        <label>How did you hear about us?</label>
+        <input type="checkbox" id="source_college" name="referral_source[]" value="College"> College
+        <input type="checkbox" id="source_friend" name="referral_source[]" value="Friend/Family">  Friend/Family 
+        <input type="checkbox" id="source_social" name="referral_source[]" value="Social Media">  Social Media 
+        <input type="checkbox" id="source_other" name="referral_source[]" value="Other">  Other 
     </div>
 
     <div class="section">
         <h3><u>Documents Checklist</u></h3>
-
-        <input type="checkbox" name="degree" value="Copy of college ID card"> Copy of college ID card
-        <input type="checkbox" name="degree" value="Updated Resume/CV"> Updated Resume/CV
-        <input type="checkbox" name="degree" value="Latest Grade Sheet/Marksheet"> Latest Grade Sheet/Marksheet
-
+        <input type="checkbox" id="doc_id" name="documents[]" value="Copy of college ID card">  Copy of college ID card 
+        <input type="checkbox" id="doc_resume" name="documents[]" value="Updated Resume/CV"> Updated Resume/CV 
+        <input type="checkbox" id="doc_marksheet" name="documents[]" value="Latest Grade Sheet/Marksheet"> Latest Grade Sheet/Marksheet 
     </div>
-
 
     <div style="margin-top: 20px; text-align: center;">
         <button type="submit">Submit</button>
+        <button type="reset">Reset</button>
     </div>
-
+ </div>
 </form>
 
 </body>
