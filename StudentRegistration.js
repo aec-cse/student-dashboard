@@ -1,6 +1,6 @@
 // Wait for the DOM to be fully loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
-    // IMPORTANT: Replace with your Firebase project's configuration object
+
     const firebaseConfig = {
         apiKey: "AIzaSyA1RR9d31qkKdBsbH02NBMEydIuqmLgOwA",
         authDomain: "student-login-system-47e0a.firebaseapp.com",
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         storageBucket: "student-login-system-47e0a.firebasestorage.app",
         messagingSenderId: "497762887092",
         appId: "1:497762887092:web:1484a822eff9e2b121fee1"
-      };
+    };
 
     let auth;
     let db;
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             firebaseStatusDiv.classList.add('bg-red-100', 'text-red-700');
         }
         if (append && firebaseStatusDiv.textContent && firebaseStatusDiv.textContent.length > 0) {
-             firebaseStatusDiv.innerHTML += `<br>${message}`;
+            firebaseStatusDiv.innerHTML += `<br>${message}`;
         } else {
             firebaseStatusDiv.textContent = message;
         }
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showFirebaseStatus(`Error initializing Firebase: ${error.message}. Please check your configuration and ensure Firebase SDKs are loaded.`, false);
         // Prevent form submission if Firebase fails to initialize
         if (registrationForm) {
-            registrationForm.addEventListener('submit', function(event) {
+            registrationForm.addEventListener('submit', function (event) {
                 event.preventDefault();
                 // Using the custom status div instead of alert
                 showFirebaseStatus("Firebase is not configured correctly. Cannot submit form.", false);
