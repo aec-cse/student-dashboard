@@ -1,4 +1,4 @@
-// Wait for the DOM to be fully loaded before running the script
+// Wait for the DOM to be fully loaded before running the scripts
 document.addEventListener('DOMContentLoaded', () => {
 
     const firebaseConfig = {
