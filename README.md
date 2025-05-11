@@ -31,19 +31,12 @@ A comprehensive web application for managing student information and administrat
 - **JavaScript (ES6+)** - Client-side functionality and validation
 
 ### Backend Options
-*(Choose one implementation)*
 
-#### Option A: Firebase Implementation
+#### Firebase Implementation
 - Firebase Authentication for secure user management
 - Firestore Database for data persistence
 - Real-time updates and synchronization
 - Secure cloud hosting
-
-#### Option B: PHP + MySQL Implementation
-- PHP backend for server-side processing
-- MySQL database for data storage
-- Secure password hashing
-- Session management
 
 ## Project Structure
 
