@@ -1,3 +1,10 @@
+// Import Firebase functions
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import {
+    getAuth,
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
 // Wait for the DOM to be fully loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
     // IMPORTANT: Replace with your Firebase project's configuration object
@@ -9,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         storageBucket: "student-login-system-47e0a.firebasestorage.app",
         messagingSenderId: "497762887092",
         appId: "1:497762887092:web:1484a822eff9e2b121fee1"
-      };
+    };
 
     let auth; // Firebase auth instance
     const loginForm = document.getElementById('loginForm');
@@ -44,28 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Firebase
     try {
-        // Check if Firebase SDK is loaded
-        if (typeof firebase === 'undefined' || typeof firebase.initializeApp === 'undefined') {
-            throw new Error("Firebase SDKs not loaded. Ensure they are included in your HTML before this script.");
-        }
-
-        // Initialize Firebase App (if not already initialized)
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully for login!");
-        } else {
-            firebase.app(); // Use existing app
-            console.log("Firebase was already initialized for login.");
-        }
-        auth = firebase.auth(); // Get Firebase Auth instance
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        console.log("Firebase initialized successfully for login!");
 
     } catch (error) {
         console.error("Error initializing Firebase for login:", error);
         // Show error message in the designated div if initialization fails
-        showFirebaseStatus(`Error initializing Firebase: ${error.message}. Please check your configuration and ensure Firebase SDKs are loaded.`, false);
+        showFirebaseStatus(`Error initializing Firebase: ${error.message}. Please check your configuration.`, false);
         // Prevent form submission if Firebase fails to initialize
         if (loginForm) {
-            loginForm.addEventListener('submit', function(event) {
+            loginForm.addEventListener('submit', function (event) {
                 event.preventDefault(); // Stop the form from submitting
                 // Remind user that Firebase isn't working
                 showFirebaseStatus("Firebase is not configured correctly. Cannot submit login form.", false);
@@ -91,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Attempt to sign in the user with Firebase Authentication
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
                 // ---- SUCCESS MESSAGE ----
@@ -118,8 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             errorMessage = "Incorrect password. Please try again.";
                             break;
                         case 'auth/invalid-credential': // Generic credential error (Firebase v9+ often uses this)
-                             errorMessage = "Invalid credentials. Please check your email and password.";
-                             break;
+                            errorMessage = "Invalid credentials. Please check your email and password.";
+                            break;
                         case 'auth/too-many-requests':
                             errorMessage = "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.";
                             break;
@@ -141,10 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!loginForm) {
             console.error("Login form (id='loginForm') not found in the DOM.");
             // Attempt to show an error if the status div itself exists
-            if(firebaseStatusDiv) showFirebaseStatus("Critical Error: Login form element not found on the page.", false);
+            if (firebaseStatusDiv) showFirebaseStatus("Critical Error: Login form element not found on the page.", false);
         }
-        if (!auth && firebase.apps.length > 0) { // If Firebase app initialized but auth failed
-             if(firebaseStatusDiv) showFirebaseStatus("Critical Error: Firebase Authentication service could not be initialized.", false);
+        if (!auth) {
+            if (firebaseStatusDiv) showFirebaseStatus("Critical Error: Firebase Authentication service could not be initialized.", false);
         }
     }
 });

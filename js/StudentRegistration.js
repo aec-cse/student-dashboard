@@ -1,3 +1,16 @@
+// Import Firebase functions
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import {
+    getAuth,
+    createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
 // Wait for the DOM to be fully loaded before running the scripts
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -38,29 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Firebase
     try {
-        // Check if Firebase is available
-        if (typeof firebase === 'undefined') {
-            throw new Error("Firebase SDKs not loaded. Ensure they are included in your HTML before this script.");
-        }
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully!");
-        } else {
-            firebase.app(); // if already initialized, use that one
-            console.log("Firebase was already initialized.");
-        }
-        auth = firebase.auth();
-        db = firebase.firestore();
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        console.log("Firebase initialized successfully!");
 
     } catch (error) {
         console.error("Error initializing Firebase:", error);
-        showFirebaseStatus(`Error initializing Firebase: ${error.message}. Please check your configuration and ensure Firebase SDKs are loaded.`, false);
+        showFirebaseStatus(`Error initializing Firebase: ${error.message}. Please check your configuration.`, false);
         // Prevent form submission if Firebase fails to initialize
         if (registrationForm) {
             registrationForm.addEventListener('submit', function (event) {
                 event.preventDefault();
-                // Using the custom status div instead of alert
                 showFirebaseStatus("Firebase is not configured correctly. Cannot submit form.", false);
             });
         }
@@ -93,20 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // 1. Create user with email and password
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 showFirebaseStatus(`User registered successfully with UID: ${user.uid}`, true);
                 console.log("User registered:", user);
 
                 // 2. Store additional student details in Firestore
-                await db.collection('students').doc(user.uid).set({
+                await setDoc(doc(db, 'students', user.uid), {
                     firstName: firstName,
                     lastName: lastName,
                     contactNumber: contactNumber,
                     email: email,
                     dob: dob,
                     address: address,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: serverTimestamp()
                 });
 
                 showFirebaseStatus("Student details saved to Firestore!", true, true);
