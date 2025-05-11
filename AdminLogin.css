@@ -1,119 +1,108 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
-*{
+/* Importing Google Fonts - Poppins */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+* {
   margin: 0;
   padding: 0;
-  /* user-select: none; */
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
-html,body{
-  height: 100%;
-}
-body{
-  display: grid;
-  place-items: center;
-  background: #dde1e7;
-  text-align: center;
-}
-.content{
-  width: 330px;
-  padding: 40px 30px;
-  background: #dde1e7;
-  border-radius: 10px;
-  box-shadow: -3px -3px 7px #ffffff73,
-               2px 2px 5px rgba(94,104,121,0.288);
-}
-.content .text{
-  font-size: 33px;
-  font-weight: 600;
-  margin-bottom: 35px;
-  color: #595959;
-}
-.field{
-  height: 50px;
-  width: 100%;
+body {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 15px;
+  background: #e9eeed;
+  overflow: hidden;
+}
+.wrapper {
+  max-width: 500px;
+  width: 100%;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0px 4px 10px 1px rgba(0, 0, 0, 0.1);
+}
+.wrapper .title {
+  height: 120px;
+  background: #16a085;
+  border-radius: 5px 5px 0 0;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wrapper form {
+  padding: 25px 35px;
+}
+.wrapper form .row {
+  height: 60px;
+  margin-top: 15px;
   position: relative;
 }
-.field:nth-child(2){
-  margin-top: 20px;
-}
-.field input{
+.wrapper form .row input {
   height: 100%;
   width: 100%;
-  padding-left: 45px;
   outline: none;
-  border: none;
+  padding-left: 70px;
+  border-radius: 5px;
+  border: 1px solid lightgrey;
   font-size: 18px;
-  background: #dde1e7;
-  color: #595959;
-  border-radius: 25px;
-  box-shadow: inset 2px 2px 5px #BABECC,
-              inset -5px -5px 10px #ffffff73;
+  transition: all 0.3s ease;
 }
-.field input:focus{
-  box-shadow: inset 1px 1px 2px #BABECC,
-              inset -1px -1px 2px #ffffff73;
+form .row input:focus {
+  border-color: #16a085;
 }
-.field span{
+form .row input::placeholder {
+  color: #999;
+}
+.wrapper form .row i {
   position: absolute;
-  color: #595959;
-  width: 50px;
-  line-height: 50px;
+  width: 55px;
+  height: 100%;
+  color: #fff;
+  font-size: 22px;
+  background: #16a085;
+  border: 1px solid #16a085;
+  border-radius: 5px 0 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.field label{
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 45px;
-  pointer-events: none;
-  color: #666666;
+.wrapper form .pass {
+  margin-top: 12px;
 }
-.field input:valid ~ label{
-  opacity: 0;
-}
-.forgot-pass{
-  text-align: left;
-  margin: 10px 0 10px 5px;
-}
-.forgot-pass a{
-  font-size: 16px;
-  color: #3498db;
+.wrapper form .pass a {
+  color: #16a085;
+  font-size: 17px;
   text-decoration: none;
 }
-.forgot-pass:hover a{
+.wrapper form .pass a:hover {
   text-decoration: underline;
 }
-button{
-  margin: 15px 0;
-  width: 100%;
-  height: 50px;
-  font-size: 18px;
-  line-height: 50px;
-  font-weight: 600;
-  background: #dde1e7;
-  border-radius: 25px;
-  border: none;
-  outline: none;
+.wrapper form .button input {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 500;
+  padding-left: 0px;
+  background: #16a085;
+  border: 1px solid #16a085;
   cursor: pointer;
-  color: #595959;
-  box-shadow: 2px 2px 5px #BABECC,
-             -5px -5px 10px #ffffff73;
 }
-button:focus{
-  color: #3498db;
-  box-shadow: inset 2px 2px 5px #BABECC,
-             inset -5px -5px 10px #ffffff73;
+form .button input:hover {
+  background: #12876f;
 }
-.sign-up{
-  margin: 10px 0;
-  color: #595959;
-  font-size: 16px;
+.wrapper form .signup-link {
+  text-align: center;
+  margin-top: 45px;
+  font-size: 17px;
 }
-.sign-up a{
-  color: #3498db;
+.wrapper form .signup-link a {
+  color: #16a085;
   text-decoration: none;
 }
-.sign-up a:hover{
+form .signup-link a:hover {
   text-decoration: underline;
 }
