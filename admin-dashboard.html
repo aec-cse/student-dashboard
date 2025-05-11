@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,23 +13,27 @@
       box-sizing: border-box;
       background-color: #4083c7;
     }
+
     .dashboard {
       display: flex;
       height: 100vh;
     }
+
     .sidebar {
       width: 250px;
       background-color: #091538;
       color: #fff;
-      display: flex;admin
+      display: flex;
       flex-direction: column;
       padding: 20px;
     }
+
     .sidebar h2 {
       text-align: center;
       margin-bottom: 20px;
       font-size: 1.5rem;
     }
+
     .sidebar a {
       text-decoration: none;
       color: #ccc;
@@ -38,16 +43,19 @@
       display: block;
       cursor: pointer;
     }
+
     .sidebar a:hover {
       background-color: #214e7a;
       color: #fff;
     }
+
     .main-content {
       flex-grow: 1;
       background-color: hsla(212, 75%, 51%, 0.74);
       padding: 20px;
       overflow-y: auto;
     }
+
     .header {
       background-color: #6c757d;
       color: #fff;
@@ -57,15 +65,18 @@
       text-align: center;
       font-size: 1.5rem;
     }
+
     /* Dashboard Section */
     .dashboard-content {
       display: block;
     }
+
     .dashboard-content .content {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
     }
+
     .card {
       background-color: #f8f9fa;
       border: 1px solid #ddd;
@@ -73,23 +84,28 @@
       padding: 20px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
     .card h3 {
       margin: 0 0 10px;
       font-size: 1.25rem;
     }
+
     .card p {
       margin: 0;
       color: #6c757d;
     }
+
     /* Main Content Section */
     .general-content {
       display: none;
     }
+
     .unique-layout {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
+
     .info-box {
       background-color: #f8f9fa;
       padding: 15px;
@@ -97,11 +113,13 @@
       border: 1px solid #ddd;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
+
     .grid-layout {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 20px;
     }
+
     .grid-item {
       background-color: #e9ecef;
       border-radius: 5px;
@@ -110,6 +128,7 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       border: 1px solid #ddd;
     }
+
     .grid-item:hover {
       background-color: #6c757d;
       color: white;
@@ -119,6 +138,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="dashboard">
     <!-- Sidebar -->
@@ -238,5 +258,5 @@
     }
   </script>
 </body>
+
 </html>
-    
