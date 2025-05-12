@@ -216,6 +216,21 @@
             </div>
 
             <div class="section">
+
+                <h3><u>Upload Image Documents</u></h3>
+                <label for="studentPhoto">Upload Photo:*</label>
+                <input type="file" id="studentPhoto" accept="image/*" onchange="previewPhoto(event)">
+                <br><br>
+                <img id="photoPreview" src="" alt="Student Photo Preview" style="width:150px; height:auto; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
+
+
+                <label for="signatureImage">Upload Signature:*</label>
+                <input type="file" id="signatureImage" accept="image/*" onchange="previewImage(event)">
+                <br><br>
+                <img id="imagePreview" src="" alt="Signature image Preview" style="width:150px; height:auto; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
+            </div>   
+            
+            <div class="section">
                 <h3><u>Academic Details</u></h3>
                 <label for="college">College/University Name:</label>
                 <input type="text" id="college" name="college">
@@ -308,23 +323,7 @@
            
         </div>
 
-         <div class="section">
-
-                <h3><u>Upload Image Documents</u></h3>
-                <label for="studentPhoto">Upload Photo:*</label>
-                <input type="file" id="studentPhoto" accept="image/*" onchange="previewPhoto(event)">
-                <br><br>
-                <img id="photoPreview" src="" alt="Student Photo Preview" style="width:150px; height:auto; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
-
-
-                <label for="signatureImage">Upload Signature:*</label>
-                <input type="file" id="signatureImage" accept="image/*" onchange="previewImage(event)">
-                <br><br>
-                <img id="imagePreview" src="" alt="Signature image Preview" style="width:150px; height:auto; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
-            </div>   
-            
-            
-            
+         
         <div class="section">     
         <h3><u>For Office Use Only</u></h3>
 
