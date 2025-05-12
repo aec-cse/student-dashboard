@@ -298,7 +298,26 @@
                 <input type="checkbox" id="doc_marksheet" name="documents[]" value="Latest Grade Sheet/Marksheet">
                 Latest Grade Sheet/Marksheet
            
-        </div><div class="section">     
+        </div>
+
+         <div class="section">
+
+                <h3><u>Upload Image Documents</u></h3>
+                <label for="studentPhoto">Upload Photo:*</label>
+                <input type="file" id="studentPhoto" accept="image/*" onchange="previewPhoto(event)">
+                <br><br>
+                <img id="photoPreview" src="" alt="Student Photo Preview" style="width:150px; height:auto; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
+
+
+                <label for="signatureImage">Upload Signature:*</label>
+                <input type="file" id="signatureImage" accept="image/*" onchange="previewImage(event)">
+                <br><br>
+                <img id="imagePreview" src="" alt="Signature image Preview" style="width:150px; height:auto; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
+            </div>   
+            
+            
+            
+        <div class="section">     
         <h3><u>For Office Use Only</u></h3>
 
         <label for="received_date">Application Received On:</label>
@@ -351,6 +370,18 @@
             document.getElementById('formStatus').style.display = 'none';
             // Your submission code here
         });
+
+        function previewPhoto(event) {
+    const photo = document.getElementById('photoPreview');
+    photo.src = URL.createObjectURL(event.target.files[0]);
+    photo.style.display = 'block';
+  }
+
+function previewImage(event) {
+    const image = document.getElementById('imagePreview');
+    image.src = URL.createObjectURL(event.target.files[0]);
+    image.style.display = 'block';
+  }
     </script>
 </body>
 
