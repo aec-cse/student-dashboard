@@ -297,7 +297,26 @@
                 <input type="checkbox" id="doc_resume" name="documents[]" value="Updated Resume/CV"> Updated Resume/CV
                 <input type="checkbox" id="doc_marksheet" name="documents[]" value="Latest Grade Sheet/Marksheet">
                 Latest Grade Sheet/Marksheet
-            </div>
+           
+        </div><div class="section">     
+        <h3><u>For Office Use Only</u></h3>
+
+        <label for="received_date">Application Received On:</label>
+        <input type="date" id="received_date" name="received_date">
+
+        <label>Application Status:</label>
+        <input type="checkbox" id="doc_id" name="documents[]" value="Accepted">  Accepted
+        <input type="checkbox" id="doc_resume" name="documents[]" value="Rejected"> Rejected 
+        <input type="checkbox" id="doc_marksheet" name="documents[]" value="Waitlisted"> Waitlisted
+
+        <label for="internship_ID">Internship ID?</label>
+        <input type="text" id="internship_ID" name="internship_ID">
+
+        <label for="assigned_mentor">Assigned Mentor?</label>
+        <input type="text" id="assigned_mentor" name="assigned_mentor">
+    </div>
+            
+
 
             <div id="formStatus" class="error" style="display: none;"></div>
             <button type="submit">Submit Application</button>
