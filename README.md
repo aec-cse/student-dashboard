@@ -1,4 +1,4 @@
-# Student Dashboard - Educational Website Login System
+# Student Dashboard - Educational Website Login Systems
 
 **Project ID:** ATITS-INT-PROJ-001  
 **Assigned by:** Anusaya Trading and IT Solutions  
