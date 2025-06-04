@@ -11,7 +11,7 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-// Wait for the DOM to be fully loaded before running the scripts
+// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
 
     const firebaseConfig = {
@@ -23,128 +23,122 @@ document.addEventListener('DOMContentLoaded', () => {
         appId: "1:497762887092:web:1484a822eff9e2b121fee1"
     };
 
-    let auth;
-    let db;
+    let auth, db;
     const registrationForm = document.getElementById('registrationForm');
     const firebaseStatusDiv = document.getElementById('firebaseStatus');
+    const togglePasswordCheckbox = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
 
-    // Function to show status messages
+    // Toggle password visibility
+    if (togglePasswordCheckbox && passwordField) {
+        togglePasswordCheckbox.addEventListener('change', () => {
+            passwordField.type = togglePasswordCheckbox.checked ? 'text' : 'password';
+        });
+    }
+
+    // Function to display status messages
     function showFirebaseStatus(message, success, append = false) {
-        if (!firebaseStatusDiv) {
-            console.warn("firebaseStatus div not found");
-            return;
-        }
-        firebaseStatusDiv.classList.remove('hidden');
-        if (success) {
-            firebaseStatusDiv.classList.remove('bg-red-100', 'text-red-700');
-            firebaseStatusDiv.classList.add('bg-green-100', 'text-green-700');
-        } else {
-            firebaseStatusDiv.classList.remove('bg-green-100', 'text-green-700');
-            firebaseStatusDiv.classList.add('bg-red-100', 'text-red-700');
-        }
-        if (append && firebaseStatusDiv.textContent && firebaseStatusDiv.textContent.length > 0) {
-            firebaseStatusDiv.innerHTML += `<br>${message}`;
-        } else {
-            firebaseStatusDiv.textContent = message;
-        }
+        if (!firebaseStatusDiv) return;
+
+        firebaseStatusDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700');
+        firebaseStatusDiv.classList.add(success ? 'bg-green-100' : 'bg-red-100');
+        firebaseStatusDiv.classList.add(success ? 'text-green-700' : 'text-red-700');
+        firebaseStatusDiv.innerHTML = append ? `${firebaseStatusDiv.innerHTML}<br>${message}` : message;
     }
 
     // Initialize Firebase
     try {
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
         console.log("Firebase initialized successfully!");
-
     } catch (error) {
-        console.error("Error initializing Firebase:", error);
-        showFirebaseStatus(`Error initializing Firebase: ${error.message}. Please check your configuration.`, false);
-        // Prevent form submission if Firebase fails to initialize
-        if (registrationForm) {
-            registrationForm.addEventListener('submit', function (event) {
-                event.preventDefault();
-                showFirebaseStatus("Firebase is not configured correctly. Cannot submit form.", false);
-            });
-        }
-        return; // Stop further script execution if Firebase fails
+        console.error("Firebase init error:", error);
+        showFirebaseStatus(`Firebase initialization failed: ${error.message}`, false);
+        return;
     }
 
-    // Add event listener only if the form exists and Firebase initialized
+    // Form submission handling
     if (registrationForm && auth && db) {
         registrationForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault();
 
-            // Get form data
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const contactNumber = document.getElementById('contactNumber').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            // Get form values
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const contactNumber = document.getElementById('contactNumber').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = passwordField.value;
             const dob = document.getElementById('dob').value;
-            const address = document.getElementById('address').value;
+            const address = document.getElementById('address').value.trim();
 
-            // Basic validation
+            // Validation
             if (!firstName || !lastName || !contactNumber || !email || !password || !dob || !address) {
                 showFirebaseStatus("Please fill in all fields.", false);
                 return;
             }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showFirebaseStatus("Invalid email format.", false);
+                return;
+            }
+
+            if (!/^\d{10}$/.test(contactNumber)) {
+                showFirebaseStatus("Contact number must be exactly 10 digits.", false);
+                return;
+            }
+
             if (password.length < 6) {
                 showFirebaseStatus("Password must be at least 6 characters long.", false);
                 return;
             }
 
+            showFirebaseStatus("Registering user, please wait...", true);
+
             try {
-                // 1. Create user with email and password
+                // Create Firebase auth user
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                showFirebaseStatus(`User registered successfully with UID: ${user.uid}`, true);
-                console.log("User registered:", user);
 
-                // 2. Store additional student details in Firestore
+                // Save additional student info
                 await setDoc(doc(db, 'students', user.uid), {
-                    firstName: firstName,
-                    lastName: lastName,
-                    contactNumber: contactNumber,
-                    email: email,
-                    dob: dob,
-                    address: address,
+                    firstName,
+                    lastName,
+                    contactNumber,
+                    email,
+                    dob,
+                    address,
                     createdAt: serverTimestamp()
                 });
 
-                showFirebaseStatus("Student details saved to Firestore!", true, true);
-                console.log("Student details saved to Firestore");
+                showFirebaseStatus("User registered and data saved successfully!", true);
 
-                // Redirect to login page after successful registration
-                window.location.href = 'Studentlogin.html';
-
+                // Reset form and redirect
                 registrationForm.reset();
+                setTimeout(() => {
+                    window.location.href = 'Studentlogin.html';
+                }, 1000);
 
             } catch (error) {
-                console.error("Error during registration:", error);
-                let errorMessage = "An error occurred during registration.";
-                if (error.code) {
-                    switch (error.code) {
-                        case 'auth/email-already-in-use':
-                            errorMessage = "This email address is already in use.";
-                            break;
-                        case 'auth/invalid-email':
-                            errorMessage = "The email address is not valid.";
-                            break;
-                        case 'auth/weak-password':
-                            errorMessage = "The password is too weak.";
-                            break;
-                        default:
-                            errorMessage = error.message;
-                    }
+                console.error("Registration error:", error);
+                let msg = "An error occurred.";
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        msg = "Email is already in use.";
+                        break;
+                    case 'auth/invalid-email':
+                        msg = "Invalid email address.";
+                        break;
+                    case 'auth/weak-password':
+                        msg = "Password is too weak.";
+                        break;
+                    default:
+                        msg = error.message;
                 }
-                showFirebaseStatus(errorMessage, false);
+                showFirebaseStatus(msg, false);
             }
         });
     } else {
-        if (!registrationForm) {
-            console.error("Registration form not found in the DOM.");
-            showFirebaseStatus("Error: Registration form element not found.", false);
-        }
+        showFirebaseStatus("Registration form not found.", false);
     }
 });
