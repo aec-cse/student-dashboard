@@ -2,7 +2,7 @@
 
 **Project ID:** ATITS-INT-PROJ-001  
 **Assigned by:** Anusaya Trading and IT Solutions  
-**Deadline:** 31st May 2025
+**Deadline:** 5 June 2025
 
 ## Overview
 
