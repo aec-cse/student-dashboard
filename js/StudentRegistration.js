@@ -1,6 +1,6 @@
 // Firebase configuration and initialization
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 
 // Firebase configuration
@@ -59,26 +59,56 @@ async function loginUser(email, password) {
 // Firebase related functions
 async function saveToFirestore(data) {
     if (!db) {
+        console.error('Firebase not initialized properly');
         throw new Error('Firebase not initialized properly. Please check your configuration.');
     }
 
     try {
+        console.log('Starting registration process with data:', {
+            internshipId: data.internshipId,
+            fullName: data.fullName,
+            email: data.email,
+            college: data.college
+        });
+
         // Create a valid email using internship ID
         const email = `${data.internshipId}@anusaya.intern`;
         const password = data.contact; // Using contact number as password
+        console.log('Generated credentials:', { email, passwordLength: password.length });
 
         // Create user account
+        console.log('Creating user account...');
         const user = await createUserAccount(email, password);
-        console.log('User account created:', user.uid);
+        console.log('User account created successfully:', {
+            uid: user.uid,
+            email: user.email
+        });
 
         // Add user ID to the data
         data.userId = user.uid;
         data.email = email;
+        data.status = 'pending'; // Add initial status
+        data.registeredAt = new Date().toISOString();
 
         // Save to Firestore
-        const docRef = await addDoc(collection(db, 'student-registrations'), data);
-        console.log('Document written with ID: ', docRef.id);
+        console.log('Saving to Firestore collection: student-registrations');
+        const studentCollection = collection(db, 'student-registrations');
+        console.log('Collection reference created:', studentCollection);
+
+        const docRef = await addDoc(studentCollection, data);
+        console.log('Document written successfully:', {
+            id: docRef.id,
+            path: docRef.path
+        });
+
         data.firestoreId = docRef.id;
+
+        // Verify the document was saved
+        const savedDoc = await getDoc(docRef);
+        console.log('Verification - Document exists:', savedDoc.exists());
+        if (savedDoc.exists()) {
+            console.log('Document data:', savedDoc.data());
+        }
 
         // Show success message with login credentials
         utils.showMessage(
@@ -89,6 +119,12 @@ async function saveToFirestore(data) {
         return docRef.id;
     } catch (error) {
         console.error('Error in registration process:', error);
+        console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+        });
+
         let errorMessage = 'Error submitting application. ';
 
         if (error.code === 'auth/email-already-in-use') {
@@ -97,6 +133,8 @@ async function saveToFirestore(data) {
             errorMessage += 'Please provide a valid contact number.';
         } else if (error.code === 'auth/invalid-email') {
             errorMessage += 'Invalid Internship ID format.';
+        } else if (error.code === 'permission-denied') {
+            errorMessage += 'Permission denied. Please contact support.';
         } else {
             errorMessage += 'Please try again.';
         }
@@ -444,21 +482,47 @@ function setupFormValidation() {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
+    console.log('Form submission started');
     document.getElementById('loadingOverlay').style.display = 'flex';
 
     try {
+        // Validate form
+        if (!utils.validateForm()) {
+            console.log('Form validation failed');
+            utils.showMessage('Please fill in all required fields correctly.', 'error');
+            return;
+        }
+
+        console.log('Collecting form data...');
         const formData = await collectFormData();
+        console.log('Form data collected:', {
+            internshipId: formData.internshipId,
+            fullName: formData.fullName,
+            college: formData.college
+        });
+
+        console.log('Saving images...');
         const imageKeys = await utils.saveImagesToLocalStorage();
+        console.log('Images saved:', imageKeys);
+
         formData.photographKey = imageKeys.photograph;
         formData.signatureKey = imageKeys.signature;
 
+        console.log('Saving to Firestore...');
         await saveToFirestore(formData);
+
+        console.log('Registration completed successfully');
         utils.showMessage('Application submitted successfully!', 'success');
         document.getElementById('studentForm').reset();
         utils.clearPreviews();
         formManager.clearSavedFormData();
     } catch (error) {
-        console.error('Error submitting form:', error);
+        console.error('Error in form submission:', error);
+        console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+        });
         utils.showMessage('Error submitting application. Please try again.', 'error');
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
