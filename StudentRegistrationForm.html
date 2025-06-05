@@ -1,335 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Internship Registration Form - Anusaya Trading and IT Solutions</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internship Registration Form - Anusaya Trading and IT Solutions</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
 
-    <!-- Firebase Compatibility Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
 
-    <!-- Application Script -->
-    <script type="module" src="js/StudentRegistration.js" defer></script>
+    header {
+      background: linear-gradient(to right, #0f172a, #1d4ed8);
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+      border-radius: 6px 6px 0 0;
+    }
 
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    h1 {
+      margin: 0;
+    }
 
-    <!-- CSS Styles -->
-    <style>
-        /* General Body Styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
+    h2 {
+      color: #1d4ed8;
+      text-align: center;
+      margin-top: 1rem;
+    }
 
-        /* Container Box Styling */
-        .container {
-            width: 100%;
-            max-width: 700px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    .section {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+    }
 
-        /* Heading Styles */
-        h1,
-        h2 {
-            text-align: center;
-        }
+    .section h4 {
+      color: #1d4ed8;
+      margin-top: 0;
+      border-bottom: 2px solid #dbeafe;
+      padding-bottom: 6px;
+    }
 
-        h1 {
-            color: white;
-        }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #1e3a8a;
+    }
 
-        h2 {
-            color: #1d4ed8;
-        }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
 
-        .subtitle {
-            color: #4b5563;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
+    textarea {
+      resize: vertical;
+    }
 
-        /* Form Fields */
-        form {
-            max-width: 700px;
-            margin: auto;
-        }
+    .checkbox-group label {
+      margin-right: 15px;
+      font-weight: normal;
+    }
 
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-            color: #374151;
-        }
+    input[type="checkbox"],
+    input[type="radio"] {
+      accent-color: #1d4ed8;
+      margin-right: 5px;
+    }
 
-        input[type="text"],
-        input[type="email"],
-        input[type="date"],
-        input[type="number"],
-        input[type="tel"],
-        textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+    button[type="submit"] {
+      background-color: #1d4ed8;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 30px;
+    }
 
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #1d4ed8;
-            box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.1);
-        }
-
-        /* Section Blocks */
-        .section {
-            margin-top: 20px;
-            padding: 20px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            background-color: #f9fafb;
-        }
-
-        .section h3 {
-            color: #1d4ed8;
-            margin-top: 0;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 10px;
-        }
-
-        /* Checkbox & Radio Styling */
-        input[type="checkbox"],
-        input[type="radio"] {
-            accent-color: #1d4ed8;
-            margin-right: 5px;
-        }
-
-        .checkbox-group label,
-        .radio-group label {
-            display: inline-block;
-            margin-right: 15px;
-            font-weight: normal;
-        }
-
-        /* Header Styles */
-        header {
-            background: linear-gradient(to right, #0f172a, #1d4ed8);
-            color: white;
-            padding: 2rem 1rem;
-            text-align: center;
-            border-radius: 4px 4px 0 0;
-            margin: -20px -20px 20px -20px;
-        }
-
-        /* File Upload Button */
-        ::file-selector-button {
-            border: 2px solid #1d4ed8;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            background-color: #1d4ed8;
-        }
-
-        /* Submit Button Styling */
-        button[type="submit"] {
-            background-color: #1d4ed8;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 20px;
-            transition: background-color 0.2s;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #1e40af;
-        }
-
-        button[type="submit"]:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.3);
-        }
-
-        /* Error Display */
-        .error {
-            color: #dc2626;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                padding: 15px;
-            }
-
-            .section {
-                padding: 15px;
-            }
-        }
-    </style>
+    button[type="submit"]:hover {
+      background-color: #1e40af;
+    }
+  </style>
 </head>
-
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <h1><i class="fas fa-graduation-cap"></i> Anusaya Trading and IT Solutions</h1>
-        </header>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-graduation-cap"></i> Anusaya Trading and IT Solutions</h1>
+    </header>
 
-        <!-- Title and Subtitle -->
-        <h2>Internship Registration Form</h2>
-        <p class="subtitle">Please fill out all required fields marked with *</p>
+    <h2>Internship Registration Form</h2>
 
-        <!-- Main Form Start -->
-        <form id="internshipForm" novalidate>
+    <form>
+      <div class="section">
+        <h4>STUDENT PERSONAL INFORMATION</h4>
+        <label>Full Name:</label>
+        <input type="text" name="fullname">
 
-            <!-- Student Personal Information -->
-            <div class="section">
-                <h3><u>Student Personal Information</u></h3>
-                <label for="fullname">Full Name: *</label>
-                <input type="text" id="fullname" name="fullname" required>
+        <label>Date of Birth:</label>
+        <input type="date" name="dob">
 
-                <label for="dob">Date of Birth: *</label>
-                <input type="date" id="dob" name="dob" required>
+        <label>Gender:</label>
+        <div class="checkbox-group">
+          <label><input type="radio" name="gender" value="Male"> Male</label>
+          <label><input type="radio" name="gender" value="Female"> Female</label>
+          <label><input type="radio" name="gender" value="Other"> Other</label>
+        </div>
 
-                <div class="radio-group">
-                    <label><b>Gender: *</b></label>
-                    <input type="radio" id="gender_male" name="gender" value="Male" required><label for="gender_male">Male</label>
-                    <input type="radio" id="gender_female" name="gender" value="Female"><label for="gender_female">Female</label>
-                    <input type="radio" id="gender_other" name="gender" value="Other"><label for="gender_other">Other</label>
-                </div>
+        <label>Email:</label>
+        <input type="email" name="email">
 
-                <label for="email">Email: *</label>
-                <input type="email" id="email" name="email" required>
+        <label>Contact Number:</label>
+        <input type="tel" name="contact">
 
-                <label for="contact">Contact Number: *</label>
-                <input type="tel" id="contact" name="contact" pattern="[0-9]{10}" required>
+        <label>Current Address:</label>
+        <textarea name="address" rows="2"></textarea>
 
-                <label for="address">Current Address: *</label>
-                <textarea id="address" name="address" rows="2" required></textarea>
+        <label>PIN:</label>
+        <input type="text" name="pin">
+      </div>
 
-                <label for="pin">PIN: *</label>
-                <input type="text" id="pin" name="pin" pattern="[0-9]{6}" required>
-            </div>
+      <div class="section">
+        <h4>ACADEMIC DETAILS</h4>
+        <label>College/University Name:</label>
+        <input type="text" name="college">
 
-            <!-- Upload Image Documents -->
-            <div class="section">
-                <h3><u>Upload Image Documents</u></h3>
+        <label>Degree Program:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="degree_program" value="BE"> BE</label>
+          <label><input type="checkbox" name="degree_program" value="B.Tech"> B.Tech</label>
+          <label><input type="checkbox" name="degree_program" value="MCA"> MCA</label>
+          <label><input type="checkbox" name="degree_program" value="Other"> Other</label>
+        </div>
 
-                <label for="studentPhoto">Upload Photo:*</label>
-                <input type="file" id="studentPhoto" accept="image/*" onchange="previewPhoto(event)">
-                <br><br>
-                <img id="photoPreview" src="" alt="Student Photo Preview" style="width:132px; height:170px; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
+        <label>Branch/Specialization:</label>
+        <input type="text" name="branch">
 
-                <label for="signatureImage">Upload Signature:*</label>
-                <input type="file" id="signatureImage" accept="image/*" onchange="previewImage(event)">
-                <br><br>
-                <img id="imagePreview" src="" alt="Signature Preview" style="width:132px; height:56px; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
-            </div>
+        <label>Current Semester:</label>
+        <input type="text" name="semester">
 
-            <!-- Academic Details -->
-            <div class="section">
-                <h3><u>Academic Details</u></h3>
-                <!-- [Academic fields here...] -->
-                <!-- Skipped here for brevity, your code remains unchanged -->
-            </div>
+        <label>Aggregate Percentage/CGPA:</label>
+        <input type="text" name="cgpa">
 
-            <!-- Technical Skills -->
-            <div class="section">
-                <h3><u>Technical Skills</u></h3>
-                <!-- [Technical fields here...] -->
-            </div>
+        <label>Expected Year of Graduation:</label>
+        <input type="text" name="graduation">
 
-            <!-- Internship Preferences -->
-            <div class="section">
-                <h3><u>Internship Preferences</u></h3>
-                <!-- [Internship preference fields...] -->
-            </div>
+        <label>Do you have any active backlogs?</label>
+        <div class="checkbox-group">
+          <label><input type="radio" name="backlogs" value="Yes"> Yes</label>
+          <label><input type="radio" name="backlogs" value="No"> No</label>
+        </div>
 
-            <!-- Additional Info -->
-            <div class="section">
-                <h3><u>Additional Information</u></h3>
-                <!-- [Additional info fields...] -->
-            </div>
+        <label>If Yes, how many?</label>
+        <input type="text" name="backlog_count">
+      </div>
 
-            <!-- Documents Checklist -->
-            <div class="section">
-                <h3><u>Documents Checklist</u></h3>
-                <!-- [Checklist checkboxes...] -->
-            </div>
+      <div class="section">
+        <h4>TECHNICAL SKILLS</h4>
+        <label>Programming Languages:</label>
+        <input type="text" name="languages">
 
-            <!-- Office Use Only -->
-            <div class="section">
-                <h3><u>For Office Use Only</u></h3>
-                <!-- [Office fields...] -->
-            </div>
+        <label>Tools/Software:</label>
+        <input type="text" name="tools">
 
-            <!-- Submission Status & Button -->
-            <div id="formStatus" class="error" style="display: none;"></div>
-            <button type="submit">Submit Application</button>
-        </form>
-    </div>
+        <label>Areas of Interest:</label>
+        <input type="text" name="interests">
+      </div>
 
-    <!-- JavaScript Section -->
-    <script>
-        // Form Validation on Submit
-        document.getElementById('internshipForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const requiredFields = this.querySelectorAll('[required]');
-            let isValid = true;
+      <div class="section">
+        <h4>INTERNSHIP PREFERENCES</h4>
+        <label>Preferred Start Date:</label>
+        <input type="date" name="start_date">
 
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    field.style.borderColor = '#dc2626';
-                } else {
-                    field.style.borderColor = '#d1d5db';
-                }
-            });
+        <label>Duration Available for Internship:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="duration" value="3 Months"> 3 Months</label>
+          <label><input type="checkbox" name="duration" value="6 Months"> 6 Months</label>
+          <label><input type="checkbox" name="duration" value="12 Months"> 12 Months</label>
+          <label><input type="checkbox" name="duration" value="Other"> Other</label>
+        </div>
 
-            if (!isValid) {
-                document.getElementById('formStatus').textContent = 'Please fill in all required fields';
-                document.getElementById('formStatus').style.display = 'block';
-                return;
-            }
+        <label>Preferred Domain:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="domain" value="Web Development"> Web Development</label>
+          <label><input type="checkbox" name="domain" value="Mobile App Development"> Mobile App Development</label>
+          <label><input type="checkbox" name="domain" value="Data Analysis"> Data Analysis</label>
+          <label><input type="checkbox" name="domain" value="Networking"> Networking</label>
+          <label><input type="checkbox" name="domain" value="Other"> Other</label>
+        </div>
+      </div>
 
-            // Form is valid
-            document.getElementById('formStatus').style.display = 'none';
-            // TODO: Add Firebase Submission Logic
-        });
+      <div class="section">
+        <h4>ADDITIONAL INFORMATION</h4>
+        <label>Why do you want to join this internship?</label>
+        <textarea name="internship_reason" rows="4"></textarea>
 
-        // Image Preview Handlers
-        function previewPhoto(event) {
-            const photo = document.getElementById('photoPreview');
-            photo.src = URL.createObjectURL(event.target.files[0]);
-            photo.style.display = 'block';
-        }
+        <label>Do you have any prior internship experience?</label>
+        <div class="checkbox-group">
+          <label><input type="radio" name="prior_experience" value="Yes"> Yes</label>
+          <label><input type="radio" name="prior_experience" value="No"> No</label>
+        </div>
 
-        function previewImage(event) {
-            const image = document.getElementById('imagePreview');
-            image.src = URL.createObjectURL(event.target.files[0]);
-            image.style.display = 'block';
-        }
-    </script>
+        <label>If Yes, please provide details (Company, Duration, Role):</label>
+        <textarea name="experience_details" rows="2"></textarea>
+
+        <label>How did you hear about us?</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="referral" value="College"> College</label>
+          <label><input type="checkbox" name="referral" value="Friend/Family"> Friend/Family</label>
+          <label><input type="checkbox" name="referral" value="Social Media"> Social Media</label>
+          <label><input type="checkbox" name="referral" value="Other"> Other</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>DOCUMENTS CHECKLIST</h4>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="documents" value="College ID"> Copy of College ID Card</label>
+          <label><input type="checkbox" name="documents" value="Resume"> Updated Resume/CV</label>
+          <label><input type="checkbox" name="documents" value="Marksheet"> Latest Grade Sheet/Marksheet</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>FOR OFFICE USE ONLY</h4>
+        <label>Application Received On:</label>
+        <input type="date" name="received_on">
+
+        <label>Application Status:</label>
+        <div class="checkbox-group">
+          <label><input type="radio" name="status" value="Accepted"> Accepted</label>
+          <label><input type="radio" name="status" value="Rejected"> Rejected</label>
+          <label><input type="radio" name="status" value="Waitlisted"> Waitlisted</label>
+        </div>
+
+        <label>Internship ID:</label>
+        <input type="text" name="internship_id">
+
+        <label>Assigned Mentor:</label>
+        <input type="text" name="assigned_mentor">
+      </div>
+
+      <button type="submit">Submit Application</button>
+    </form>
+  </div>
 </body>
-
 </html>
