@@ -1,8 +1,9 @@
+<!-- START OF HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Internship Registration Form - Anusaya Trading and IT Solutions</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
   <style>
@@ -67,6 +68,7 @@
     input[type="email"],
     input[type="tel"],
     input[type="date"],
+    input[type="file"],
     textarea {
       width: 100%;
       padding: 8px;
@@ -118,39 +120,34 @@
     <h2>Internship Registration Form</h2>
 
     <form>
+      <!-- PERSONAL INFORMATION -->
       <div class="section">
         <h4>STUDENT PERSONAL INFORMATION</h4>
         <label>Full Name:</label>
         <input type="text" name="fullname">
-
         <label>Date of Birth:</label>
         <input type="date" name="dob">
-
         <label>Gender:</label>
         <div class="checkbox-group">
           <label><input type="radio" name="gender" value="Male"> Male</label>
           <label><input type="radio" name="gender" value="Female"> Female</label>
           <label><input type="radio" name="gender" value="Other"> Other</label>
         </div>
-
         <label>Email:</label>
         <input type="email" name="email">
-
         <label>Contact Number:</label>
         <input type="tel" name="contact">
-
         <label>Current Address:</label>
         <textarea name="address" rows="2"></textarea>
-
         <label>PIN:</label>
         <input type="text" name="pin">
       </div>
 
+      <!-- ACADEMIC DETAILS -->
       <div class="section">
         <h4>ACADEMIC DETAILS</h4>
         <label>College/University Name:</label>
         <input type="text" name="college">
-
         <label>Degree Program:</label>
         <div class="checkbox-group">
           <label><input type="checkbox" name="degree_program" value="BE"> BE</label>
@@ -158,46 +155,39 @@
           <label><input type="checkbox" name="degree_program" value="MCA"> MCA</label>
           <label><input type="checkbox" name="degree_program" value="Other"> Other</label>
         </div>
-
         <label>Branch/Specialization:</label>
         <input type="text" name="branch">
-
         <label>Current Semester:</label>
         <input type="text" name="semester">
-
         <label>Aggregate Percentage/CGPA:</label>
         <input type="text" name="cgpa">
-
         <label>Expected Year of Graduation:</label>
         <input type="text" name="graduation">
-
         <label>Do you have any active backlogs?</label>
         <div class="checkbox-group">
           <label><input type="radio" name="backlogs" value="Yes"> Yes</label>
           <label><input type="radio" name="backlogs" value="No"> No</label>
         </div>
-
         <label>If Yes, how many?</label>
         <input type="text" name="backlog_count">
       </div>
 
+      <!-- TECHNICAL SKILLS -->
       <div class="section">
         <h4>TECHNICAL SKILLS</h4>
         <label>Programming Languages:</label>
         <input type="text" name="languages">
-
         <label>Tools/Software:</label>
         <input type="text" name="tools">
-
         <label>Areas of Interest:</label>
         <input type="text" name="interests">
       </div>
 
+      <!-- INTERNSHIP PREFERENCES -->
       <div class="section">
         <h4>INTERNSHIP PREFERENCES</h4>
         <label>Preferred Start Date:</label>
         <input type="date" name="start_date">
-
         <label>Duration Available for Internship:</label>
         <div class="checkbox-group">
           <label><input type="checkbox" name="duration" value="3 Months"> 3 Months</label>
@@ -205,7 +195,6 @@
           <label><input type="checkbox" name="duration" value="12 Months"> 12 Months</label>
           <label><input type="checkbox" name="duration" value="Other"> Other</label>
         </div>
-
         <label>Preferred Domain:</label>
         <div class="checkbox-group">
           <label><input type="checkbox" name="domain" value="Web Development"> Web Development</label>
@@ -216,20 +205,18 @@
         </div>
       </div>
 
+      <!-- ADDITIONAL INFO -->
       <div class="section">
         <h4>ADDITIONAL INFORMATION</h4>
         <label>Why do you want to join this internship?</label>
         <textarea name="internship_reason" rows="4"></textarea>
-
         <label>Do you have any prior internship experience?</label>
         <div class="checkbox-group">
           <label><input type="radio" name="prior_experience" value="Yes"> Yes</label>
           <label><input type="radio" name="prior_experience" value="No"> No</label>
         </div>
-
         <label>If Yes, please provide details (Company, Duration, Role):</label>
         <textarea name="experience_details" rows="2"></textarea>
-
         <label>How did you hear about us?</label>
         <div class="checkbox-group">
           <label><input type="checkbox" name="referral" value="College"> College</label>
@@ -239,6 +226,16 @@
         </div>
       </div>
 
+      <!-- PHOTOGRAPH AND SIGNATURE SECTION -->
+      <div class="section">
+        <h4>UPLOAD PHOTOGRAPH AND SIGNATURE</h4>
+        <label>Upload Passport Size Photograph:</label>
+        <input type="file" name="photo" accept="image/*">
+        <label>Upload Signature:</label>
+        <input type="file" name="signature" accept="image/*">
+      </div>
+
+      <!-- DOCUMENT CHECKLIST -->
       <div class="section">
         <h4>DOCUMENTS CHECKLIST</h4>
         <div class="checkbox-group">
@@ -248,25 +245,24 @@
         </div>
       </div>
 
+      <!-- OFFICE USE -->
       <div class="section">
         <h4>FOR OFFICE USE ONLY</h4>
         <label>Application Received On:</label>
         <input type="date" name="received_on">
-
         <label>Application Status:</label>
         <div class="checkbox-group">
           <label><input type="radio" name="status" value="Accepted"> Accepted</label>
           <label><input type="radio" name="status" value="Rejected"> Rejected</label>
           <label><input type="radio" name="status" value="Waitlisted"> Waitlisted</label>
         </div>
-
         <label>Internship ID:</label>
         <input type="text" name="internship_id">
-
         <label>Assigned Mentor:</label>
         <input type="text" name="assigned_mentor">
       </div>
 
+      <!-- SUBMIT -->
       <button type="submit">Submit Application</button>
     </form>
   </div>
