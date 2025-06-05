@@ -152,8 +152,7 @@ async function getStudentsByStatus() {
     const groupedStudents = {
       approved: [],
       rejected: [],
-      pending: [],
-      waitlisted: []
+      pending: []
     };
 
     students.forEach(student => {
@@ -168,8 +167,7 @@ async function getStudentsByStatus() {
     console.log("Students grouped by status:", {
       approved: groupedStudents.approved.length,
       rejected: groupedStudents.rejected.length,
-      pending: groupedStudents.pending.length,
-      waitlisted: groupedStudents.waitlisted.length
+      pending: groupedStudents.pending.length
     });
 
     return groupedStudents;
@@ -178,8 +176,7 @@ async function getStudentsByStatus() {
     return {
       approved: [],
       rejected: [],
-      pending: [],
-      waitlisted: []
+      pending: []
     };
   }
 }
@@ -244,8 +241,7 @@ function getStatusColor(status) {
   const colors = {
     pending: '#f1c40f',
     approved: '#2ecc71',
-    rejected: '#e74c3c',
-    waitlisted: '#3498db'
+    rejected: '#e74c3c'
   };
   return colors[status?.toLowerCase()] || colors.pending;
 }
@@ -260,8 +256,7 @@ async function renderDashboard() {
       total: totalStudents,
       approved: studentsByStatus.approved.length,
       rejected: studentsByStatus.rejected.length,
-      pending: studentsByStatus.pending.length,
-      waitlisted: studentsByStatus.waitlisted.length
+      pending: studentsByStatus.pending.length
     };
 
     return `
@@ -286,13 +281,6 @@ async function renderDashboard() {
                         <div class="stat-info">
                             <h3>Pending</h3>
                             <p>${stats.pending}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card waitlisted">
-                        <i class="fas fa-hourglass-half"></i>
-                        <div class="stat-info">
-                            <h3>Waitlisted</h3>
-                            <p>${stats.waitlisted}</p>
                         </div>
                     </div>
                     <div class="stat-card rejected">
@@ -320,13 +308,6 @@ async function renderDashboard() {
                     </div>
 
                     <div class="status-section">
-                        <h2><i class="fas fa-hourglass-half"></i> Waitlisted Students (${stats.waitlisted})</h2>
-                        <div class="student-list">
-                            ${renderStatusStudentList(studentsByStatus.waitlisted, true)}
-                        </div>
-                    </div>
-
-                    <div class="status-section">
                         <h2><i class="fas fa-times-circle"></i> Rejected Students (${stats.rejected})</h2>
                         <div class="student-list">
                             ${renderStatusStudentList(studentsByStatus.rejected, true)}
@@ -336,8 +317,8 @@ async function renderDashboard() {
             </div>
         `;
   } catch (error) {
-    console.error("Error rendering dashboard:", error);
-    return `<div class="error-message">Error loading dashboard. Please try again.</div>`;
+    console.error('Error rendering dashboard:', error);
+    return '<div class="error-message">Error loading dashboard</div>';
   }
 }
 
@@ -403,7 +384,6 @@ function renderStudentDetail(student) {
   const statusOptions = [
     { value: 'pending', label: 'Pending', icon: 'clock', color: '#f1c40f' },
     { value: 'approved', label: 'Approved', icon: 'check-circle', color: '#2ecc71' },
-    { value: 'waitlisted', label: 'Waitlisted', icon: 'hourglass-half', color: '#3498db' },
     { value: 'rejected', label: 'Rejected', icon: 'times-circle', color: '#e74c3c' }
   ];
 

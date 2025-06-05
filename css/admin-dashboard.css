@@ -519,11 +519,6 @@ body {
 
 /* Pending */
 .status-section:nth-child(3) h2 i {
-    color: #e67e22;
-}
-
-/* Waitlisted */
-.status-section:nth-child(4) h2 i {
     color: #e74c3c;
 }
 
