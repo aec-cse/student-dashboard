@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - Anusaya Intern</title>
+    <link rel="stylesheet" href="/css/StudentRegiatration.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .login-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .login-btn:hover {
+            background-color: #45a049;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .register-link a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Student Login</h1>
+            <p>Login to access your internship dashboard</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm" class="login-form">
+            <div class="form-group">
+                <label for="internshipId">Internship ID</label>
+                <input type="text" id="internshipId" name="internshipId" required
+                    placeholder="Enter your Internship ID">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password (Contact Number)</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your contact number">
+            </div>
+
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
+            authDomain: "admin-af1fc.firebaseapp.com",
+            projectId: "admin-af1fc",
+            storageBucket: "admin-af1fc.firebasestorage.app",
+            messagingSenderId: "1042593739824",
+            appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Login form handling
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const internshipId = document.getElementById('internshipId').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Create email from internship ID
+                const email = `${internshipId}@intern.anusaya.com`;
+
+                // Attempt login
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('Logged in successfully:', userCredential.user);
+
+                // Redirect to dashboard (you'll need to create this page)
+                window.location.href = '/dashboard.html';
+            } catch (error) {
+                console.error('Login error:', error);
+                let message = 'Login failed. ';
+
+                if (error.code === 'auth/user-not-found') {
+                    message += 'Internship ID not found.';
+                } else if (error.code === 'auth/wrong-password') {
+                    message += 'Invalid contact number.';
+                } else {
+                    message += 'Please try again.';
+                }
+
+                showError(message);
+            }
+        });
+    </script>
+</body>
+
+</html>
