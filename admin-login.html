@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Login - Anusaya Intern</title>
+    <title>Admin Login - Anusaya Intern</title>
     <link rel="stylesheet" href="/css/StudentRegiatration.css">
     <style>
         .login-container {
@@ -76,20 +76,20 @@
             display: none;
         }
 
-        .admin-link {
+        .back-link {
             text-align: center;
             margin-top: 20px;
             padding-top: 20px;
             border-top: 1px solid #eee;
         }
 
-        .admin-link a {
+        .back-link a {
             color: #4CAF50;
             text-decoration: none;
             font-size: 14px;
         }
 
-        .admin-link a:hover {
+        .back-link a:hover {
             text-decoration: underline;
         }
     </style>
@@ -98,49 +98,35 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1>Student Login</h1>
-            <p>Login to access your internship dashboard</p>
+            <h1>Admin Login</h1>
+            <p>Login to access the admin dashboard</p>
         </div>
 
         <div id="errorMessage" class="error-message"></div>
 
         <form id="loginForm" class="login-form">
             <div class="form-group">
-                <label for="internshipId">Internship ID</label>
-                <input type="text" id="internshipId" name="internshipId" required>
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" required>
             </div>
             <div class="form-group">
-                <label for="password">Password (Contact Number)</label>
-                <input type="password" id="password" name="password" pattern="[0-9]{10}" maxlength="10"
-                    placeholder="Enter your 10-digit contact number" title="Please enter your 10-digit contact number"
-                    required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
             </div>
             <button type="submit" class="login-btn">Login</button>
         </form>
 
-        <div class="admin-link">
-            <a href="admin-login.html">Admin Login</a>
+        <div class="back-link">
+            <a href="login.html">Back to Student Login</a>
         </div>
     </div>
 
     <script type="module">
-        // Firebase imports
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
-            authDomain: "admin-af1fc.firebaseapp.com",
-            projectId: "admin-af1fc",
-            storageBucket: "admin-af1fc.firebasestorage.app",
-            messagingSenderId: "1042593739824",
-            appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
+        // Admin credentials
+        const ADMIN_CREDENTIALS = {
+            email: 'anusayatradingsolutions@gmail.com',
+            password: '8308156115'
         };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
 
         // DOM Elements
         const loginForm = document.getElementById('loginForm');
@@ -157,37 +143,17 @@
             e.preventDefault();
             errorMessage.style.display = 'none';
 
-            try {
-                const internshipId = document.getElementById('internshipId').value.trim();
-                const password = document.getElementById('password').value.trim();
+            const email = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-                // Validate password length
-                if (password.length !== 10) {
-                    showError('Password must be exactly 10 digits');
-                    return;
-                }
-
-                // Create email from internship ID
-                const email = `${internshipId}@anusaya.intern`;
-
-                // Attempt login
-                await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = 'student-dashboard.html';
-            } catch (error) {
-                console.error('Login error:', error);
-                let errorMessage = 'Login failed. ';
-
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage += 'Internship ID not found.';
-                } else if (error.code === 'auth/wrong-password') {
-                    errorMessage += 'Incorrect contact number.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage += 'Invalid login format.';
-                } else {
-                    errorMessage += 'Please try again.';
-                }
-
-                showError(errorMessage);
+            // Check credentials
+            if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+                // Store admin session
+                sessionStorage.setItem('isAdmin', 'true');
+                // Redirect to admin dashboard
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                showError('Invalid admin credentials');
             }
         });
     </script>
