@@ -118,93 +118,155 @@ body {
 
 .student-card {
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     padding: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.3s ease;
     cursor: pointer;
-    border: 1px solid #eee;
+    border: 1px solid #eef2f7;
     position: relative;
+    overflow: hidden;
+}
+
+.student-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--status-color, #f1c40f);
+    transition: all 0.3s ease;
 }
 
 .student-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.student-card:hover::before {
+    width: 6px;
 }
 
 .student-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
 }
 
 .student-header h3 {
     margin: 0;
     color: #2c3e50;
-    font-size: 1.3em;
+    font-size: 1.2em;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.student-header h3::before {
+    content: '#';
+    color: #94a3b8;
+    font-size: 0.9em;
 }
 
 .status-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
     font-weight: 500;
     text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
 }
 
 .status-badge.pending {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: #fff7ed;
+    color: #c2410c;
 }
 
 .status-badge.approved {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: #f0fdf4;
+    color: #166534;
 }
 
 .status-badge.rejected {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+
+.status-badge.waitlisted {
+    background-color: #eff6ff;
+    color: #1e40af;
 }
 
 .student-info {
-    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 
 .student-info p {
-    margin: 8px 0;
-    color: #666;
+    margin: 0;
+    color: #475569;
     font-size: 0.95em;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .student-info p strong {
-    color: #4a90e2;
-    min-width: 100px;
+    color: #64748b;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .view-details-btn {
     width: 100%;
     padding: 12px;
-    background-color: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 6px;
+    background-color: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     font-weight: 500;
     text-transform: uppercase;
-    font-size: 0.9em;
+    font-size: 0.85em;
     letter-spacing: 0.5px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.view-details-btn::after {
+    content: '→';
+    transition: transform 0.2s ease;
 }
 
 .view-details-btn:hover {
-    background-color: #357abd;
+    background-color: #f1f5f9;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+.view-details-btn:hover::after {
+    transform: translateX(4px);
 }
 
 .no-students {
@@ -429,43 +491,89 @@ body {
 
 /* Student Detail Container */
 .student-detail-container {
-    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
 }
 
 .student-detail-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+    position: sticky;
+    top: 24px;
+    z-index: 10;
 }
 
 .student-detail-header h1 {
-    margin: 0;
-    color: #2c3e50;
+    margin: 0 0 16px 0;
+    color: #1e293b;
     font-size: 1.8em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.student-detail-header h1::before {
+    content: '#';
+    color: #94a3b8;
+    font-size: 0.9em;
+}
+
+.student-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-section h3 {
+    color: #1e293b;
+    font-size: 1.2em;
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-section p {
+    margin: 12px 0;
+    color: #475569;
+    font-size: 0.95em;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-section p strong {
+    color: #64748b;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Status Update Section */
 .status-update-section {
-    background: white;
-    border-radius: 10px;
+    background: #f8fafc;
+    border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 300px;
-}
-
-.status-update-section h3 {
-    margin: 0 0 15px 0;
-    color: #2c3e50;
-    font-size: 1.1em;
+    border: 1px solid #e2e8f0;
 }
 
 .status-options {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
 }
 
 .status-option {
@@ -473,23 +581,25 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px;
-    border: 2px solid #eee;
-    border-radius: 6px;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
     background: white;
-    color: #666;
+    color: #475569;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 0.9em;
+    font-weight: 500;
 }
 
 .status-option i {
-    color: var(--status-color);
+    font-size: 1.1em;
 }
 
 .status-option:hover {
     border-color: var(--status-color);
     color: var(--status-color);
+    background: color-mix(in srgb, var(--status-color) 5%, white);
 }
 
 .status-option.active {
@@ -502,72 +612,46 @@ body {
     color: white;
 }
 
-.status-option:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-/* Status Message */
-.status-message {
-    margin-top: 15px;
-    text-align: center;
-    min-height: 20px;
-}
-
-.status-message p {
-    margin: 0;
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 0.9em;
-}
-
-.status-message .updating {
-    background: #f8f9fa;
-    color: #666;
-}
-
-.status-message .success {
-    background: #d4edda;
-    color: #155724;
-}
-
-.status-message .error {
-    background: #f8d7da;
-    color: #721c24;
-}
-
 /* Back Button */
 .back-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    color: #495057;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #475569;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    font-weight: 500;
 }
 
 .back-button:hover {
-    background: #e9ecef;
-    color: #212529;
-}
-
-.back-button i {
-    font-size: 0.9em;
+    background: #f1f5f9;
+    color: #334155;
+    border-color: #cbd5e1;
 }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-    .student-detail-header {
-        flex-direction: column;
+    .student-detail-container {
+        padding: 16px;
     }
 
-    .status-update-section {
-        width: 100%;
+    .student-detail-header {
+        padding: 16px;
+        position: relative;
+        top: 0;
+    }
+
+    .student-details {
+        grid-template-columns: 1fr;
+    }
+
+    .form-section {
+        padding: 16px;
     }
 
     .status-options {

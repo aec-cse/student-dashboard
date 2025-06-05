@@ -197,9 +197,10 @@ function renderStatusStudentList(students, isDashboard = true) {
   if (isDashboard) {
     // Simplified card for dashboard view
     return students.map(student => `
-            <div class="student-card dashboard-card" data-id="${student.id}">
+            <div class="student-card dashboard-card" data-id="${student.id}" style="--status-color: ${getStatusColor(student.status)}">
                 <div class="student-info">
                     <h3>${student.fullName || 'N/A'}</h3>
+                    <span class="status-badge ${student.status || 'pending'}">${student.status || 'Pending'}</span>
                 </div>
             </div>
         `).join('');
@@ -207,20 +208,46 @@ function renderStatusStudentList(students, isDashboard = true) {
 
   // Full card for student management view
   return students.map(student => `
-        <div class="student-card" data-id="${student.id}">
-            <div class="student-info">
-                <div class="student-header">
-                    <h3>${student.internshipId || 'ID not provided'}</h3>
-                    <span class="status-badge ${student.status || 'pending'}">${student.status || 'Pending'}</span>
-                </div>
-                <p><strong>Name:</strong> ${student.fullName || 'N/A'}</p>
-                <p><strong>Email:</strong> ${student.email || 'N/A'}</p>
-                <p><strong>College:</strong> ${student.college || 'N/A'}</p>
-                <p><strong>Submitted:</strong> ${new Date(student.submittedAt).toLocaleDateString()}</p>
+        <div class="student-card" data-id="${student.id}" style="--status-color: ${getStatusColor(student.status)}">
+            <div class="student-header">
+                <h3>${student.internshipId || 'ID not provided'}</h3>
+                <span class="status-badge ${student.status || 'pending'}">${student.status || 'Pending'}</span>
             </div>
-            <button class="view-details-btn">View Details</button>
+            <div class="student-info">
+                <p>
+                    <strong>Name</strong>
+                    ${student.fullName || 'N/A'}
+                </p>
+                <p>
+                    <strong>Email</strong>
+                    ${student.email || 'N/A'}
+                </p>
+                <p>
+                    <strong>College</strong>
+                    ${student.college || 'N/A'}
+                </p>
+                <p>
+                    <strong>Submitted</strong>
+                    ${new Date(student.submittedAt).toLocaleDateString()}
+                </p>
+            </div>
+            <button class="view-details-btn">
+                View Details
+                <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
     `).join('');
+}
+
+// Helper function to get status color
+function getStatusColor(status) {
+  const colors = {
+    pending: '#f1c40f',
+    approved: '#2ecc71',
+    rejected: '#e74c3c',
+    waitlisted: '#3498db'
+  };
+  return colors[status?.toLowerCase()] || colors.pending;
 }
 
 // Function to render the dashboard content
@@ -239,8 +266,6 @@ async function renderDashboard() {
 
     return `
             <div class="dashboard-container">
-                <h1>Welcome, Admin!</h1>
-                
                 <div class="stats-cards">
                     <div class="stat-card total">
                         <i class="fas fa-users"></i>
@@ -327,13 +352,6 @@ function renderStudentList(students) {
     `;
   }
 
-  // Add search bar
-  const searchHtml = `
-    <div class="search-container">
-      <input type="text" id="studentSearch" placeholder="Search by Internship ID..." class="search-input">
-    </div>
-  `;
-
   const studentCards = students.map(student => `
     <div class="student-card" data-id="${student.id}">
       <div class="student-info">
@@ -353,7 +371,6 @@ function renderStudentList(students) {
   `).join('');
 
   return `
-    ${searchHtml}
     <div class="student-list">
       ${studentCards}
     </div>
@@ -386,7 +403,7 @@ function renderStudentDetail(student) {
   const statusOptions = [
     { value: 'pending', label: 'Pending', icon: 'clock', color: '#f1c40f' },
     { value: 'approved', label: 'Approved', icon: 'check-circle', color: '#2ecc71' },
-    { value: 'waitlisted', label: 'Waitlisted', icon: 'hourglass-half', color: '#e67e22' },
+    { value: 'waitlisted', label: 'Waitlisted', icon: 'hourglass-half', color: '#3498db' },
     { value: 'rejected', label: 'Rejected', icon: 'times-circle', color: '#e74c3c' }
   ];
 
@@ -412,13 +429,19 @@ function renderStudentDetail(student) {
 
   // Helper to render details safely, handling missing data
   const renderDetail = (label, value) => `
-        <p><strong>${label}:</strong> ${value || 'N/A'}</p>
+        <p>
+            <strong>${label}</strong>
+            ${value || 'N/A'}
+        </p>
     `;
 
   // Helper to render section details
-  const renderSection = (title, details) => `
+  const renderSection = (title, icon, details) => `
         <div class="form-section">
-            <h3>${title}</h3>
+            <h3>
+                <i class="fas fa-${icon}"></i>
+                ${title}
+            </h3>
             ${details}
         </div>
     `;
@@ -458,8 +481,10 @@ function renderStudentDetail(student) {
 
   const additionalInfo = `
         <div class="form-group full-width">
-            <label>Why do you want to join this internship?</label>
-            <p>${student.whyJoin || 'N/A'}</p>
+            <p>
+                <strong>Why do you want to join this internship?</strong>
+                ${student.whyJoin || 'N/A'}
+            </p>
         </div>
         ${renderDetail('Prior Internship Experience', student.priorExperience)}
         ${student.priorExperience === 'Yes' ? `
@@ -472,12 +497,13 @@ function renderStudentDetail(student) {
         ${renderDetail('How did you hear about us?', student.hearAbout)}
     `;
 
-  // Documents (Displaying keys for now, actual retrieval would be needed)
   const documentChecklist = `
-        <p><strong>Documents Provided:</strong> ${student.documents && student.documents.length > 0 ? student.documents.join(', ') : 'None'}</p>
+        <p>
+            <strong>Documents Provided</strong>
+            ${student.documents && student.documents.length > 0 ? student.documents.join(', ') : 'None'}
+        </p>
     `;
 
-  // Office Use (Admin Section)
   const officeUse = `
         ${renderDetail('Application Received On', student.applicationDate)}
         ${renderDetail('Application Status', student.applicationStatus)}
@@ -488,22 +514,23 @@ function renderStudentDetail(student) {
   return `
         <div class="student-detail-container">
             <button id="back-to-list" class="back-button">
-                <i class="fas fa-arrow-left"></i> Back to Student List
+                <i class="fas fa-arrow-left"></i>
+                Back to Student List
             </button>
             
             <div class="student-detail-header">
-                <h1>Student Details: ${student.fullName || 'N/A'}</h1>
+                <h1>${student.fullName || 'N/A'}</h1>
                 ${statusUpdateSection}
             </div>
 
             <div class="student-details">
-                ${renderSection('Personal Information', personalInfo)}
-                ${renderSection('Academic Details', academicDetails)}
-                ${renderSection('Technical Details', technicalDetails)}
-                ${renderSection('Internship Preference', internshipPreference)}
-                ${renderSection('Additional Information', additionalInfo)}
-                ${renderSection('Document Checklist', documentChecklist)}
-                ${renderSection('Office Use (Admin)', officeUse)}
+                ${renderSection('Personal Information', 'user', personalInfo)}
+                ${renderSection('Academic Details', 'graduation-cap', academicDetails)}
+                ${renderSection('Technical Details', 'code', technicalDetails)}
+                ${renderSection('Internship Preference', 'briefcase', internshipPreference)}
+                ${renderSection('Additional Information', 'info-circle', additionalInfo)}
+                ${renderSection('Document Checklist', 'file-alt', documentChecklist)}
+                ${renderSection('Office Use', 'building', officeUse)}
             </div>
         </div>
     `;

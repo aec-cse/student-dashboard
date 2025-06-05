@@ -413,19 +413,50 @@ function setupFilePreview() {
     const photographInput = document.getElementById('photograph');
     const signatureInput = document.getElementById('signature');
 
-    photographInput.addEventListener('change', e => previewFile(e.target, 'photographPreview'));
-    signatureInput.addEventListener('change', e => previewFile(e.target, 'signaturePreview'));
+    photographInput.addEventListener('change', async e => {
+        await handleImageInputChange(e.target, 'photographPreview', 'photograph');
+    });
+    signatureInput.addEventListener('change', async e => {
+        await handleImageInputChange(e.target, 'signaturePreview', 'signature');
+    });
+
+    // On page load, restore previews if available
+    restoreImagePreview('photograph', 'photographPreview');
+    restoreImagePreview('signature', 'signaturePreview');
 }
 
-function previewFile(input, previewId) {
-    const preview = document.getElementById(previewId);
+async function handleImageInputChange(input, previewId, type) {
     const file = input.files[0];
+    const preview = document.getElementById(previewId);
     if (file) {
         const reader = new FileReader();
-        reader.onload = e => preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        reader.onload = function (e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            // Save to localStorage
+            const imageKey = `${type}_autosave`;
+            const imageData = {
+                data: e.target.result,
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                uploadedAt: new Date().toISOString()
+            };
+            localStorage.setItem(imageKey, JSON.stringify(imageData));
+        };
         reader.readAsDataURL(file);
     } else {
         preview.innerHTML = 'No file selected';
+        localStorage.removeItem(`${type}_autosave`);
+    }
+}
+
+function restoreImagePreview(type, previewId) {
+    const imageKey = `${type}_autosave`;
+    const imageData = localStorage.getItem(imageKey);
+    const preview = document.getElementById(previewId);
+    if (imageData && preview) {
+        const img = JSON.parse(imageData);
+        preview.innerHTML = `<img src="${img.data}" alt="Preview">`;
     }
 }
 
@@ -516,6 +547,9 @@ async function handleFormSubmit(e) {
         document.getElementById('studentForm').reset();
         utils.clearPreviews();
         formManager.clearSavedFormData();
+        // Remove autosave images
+        localStorage.removeItem('photograph_autosave');
+        localStorage.removeItem('signature_autosave');
     } catch (error) {
         console.error('Error in form submission:', error);
         console.error('Error details:', {
