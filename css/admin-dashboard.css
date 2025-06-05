@@ -11,36 +11,74 @@ body {
     background-color: #f4f6f8;
 }
 
+/* Modern Sidebar Styles */
 .sidebar {
-    width: 220px;
-    background-color: #2c3e50;
-    color: white;
-    padding: 20px;
+    width: 260px;
+    background: #1a1f36;
+    color: #fff;
+    padding: 1.5rem 1rem;
     position: fixed;
-    height: 100%;
+    height: 100vh;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: all 0.3s ease;
 }
 
 .sidebar h2 {
-    margin-bottom: 30px;
-    font-size: 24px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+}
+
+.sidebar h2 i {
+    color: #4a90e2;
+    font-size: 1.75rem;
 }
 
 .sidebar a {
-    display: block;
-    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    margin: 15px 0;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.sidebar a i {
+    font-size: 1.1rem;
+    width: 1.25rem;
+    text-align: center;
+    transition: all 0.2s ease;
 }
 
 .sidebar a:hover {
-    background-color: #34495e;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.sidebar a.active {
+    background: #4a90e2;
+    color: #fff;
+}
+
+.sidebar a.active i {
+    color: #fff;
 }
 
 .main {
-    margin-left: 220px;
+    margin-left: 260px;
     padding: 30px;
     flex: 1;
 }
@@ -126,6 +164,9 @@ body {
     border: 1px solid #eef2f7;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .student-card::before {
@@ -155,6 +196,7 @@ body {
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid #eef2f7;
+    min-height: 40px;
 }
 
 .student-header h3 {
@@ -165,6 +207,9 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    line-height: 1.4;
+    min-height: 24px;
+    font-style: normal;
 }
 
 .student-header h3::before {
@@ -216,6 +261,8 @@ body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    flex: 1;
+    align-items: center;
 }
 
 .student-info p {
@@ -225,6 +272,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-height: 40px;
+    justify-content: center;
+    font-style: normal;
 }
 
 .student-info p strong {
@@ -232,6 +282,8 @@ body {
     font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    min-height: 16px;
+    font-style: normal;
 }
 
 .view-details-btn {
@@ -269,25 +321,56 @@ body {
     transform: translateX(4px);
 }
 
+/* No Students Message */
 .no-students {
     text-align: center;
-    padding: 40px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin: 20px;
+    padding: 20px;
+    color: #64748b;
+    background: transparent;
+    box-shadow: none;
+    margin: 0;
     grid-column: 1 / -1;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .no-students h2 {
     color: #2c3e50;
     margin-bottom: 10px;
-    font-size: 1.5em;
+    font-size: 1.2em;
+    font-weight: 500;
+    font-style: normal;
 }
 
 .no-students p {
-    color: #666;
-    font-size: 1.1em;
+    color: #64748b;
+    font-size: 0.95em;
+    margin: 0;
+    font-style: normal;
+}
+
+/* Status Section No Students */
+.status-section .no-students {
+    padding: 15px;
+    min-height: 80px;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.status-section .no-students p {
+    color: #64748b;
+    font-size: 0.9em;
+    font-style: normal;
+    text-align: center;
     margin: 0;
 }
 
@@ -445,14 +528,6 @@ body {
 }
 
 /* Rejected */
-
-/* No Students Message */
-.no-students {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-    font-style: italic;
-}
 
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
@@ -661,7 +736,7 @@ body {
 
 /* Dashboard Student Cards */
 .dashboard-card {
-    padding: 12px 15px !important;
+    padding: 12px 15px;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid #eee;
@@ -670,6 +745,9 @@ body {
     margin-bottom: 8px;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .dashboard-card:hover {
@@ -678,23 +756,35 @@ body {
     border-color: #dee2e6;
 }
 
-.dashboard-card .student-info {
-    margin: 0;
+.dashboard-card .student-header {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    min-height: 32px;
+    align-items: center;
 }
 
 .dashboard-card h3 {
-    margin: 0;
     font-size: 1em;
-    color: #2c3e50;
-    font-weight: 500;
+    min-height: 20px;
+    font-style: normal;
+    display: flex;
+    align-items: center;
 }
 
-.status-section .no-students {
-    background: transparent;
-    box-shadow: none;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
+.dashboard-card .student-info {
+    gap: 8px;
+    align-items: center;
+}
+
+.dashboard-card .student-info p {
+    min-height: 32px;
+    justify-content: center;
+    font-style: normal;
+}
+
+.dashboard-card .student-info p strong {
+    min-height: 14px;
+    font-style: normal;
 }
 
 /* Dashboard Layout */
@@ -1091,5 +1181,31 @@ body {
 
     to {
         opacity: 1;
+    }
+}
+
+/* Responsive Sidebar */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 220px;
+    }
+
+    .main {
+        margin-left: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main {
+        margin-left: 0;
     }
 }
