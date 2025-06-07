@@ -50,15 +50,18 @@ student-dashboard/
 ├── StudentRegistration.html  # Student registration
 ├── AdminRegistration.html    # Admin registration
 ├── css/
-│   ├── style.css            # Global styles
-│   ├── login.css            # Login page styles
-│   ├── AdminLogin.css       # Admin login styles
-│   └── AdminRegistration.css # Admin registration styles
+│   ├── style.css              # Main styles
+│   ├── student-dashboard.css  # Student dashboard styles
+│   ├── admin-dashboard.css    # Admin dashboard styles
+│   ├── student-login.css      # Student login styles
+│   ├── admin-login.css        # Admin login styles
+│   └── StudentRegiatration.css # Student registration styles
 ├── js/
-│   ├── Studentlogin.js      # Student login logic
-│   ├── StudentRegistration.js # Student registration
-│   ├── AdminLoginAutho.js   # Admin authentication
-│   └── AdminRegistrationAuth.js # Admin registration
+│   ├── student-dashboard.js   # Student dashboard logic
+│   ├── admin-dashboard.js     # Admin dashboard logic
+│   ├── student-login.js       # Student login logic
+│   ├── admin-login.js         # Admin login logic
+│   └── StudentRegistration.js # Student registration logic
 └── README.md                # Project documentation
 ```
 

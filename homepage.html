@@ -1,61 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ANUSAYA TRADING AND IT SOLUTIONS</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-</head>
+  <title>Anusaya Trading and IT Solutions</title>
+  
+  <!-- SEO & Metadata -->
+  <meta name="description" content="Anusaya Trading and IT Solutions offers IT services, software development, training, and financial consulting in Maharashtra. ISO 9001:2015 certified.">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <meta property="og:title" content="Anusaya Trading and IT Solutions" />
+  <meta property="og:description" content="Empowering Through Education & Innovation." />
+  <meta property="og:image" content="logo.jpg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com" />
 
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+  <!-- Styles -->
+  <style>
+    :root {
+      --primary: #1b4f72;
+      --secondary: #2980b9;
+      --accent: #85c1e9;
+      --background: #f4faff;
+      --text: #2c3e50;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(to right, var(--primary), #2e86c1);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    header img {
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      background-color: var(--primary);
+      padding: 15px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: var(--accent);
+    }
+
+    section {
+      padding: 60px 20px;
+    }
+
+    .hero {
+      background: var(--accent);
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .hero h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .hero p {
+      max-width: 800px;
+      margin: auto;
+      font-size: 1.1rem;
+    }
+
+    .services h2,
+    .about h2 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .service-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .service-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      width: 270px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .service-card i {
+      font-size: 2.2rem;
+      color: var(--secondary);
+      margin-bottom: 15px;
+    }
+
+    .service-card h3 {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    .about p {
+      max-width: 800px;
+      margin: auto;
+      font-size: 1.1rem;
+    }
+
+    .login-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      text-align: center;
+    }
+
+    .login-box {
+      position: relative;
+      background-color: var(--secondary);
+      color: white;
+      border-radius: 12px;
+      padding: 30px 20px;
+      width: 220px;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+
+    .login-box:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(41, 185, 175, 0.7), 0 0 40px rgba(41, 91, 185, 0.5);
+    }
+
+    .login-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(41, 151, 185, 0.3), rgba(172, 52, 219, 0.395));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: -1;
+    }
+
+    .login-box:hover::before {
+      opacity: 1;
+    }
+
+    .login-box img,
+    .login-box h3 {
+      transition: transform 0.3s ease;
+    }
+
+    .login-box:hover img,
+    .login-box:hover h3 {
+      transform: scale(1.1);
+    }
+
+    footer {
+      background: var(--primary);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .service-list,
+      .login-section {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      .hero h2 {
+        font-size: 1.6rem;
+      }
+    }
+  
+    .watermark img {
+        width: 35%; /* Adjust size of watermark logo */
+        height: 60%;
+        position: absolute;
+        top: 120%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.2; /* Adjust transparency */
+    }
+
+    .watermark-container img {
+        /*  Your image styles  */
+        max-width: 100%;
+        height: auto;
+    }
+  </style>
+</head>
 <body>
 
   <!-- Header -->
   <header>
-    <h1><i class="fas fa-graduation-cap"></i> ANUSAYA TRADING AND IT SOLUTIONS</h1>
-    <p class="subtitle">Empowering Through Education</p>
+    <h1><img src="Logo.png" alt="" height="100" width="100"> ANUSAYA TRADING AND IT SOLUTIONS</h1>
+    <p class="subtitle">Empowering Through Education & Innovation</p>
   </header>
 
   <!-- Navigation -->
-  <nav>
-    <a href="#">Home</a>
-    <a href="#">Career</a>
-    <a href="#">About</a>
-    <a onclick="document.querySelector('.login-section').style.display='flex'">
-      <i class="fas fa-sign-in-alt"></i> Login
-    </a>
-
+  <nav aria-label="Main Navigation">
+    <a href="#hero">Home</a>
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#login"> Login</a>
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero">
-    <h2><i class="fas fa-lightbulb"></i> Your Gateway to Knowledge</h2>
-    <p>Welcome to a platform where learning meets innovation. Join thousands of students and educators on a mission to
-      transform the future of education through technology.</p>
+  <section class="hero" id="hero">
+    <h2><i class="fas fa-lightbulb"></i> Welcome to Anusaya Trading and IT Solutions</h2>
+    <p>
+      We provide ISO-certified IT & financial consulting, training, and development services across Maharashtra.
+    </p>
+     With a commitment to excellence and innovation, we bridge the gap between technology and business, fostering sustainable growth and empowering our clients to achieve their professional and financial goals.
+    </p>
+     <div class="watermark">
+            <img src="Logo.png" alt="Watermark logo">
   </section>
 
-  <!-- Login Options -->
-  <section class="login-section">
+  <!-- Services Section -->
+  <section class="services" id="services">
+    <h2>Our Services</h2>
+    <div class="service-list">
+      <div class="service-card">
+        <i class="fas fa-laptop-code"></i>
+        <h3>Software Development</h3>
+        <p>Custom web and app solutions tailored for your business growth.</p>
+      </div>
+      <div class="service-card">
+        <i class="fas fa-chalkboard-teacher"></i>
+        <h3>IT Training</h3>
+        <p>Industry-ready courses in Python, Java, Web Development, and more.</p>
+      </div>
+      <div class="service-card">
+        <i class="fas fa-network-wired"></i>
+        <h3>Consulting</h3>
+        <p>IT infrastructure setup, strategy planning, and digital transformation.</p>
+      </div>
+      <div class="service-card">
+        <i class="fas fa-user-lock"></i>
+        <h3>Cybersecurity</h3>
+        <p>Advanced security solutions and audits to protect your data.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="about" id="about">
+    <h2>About Us</h2>
+    <p>
+      Based in Chikhli, Maharashtra, Anusaya Trading and IT Solutions is a forward-thinking company offering innovative digital services and technical education.
+    </p>
+  </section>
+
+  <!-- Login Section -->
+  <section class="login-section" id="login">
     <a class="login-box" href="Studentlogin.html">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/student-center.png" alt="Student Logo" />
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/student-center.png" alt="Student Login" />
       <h3><i class="fas fa-user-graduate"></i> Student Login</h3>
     </a>
-
     <a class="login-box" href="AdminLogin.html">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/admin-settings-male.png" alt="Admin Logo" />
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/admin-settings-male.png" alt="Admin Login" />
       <h3><i class="fas fa-user-shield"></i> Admin Login</h3>
     </a>
   </section>
 
   <!-- Footer -->
   <footer>
-    <p>Contact: <a href="mailto:anusayatradingsolution@gmail.com">anusayatradingsolution@gmail.com</a></p>
-    <p>Address: Gandhi Nagar, near Gupta Hospital, Chikhli - 443201</p>
-    <p>&copy; 2025 ANUSAYA TRADING AND IT SOLUTIONS. All rights reserved.</p>
+    <p><strong>Anusaya Trading and IT Solutions</strong></p>
+    <p>Contact: <a href="mailto:anusayatradingsolutions@gmail.com">anusayatradingsolutions@gmail.com</a></p>
+    <p>&copy; 2025 Anusaya Trading and IT Solutions. All rights reserved.</p>
   </footer>
 
 </body>
-
 </html>

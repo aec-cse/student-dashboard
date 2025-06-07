@@ -103,8 +103,14 @@
       color: #333;
     }
   </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body>
+
 
   <div class="sidebar">
     <h2>Admin Dashboard</h2>
@@ -240,5 +246,19 @@
       });
     }
   </script>
+    <div class="sidebar">
+        <h2>Admin Dashboard</h2>
+        <a href="#" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="#" data-section="student-management"><i class="fas fa-users"></i> Student Management</a>
+        <a href="#" data-section="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="main">
+        <div id="content-area">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+
+    <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>

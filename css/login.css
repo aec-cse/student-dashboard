@@ -1,106 +1,111 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
-*{
-  margin: 0;
-  padding: 0;
-  font-family: 'Poppins',sans-serif;
+/* Common Login Styles */
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-body{
-  display: flex;
-  height: 100vh;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  background: #271919;
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
 }
-.login-form{
-  position: relative;
-  width: 370px;
-  height: auto;
-  background: #1b1b1b;
-  padding: 40px 35px 60px;
-  box-sizing: border-box;
-  border: 1px solid black;
-  border-radius: 5px;
-  box-shadow: inset 0 0 1px #272727;
+
+.login-header h1 {
+    color: #333;
+    margin-bottom: 10px;
 }
-.text{
-  font-size: 30px;
-  color: #c7c7c7;
-  font-weight: 600;
-  letter-spacing: 2px;
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
-form{
-  margin-top: 40px;
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
-form .field{
-  margin-top: 20px;
-  display: flex;
+
+.form-group label {
+    font-weight: 500;
+    color: #555;
 }
-.field .fas{
-  height: 50px;
-  width: 60px;
-  color: #868686;
-  font-size: 20px;
-  line-height: 50px;
-  border: 1px solid #444;
-  border-right: none;
-  border-radius: 5px 0 0 5px;
-  background: linear-gradient(#333,#222);
+
+.form-group input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
 }
-.field input,form button{
-  height: 50px;
-  width: 100%;
-  outline: none;
-  font-size: 19px;
-  color: #868686;
-  padding: 0 15px;
-  border-radius: 0 5px 5px 0;
-  border: 1px solid #444;
-  caret-color: #339933;
-  background: linear-gradient(#333,#222);
+
+.login-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s;
 }
-input:focus{
-  color: #339933;
-  box-shadow: 0 0 5px rgba(0,255,0,.2),
-              inset 0 0 5px rgba(0,255,0,.1);
-  background: linear-gradient(#333933,#222922);
-  animation: glow .8s ease-out infinite alternate;
+
+.login-btn:hover {
+    background-color: #45a049;
 }
-@keyframes glow {
-   0%{
-    border-color: #339933;
-    box-shadow: 0 0 5px rgba(0,255,0,.2),
-                inset 0 0 5px rgba(0,0,0,.1);
-  }
-   100%{
-    border-color: #6f6;
-    box-shadow: 0 0 20px rgba(0,255,0,.6),
-                inset 0 0 10px rgba(0,255,0,.4);
-  }
+
+.error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: none;
 }
-button{
-  margin-top: 30px;
-  border-radius: 5px!important;
-  font-weight: 600;
-  letter-spacing: 1px;
-  cursor: pointer;
+
+/* Navigation Links */
+.admin-link,
+.back-link {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
-button:hover{
-  color: #339933;
-  border: 1px solid #339933;
-  box-shadow: 0 0 5px rgba(0,255,0,.3),
-              0 0 10px rgba(0,255,0,.2),
-              0 0 15px rgba(0,255,0,.1),
-              0 2px 0 black;
+
+.admin-link a,
+.back-link a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-size: 14px;
 }
-.link{
-  margin-top: 25px;
-  color: #868686;
+
+.admin-link a:hover,
+.back-link a:hover {
+    text-decoration: underline;
 }
-.link a{
-  color: #339933;
-  text-decoration: none;
-}
-.link a:hover{
-  text-decoration: underline;
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .login-container {
+        margin: 20px;
+        padding: 15px;
+    }
+
+    .login-header h1 {
+        font-size: 1.5em;
+    }
+
+    .form-group input {
+        font-size: 14px;
+    }
+
+    .login-btn {
+        padding: 10px;
+        font-size: 14px;
+    }
 }

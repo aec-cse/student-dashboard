@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration Form</title>
+    <link rel="stylesheet" href="/css/student-registration.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Anusaya Intern Registration Form</h1>
+            <p>Complete all sections to register for the internship program</p>
+        </header>
+
+        <form id="studentForm" class="registration-form">
+            <!-- Personal Information -->
+            <section class="form-section">
+                <h2>Personal Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dob">Date of Birth *</label>
+                        <input type="date" id="dob" name="dob" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender *</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact">Contact Number *</label>
+                        <input type="tel" id="contact" name="contact" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="address">Current Address *</label>
+                        <textarea id="address" name="address" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="zipCode">ZIP Code *</label>
+                        <input type="text" id="zipCode" name="zipCode" required>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Academic Details -->
+            <section class="form-section">
+                <h2>Academic Details</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="college">College *</label>
+                        <input type="text" id="college" name="college" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="degreeProgram">Degree Program *</label>
+                        <select id="degreeProgram" name="degreeProgram" required>
+                            <option value="">Select Degree</option>
+                            <option value="BE">BE</option>
+                            <option value="B.Tech">B.Tech</option>
+                            <option value="MCA">MCA</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="branch">Branch/Specialization *</label>
+                        <input type="text" id="branch" name="branch" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="semester">Current Semester *</label>
+                        <select id="semester" name="semester" required>
+                            <option value="">Select Semester</option>
+                            <option value="1">1st Semester</option>
+                            <option value="2">2nd Semester</option>
+                            <option value="3">3rd Semester</option>
+                            <option value="4">4th Semester</option>
+                            <option value="5">5th Semester</option>
+                            <option value="6">6th Semester</option>
+                            <option value="7">7th Semester</option>
+                            <option value="8">8th Semester</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gpa">Aggregate GPA *</label>
+                        <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="graduationYear">Year of Graduation *</label>
+                        <input type="number" id="graduationYear" name="graduationYear" min="2020" max="2030" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hasBacklogs">Do you have any active backlogs? *</label>
+                        <select id="hasBacklogs" name="hasBacklogs" required>
+                            <option value="">Select Option</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="backlogCountGroup" style="display: none;">
+                        <label for="backlogCount">Number of Active Backlogs</label>
+                        <input type="number" id="backlogCount" name="backlogCount" min="1">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Details -->
+            <section class="form-section">
+                <h2>Technical Details</h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="programmingLanguages">Programming Languages Known *</label>
+                        <textarea id="programmingLanguages" name="programmingLanguages" rows="2"
+                            placeholder="e.g., Java, Python, JavaScript, C++" required></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="toolsSoftware">Tools/Software *</label>
+                        <textarea id="toolsSoftware" name="toolsSoftware" rows="2"
+                            placeholder="e.g., VS Code, Git, Docker, MySQL" required></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="areaOfInterest">Area of Interest *</label>
+                        <textarea id="areaOfInterest" name="areaOfInterest" rows="2"
+                            placeholder="e.g., Web Development, Machine Learning, Data Science" required></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Internship Preference -->
+            <section class="form-section">
+                <h2>Internship Preference</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="startDate">Preferred Start Date *</label>
+                        <input type="date" id="startDate" name="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Duration Available for Internship *</label>
+                        <select id="duration" name="duration" required>
+                            <option value="">Select Duration</option>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12">12 Months</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="preferredDomain">Preferred Domain *</label>
+                        <select id="preferredDomain" name="preferredDomain" required>
+                            <option value="">Select Domain</option>
+                            <option value="Web Development">Web Development</option>
+                            <option value="App Development">App Development</option>
+                            <option value="Data Analyst">Data Analyst</option>
+                            <option value="Networking">Networking</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Additional Information -->
+            <section class="form-section">
+                <h2>Additional Information</h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="whyJoin">Why do you want to join this internship? *</label>
+                        <textarea id="whyJoin" name="whyJoin" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="priorExperience">Do you have any prior internship experience? *</label>
+                        <select id="priorExperience" name="priorExperience" required>
+                            <option value="">Select Option</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="experienceDetails" style="display: none;">
+                        <div class="form-group">
+                            <label for="expCompany">Company</label>
+                            <input type="text" id="expCompany" name="expCompany">
+                        </div>
+                        <div class="form-group">
+                            <label for="expDuration">Duration</label>
+                            <input type="text" id="expDuration" name="expDuration" placeholder="e.g., 3 months">
+                        </div>
+                        <div class="form-group">
+                            <label for="expRole">Role</label>
+                            <input type="text" id="expRole" name="expRole">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="hearAbout">How did you hear about us? *</label>
+                        <select id="hearAbout" name="hearAbout" required>
+                            <option value="">Select Option</option>
+                            <option value="College">College</option>
+                            <option value="Friend/Family">Friend/Family</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Photograph and Signature -->
+            <section class="form-section">
+                <h2>Photograph and Signature</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="photograph">Photograph *</label>
+                        <input type="file" id="photograph" name="photograph" accept="image/*" required>
+                        <div id="photographPreview" class="file-preview"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signature">Signature *</label>
+                        <input type="file" id="signature" name="signature" accept="image/*" required>
+                        <div id="signaturePreview" class="file-preview"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Document Checklist -->
+            <section class="form-section">
+                <h2>Document Checklist</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="collegeId" name="documents" value="College ID Card">
+                        <label for="collegeId">Copy of College ID Card</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="resume" name="documents" value="Resume/CV">
+                        <label for="resume">Updated Resume/CV</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="gradeSheet" name="documents" value="Grade Sheet">
+                        <label for="gradeSheet">Latest Grade Sheet/Marksheet</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Office Use (Admin Section) -->
+            <section class="form-section admin-section">
+                <h2>Office Use Only</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="applicationDate">Application Received On</label>
+                        <input type="date" id="applicationDate" name="applicationDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="applicationStatus">Application Status</label>
+                        <select id="applicationStatus" name="applicationStatus">
+                            <option value="">Select Status</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="internshipId">Internship ID</label>
+                        <input type="text" id="internshipId" name="internshipId">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignedMentor">Assigned Mentor</label>
+                        <input type="text" id="assignedMentor" name="assignedMentor">
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Submit Application</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Submitting your application...</p>
+    </div>
+
+    <script type="module" src="/js/student-registration.js"></script>
+</body>
+
+</html>
