@@ -106,7 +106,7 @@ async function saveToFirestore(data, photographFile, signatureFile) {
         }
 
         utils.showMessage(
-            `Registration successful! You can login using:\nInternship ID: ${data.internshipId}\nPassword: Your contact number`,
+            `Registration successful! Your Internship ID is: ${data.internshipId}\nYou can login using:\nEmail: ${data.email}\nPassword: Your contact number`,
             'success'
         );
 
@@ -144,6 +144,11 @@ async function collectFormData() {
         }
     }
 
+    // Generate internship ID automatically
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    data.internshipId = `INT${timestamp}${random}`;
+
     const documentCheckboxes = document.querySelectorAll('input[name="documents"]:checked');
     data.documents = Array.from(documentCheckboxes).map(cb => cb.value);
     data.submittedAt = new Date().toISOString();
@@ -159,21 +164,36 @@ async function handleFormSubmit(e) {
     document.getElementById('loadingOverlay').style.display = 'flex';
 
     try {
+        console.log('Starting form validation...');
         if (!utils.validateForm()) {
-            console.log('Form validation failed');
+            console.log('Form validation failed - please check required fields');
             utils.showMessage('Please fill in all required fields correctly.', 'error');
             return;
         }
+        console.log('Form validation passed');
 
+        console.log('Collecting form data...');
         const { data, photographFile, signatureFile } = await collectFormData();
+        console.log('Form data collected:', { 
+            ...data, 
+            photographFile: photographFile ? 'File present' : 'No file', 
+            signatureFile: signatureFile ? 'File present' : 'No file' 
+        });
+
+        console.log('Attempting to save to Firestore...');
         await saveToFirestore(data, photographFile, signatureFile);
+        console.log('Successfully saved to Firestore');
 
         utils.showMessage('Application submitted successfully!', 'success');
         document.getElementById('studentForm').reset();
         utils.clearPreviews();
         formManager.clearSavedFormData();
     } catch (error) {
-        console.error('Error in form submission:', error);
+        console.error('Detailed error in form submission:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         utils.showMessage('Error submitting application. Please try again.', 'error');
     } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
