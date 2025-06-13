@@ -343,11 +343,15 @@ function renderStudentList(students) {
     if (!students || students.length === 0) {
 =======
   if (!students || students.length === 0) {
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         return '<div class="no-students">No students found</div>';
     }
 
     return `
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
         <div class="student-grid">
             ${students.map(student => `
@@ -359,18 +363,24 @@ function renderStudentList(students) {
                                   class="student-image"
                                   onerror="handleImageError(this, 'photo')">` :
 =======
+=======
+>>>>>>> Stashed changes
         <div class="student-list">
             ${students.map(student => `
                 <div class="student-card" onclick="loadContent('student-detail', '${student.userId}')">
                     <div class="student-photo">
                         ${student.photograph?.url ? 
                             `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="student-image">` :
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                             `<div class="no-photo"><i class="fas fa-user"></i></div>`
                         }
                     </div>
                     <div class="student-info">
                         <h3>${student.fullName}</h3>
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
                         <p><i class="fas fa-id-card"></i> ${student.internshipId || 'N/A'}</p>
                         <p><i class="fas fa-envelope"></i> ${student.email}</p>
@@ -386,11 +396,16 @@ function renderStudentList(students) {
                         </button>
                     </div>
 =======
+=======
+>>>>>>> Stashed changes
                         <p><i class="fas fa-id-card"></i> ${student.internshipId}</p>
                         <p><i class="fas fa-envelope"></i> ${student.email}</p>
                         <p><i class="fas fa-phone"></i> ${student.contactNumber}</p>
                         <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
                     </div>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                 </div>
             `).join('')}
@@ -426,6 +441,9 @@ function renderStudentDetail(student) {
                 <h2>Student Details</h2>
                 <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
             </div>
 
             <div class="student-detail-content">
@@ -434,21 +452,31 @@ function renderStudentDetail(student) {
                     <div class="student-images">
                         <div class="image-container">
                             <h3>Photograph</h3>
+<<<<<<< Updated upstream
                             ${student.photographURL ? 
                                 `<img src="${student.photographURL}" 
                                       alt="${student.fullName}'s photo" 
                                       class="detail-image"
                                       onerror="handleImageError(this, 'photo')">` :
+=======
+                            ${student.photograph?.url ? 
+                                `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="detail-image">` :
+>>>>>>> Stashed changes
                                 `<div class="no-image"><i class="fas fa-user"></i> No photo available</div>`
                             }
                         </div>
                         <div class="image-container">
                             <h3>Signature</h3>
+<<<<<<< Updated upstream
                             ${student.signatureURL ? 
                                 `<img src="${student.signatureURL}" 
                                       alt="${student.fullName}'s signature" 
                                       class="detail-image"
                                       onerror="handleImageError(this, 'signature')">` :
+=======
+                            ${student.signature?.url ? 
+                                `<img src="${student.signature.url}" alt="${student.fullName}'s signature" class="detail-image">` :
+>>>>>>> Stashed changes
                                 `<div class="no-image"><i class="fas fa-signature"></i> No signature available</div>`
                             }
                         </div>
@@ -575,6 +603,7 @@ function renderStudentDetail(student) {
                                 <p>${student.whyJoin || 'N/A'}</p>
         </div>
                             <div class="detail-item">
+<<<<<<< Updated upstream
                                 <label for="priorExperience">Do you have any prior internship experience? *</label>
                                 <select id="priorExperience" name="priorExperience" required>
                                   <option value="">Select Option</option>
@@ -753,6 +782,8 @@ function renderStudentDetail(student) {
                                 <p>${student.whyJoin || 'N/A'}</p>
         </div>
                             <div class="detail-item">
+=======
+>>>>>>> Stashed changes
                                 <label>Prior Experience</label>
                                 <p>${student.priorExperience || 'N/A'}</p>
                             </div>
@@ -777,6 +808,9 @@ function renderStudentDetail(student) {
                         </div>
             </div>
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                     <!-- Metadata -->
                     <div class="detail-section">
@@ -1336,7 +1370,10 @@ async function createStudentAccount(email, password) {
 // Cloudinary upload function
 async function uploadToCloudinary(file, previewId) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     if (!file) {
         throw new Error('No file provided for upload');
     }
@@ -1351,11 +1388,15 @@ async function uploadToCloudinary(file, previewId) {
         throw new Error('File size should be less than 5MB');
     }
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     const url = `https://api.cloudinary.com/v1_1/deksu6n47/upload`;
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "student_upload");
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
     const response = await fetch(url, {
@@ -1376,6 +1417,8 @@ async function uploadToCloudinary(file, previewId) {
 // Update initializeRegistrationForm function
 function initializeRegistrationForm() {
 =======
+=======
+>>>>>>> Stashed changes
     formData.append("folder", "student_registrations"); // Add folder organization
 
     try {
@@ -1418,6 +1461,9 @@ function initializeRegistrationForm() {
 
 // Update the registration form submission to handle the new Cloudinary response
 async function initializeRegistrationForm() {
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     const registrationForm = document.getElementById('studentRegistrationForm');
     if (!registrationForm) return;
@@ -1512,10 +1558,13 @@ async function initializeRegistrationForm() {
             }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             // Upload images
             const photographURL = await uploadToCloudinary(photographFile, 'photographPreview');
             const signatureURL = await uploadToCloudinary(signatureFile, 'signaturePreview');
 =======
+=======
+>>>>>>> Stashed changes
             // Upload images with better error handling
             let photographData, signatureData;
             try {
@@ -1524,6 +1573,9 @@ async function initializeRegistrationForm() {
             } catch (uploadError) {
                 throw new Error(`Image upload failed: ${uploadError.message}`);
             }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
             const studentData = {
@@ -1570,10 +1622,13 @@ async function initializeRegistrationForm() {
                 status: 'pending',
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 // Add image URLs
                 photographURL: photographURL,
                 signatureURL: signatureURL,
 =======
+=======
+>>>>>>> Stashed changes
                 // Update image URLs with both URL and public_id
                 photograph: {
                     url: photographData.url,
@@ -1583,6 +1638,9 @@ async function initializeRegistrationForm() {
                     url: signatureData.url,
                     public_id: signatureData.public_id
                 },
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             };
 
@@ -1725,6 +1783,7 @@ document.head.appendChild(style);
 const studentImageStyles = document.createElement('style');
 studentImageStyles.textContent = `
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     .student-photo, .image-container {
         position: relative;
         min-height: 120px;
@@ -1765,10 +1824,13 @@ studentImageStyles.textContent = `
 
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     .student-photo {
         width: 120px;
         height: 120px;
         border-radius: 50%;
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
         margin: 0 auto 15px;
         border: 3px solid #4CAF50;
@@ -1777,6 +1839,8 @@ studentImageStyles.textContent = `
     .image-container {
         background: white;
 =======
+=======
+>>>>>>> Stashed changes
         overflow: hidden;
         margin: 0 auto 15px;
         border: 3px solid #4CAF50;
@@ -1809,6 +1873,9 @@ studentImageStyles.textContent = `
 
     .image-container {
         background: #fff;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         padding: 20px;
         border-radius: 10px;
@@ -1823,7 +1890,13 @@ studentImageStyles.textContent = `
 
     .detail-image {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         max-height: 300px;
+=======
+        width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+>>>>>>> Stashed changes
 =======
         width: 100%;
         max-height: 300px;
@@ -1834,7 +1907,10 @@ studentImageStyles.textContent = `
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     .no-image {
         padding: 40px;
         text-align: center;
@@ -1863,6 +1939,9 @@ studentImageStyles.textContent = `
         margin-top: 15px;
     }
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     @media (max-width: 768px) {
         .student-photo {
@@ -1881,6 +1960,7 @@ studentImageStyles.textContent = `
 `;
 document.head.appendChild(studentImageStyles);
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 // Add CSS for improved image handling
 const imageStyles = document.createElement('style');
@@ -1967,6 +2047,8 @@ imageStyles.textContent = `
 `;
 document.head.appendChild(imageStyles); 
 =======
+=======
+>>>>>>> Stashed changes
 // Add CSS for image previews
 const imagePreviewStyles = document.createElement('style');
 imagePreviewStyles.textContent = `
@@ -2002,5 +2084,9 @@ imagePreviewStyles.textContent = `
         color: #888;
     }
 `;
+<<<<<<< Updated upstream
+document.head.appendChild(imagePreviewStyles); 
+>>>>>>> Stashed changes
+=======
 document.head.appendChild(imagePreviewStyles); 
 >>>>>>> Stashed changes
