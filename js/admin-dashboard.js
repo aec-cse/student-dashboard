@@ -339,11 +339,16 @@ function createImageWithErrorHandling(url, alt, type) {
 
 // Function to render the student list
 function renderStudentList(students) {
+<<<<<<< Updated upstream
     if (!students || students.length === 0) {
+=======
+  if (!students || students.length === 0) {
+>>>>>>> Stashed changes
         return '<div class="no-students">No students found</div>';
     }
 
     return `
+<<<<<<< Updated upstream
         <div class="student-grid">
             ${students.map(student => `
                 <div class="student-card" data-student-id="${student.userId}">
@@ -353,11 +358,20 @@ function renderStudentList(students) {
                                   alt="${student.fullName}'s photo" 
                                   class="student-image"
                                   onerror="handleImageError(this, 'photo')">` :
+=======
+        <div class="student-list">
+            ${students.map(student => `
+                <div class="student-card" onclick="loadContent('student-detail', '${student.userId}')">
+                    <div class="student-photo">
+                        ${student.photograph?.url ? 
+                            `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="student-image">` :
+>>>>>>> Stashed changes
                             `<div class="no-photo"><i class="fas fa-user"></i></div>`
                         }
                     </div>
                     <div class="student-info">
                         <h3>${student.fullName}</h3>
+<<<<<<< Updated upstream
                         <p><i class="fas fa-id-card"></i> ${student.internshipId || 'N/A'}</p>
                         <p><i class="fas fa-envelope"></i> ${student.email}</p>
                         <p><i class="fas fa-phone"></i> ${student.contactNumber}</p>
@@ -371,6 +385,13 @@ function renderStudentList(students) {
                             <i class="fas fa-eye"></i> View Details
                         </button>
                     </div>
+=======
+                        <p><i class="fas fa-id-card"></i> ${student.internshipId}</p>
+                        <p><i class="fas fa-envelope"></i> ${student.email}</p>
+                        <p><i class="fas fa-phone"></i> ${student.contactNumber}</p>
+                        <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
+                    </div>
+>>>>>>> Stashed changes
                 </div>
             `).join('')}
         </div>
@@ -404,6 +425,7 @@ function renderStudentDetail(student) {
                 </button>
                 <h2>Student Details</h2>
                 <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
+<<<<<<< Updated upstream
             </div>
 
             <div class="student-detail-content">
@@ -587,6 +609,175 @@ function renderStudentDetail(student) {
                         </div>
             </div>
 
+=======
+            </div>
+
+            <div class="student-detail-content">
+                <div class="student-detail-grid">
+                    <!-- Student Photo and Signature -->
+                    <div class="student-images">
+                        <div class="image-container">
+                            <h3>Photograph</h3>
+                            ${student.photograph?.url ? 
+                                `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="detail-image">` :
+                                `<div class="no-image"><i class="fas fa-user"></i> No photo available</div>`
+                            }
+                        </div>
+                        <div class="image-container">
+                            <h3>Signature</h3>
+                            ${student.signature?.url ? 
+                                `<img src="${student.signature.url}" alt="${student.fullName}'s signature" class="detail-image">` :
+                                `<div class="no-image"><i class="fas fa-signature"></i> No signature available</div>`
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-user"></i> Personal Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Full Name</label>
+                                <p>${student.fullName}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Internship ID</label>
+                                <p>${student.internshipId || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Email</label>
+                                <p>${student.email}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Contact Number</label>
+                                <p>${student.contactNumber}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Date of Birth</label>
+                                <p>${student.dob || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Gender</label>
+                                <p>${student.gender || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item full-width">
+                                <label>Address</label>
+                                <p>${student.address || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>ZIP Code</label>
+                                <p>${student.zipCode || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Academic Information -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>College</label>
+                                <p>${student.college}</p>
+            </div>
+                            <div class="detail-item">
+                                <label>Degree Program</label>
+                                <p>${student.degreeProgram}</p>
+        </div>
+                            <div class="detail-item">
+                                <label>Branch</label>
+                                <p>${student.branch || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Current Semester</label>
+                                <p>${student.semester || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>GPA</label>
+                                <p>${student.gpa}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Graduation Year</label>
+                                <p>${student.graduationYear}</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Backlogs</label>
+                                <p>${student.hasBacklogs === 'Yes' ? student.backlogCount : 'None'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Technical Information -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-code"></i> Technical Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item full-width">
+                                <label>Programming Languages</label>
+                                <p>${student.programmingLanguages?.join(', ') || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item full-width">
+                                <label>Tools/Software</label>
+                                <p>${student.toolsSoftware?.join(', ') || 'N/A'}</p>
+                            </div>
+                            <div class="detail-item full-width">
+                                <label>Area of Interest</label>
+                                <p>${student.areaOfInterest?.join(', ') || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Internship Details -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-briefcase"></i> Internship Details</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Preferred Domain</label>
+                                <p>${student.preferredDomain || 'N/A'}</p>
+        </div>
+                            <div class="detail-item">
+                                <label>Duration</label>
+                                <p>${student.preferredDuration} Months</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Start Date</label>
+                                <p>${student.preferredStartDate || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item full-width">
+                                <label>Why Join</label>
+                                <p>${student.whyJoin || 'N/A'}</p>
+        </div>
+                            <div class="detail-item">
+                                <label>Prior Experience</label>
+                                <p>${student.priorExperience || 'N/A'}</p>
+                            </div>
+        ${student.priorExperience === 'Yes' ? `
+                                <div class="detail-item">
+                                    <label>Company</label>
+                                    <p>${student.expCompany || 'N/A'}</p>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Duration</label>
+                                    <p>${student.expDuration || 'N/A'}</p>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Role</label>
+                                    <p>${student.expRole || 'N/A'}</p>
+            </div>
+        ` : ''}
+                            <div class="detail-item">
+                                <label>How did you hear about us?</label>
+                                <p>${student.hearAbout || 'N/A'}</p>
+                            </div>
+                        </div>
+            </div>
+
+>>>>>>> Stashed changes
                     <!-- Metadata -->
                     <div class="detail-section">
                         <h3><i class="fas fa-database"></i> Registration Information</h3>
@@ -1144,10 +1335,28 @@ async function createStudentAccount(email, password) {
 
 // Cloudinary upload function
 async function uploadToCloudinary(file, previewId) {
+<<<<<<< Updated upstream
+=======
+    if (!file) {
+        throw new Error('No file provided for upload');
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File size should be less than 5MB');
+    }
+
+>>>>>>> Stashed changes
     const url = `https://api.cloudinary.com/v1_1/deksu6n47/upload`;
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "student_upload");
+<<<<<<< Updated upstream
 
     const response = await fetch(url, {
         method: "POST",
@@ -1166,6 +1375,50 @@ async function uploadToCloudinary(file, previewId) {
 
 // Update initializeRegistrationForm function
 function initializeRegistrationForm() {
+=======
+    formData.append("folder", "student_registrations"); // Add folder organization
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Failed to upload image');
+        }
+
+        const data = await response.json();
+
+        // Show preview
+        if (previewId && document.getElementById(previewId)) {
+            const previewContainer = document.getElementById(previewId);
+            previewContainer.innerHTML = `
+                <div class="preview-container">
+                    <img src="${data.secure_url}" alt="Uploaded Image" class="preview-image">
+                    <div class="preview-info">
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-size">${(file.size / 1024).toFixed(1)}KB</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Return both secure_url and public_id for better tracking
+        return {
+            url: data.secure_url,
+            public_id: data.public_id
+        };
+    } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        throw new Error(`Failed to upload image: ${error.message}`);
+    }
+}
+
+// Update the registration form submission to handle the new Cloudinary response
+async function initializeRegistrationForm() {
+>>>>>>> Stashed changes
     const registrationForm = document.getElementById('studentRegistrationForm');
     if (!registrationForm) return;
 
@@ -1258,9 +1511,20 @@ function initializeRegistrationForm() {
                 throw new Error('Please upload both photograph and signature');
             }
 
+<<<<<<< Updated upstream
             // Upload images
             const photographURL = await uploadToCloudinary(photographFile, 'photographPreview');
             const signatureURL = await uploadToCloudinary(signatureFile, 'signaturePreview');
+=======
+            // Upload images with better error handling
+            let photographData, signatureData;
+            try {
+                photographData = await uploadToCloudinary(photographFile, 'photographPreview');
+                signatureData = await uploadToCloudinary(signatureFile, 'signaturePreview');
+            } catch (uploadError) {
+                throw new Error(`Image upload failed: ${uploadError.message}`);
+            }
+>>>>>>> Stashed changes
 
             const studentData = {
                 // Personal Information
@@ -1305,9 +1569,21 @@ function initializeRegistrationForm() {
                 registeredAt: new Date().toISOString(),
                 status: 'pending',
 
+<<<<<<< Updated upstream
                 // Add image URLs
                 photographURL: photographURL,
                 signatureURL: signatureURL,
+=======
+                // Update image URLs with both URL and public_id
+                photograph: {
+                    url: photographData.url,
+                    public_id: photographData.public_id
+                },
+                signature: {
+                    url: signatureData.url,
+                    public_id: signatureData.public_id
+                },
+>>>>>>> Stashed changes
             };
 
             // Generate internship ID
@@ -1448,6 +1724,7 @@ document.head.appendChild(style);
 // Add CSS for student images
 const studentImageStyles = document.createElement('style');
 studentImageStyles.textContent = `
+<<<<<<< Updated upstream
     .student-photo, .image-container {
         position: relative;
         min-height: 120px;
@@ -1486,16 +1763,53 @@ studentImageStyles.textContent = `
         color: #adb5bd;
     }
 
+=======
+>>>>>>> Stashed changes
     .student-photo {
         width: 120px;
         height: 120px;
         border-radius: 50%;
+<<<<<<< Updated upstream
         margin: 0 auto 15px;
         border: 3px solid #4CAF50;
     }
 
     .image-container {
         background: white;
+=======
+        overflow: hidden;
+        margin: 0 auto 15px;
+        border: 3px solid #4CAF50;
+        background: #f8f9fa;
+    }
+
+    .student-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-photo {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        color: #6c757d;
+        font-size: 2rem;
+    }
+
+    .student-images {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .image-container {
+        background: #fff;
+>>>>>>> Stashed changes
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1508,11 +1822,48 @@ studentImageStyles.textContent = `
     }
 
     .detail-image {
+<<<<<<< Updated upstream
         max-height: 300px;
+=======
+        width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+>>>>>>> Stashed changes
         border-radius: 8px;
         border: 1px solid #e1e8ed;
     }
 
+<<<<<<< Updated upstream
+=======
+    .no-image {
+        padding: 40px;
+        text-align: center;
+        background: #f8f9fa;
+        border-radius: 8px;
+        color: #6c757d;
+        font-size: 1.2rem;
+    }
+
+    .no-image i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .student-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .student-info {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+>>>>>>> Stashed changes
     @media (max-width: 768px) {
         .student-photo {
             width: 100px;
@@ -1530,6 +1881,7 @@ studentImageStyles.textContent = `
 `;
 document.head.appendChild(studentImageStyles);
 
+<<<<<<< Updated upstream
 // Add CSS for improved image handling
 const imageStyles = document.createElement('style');
 imageStyles.textContent = `
@@ -1614,3 +1966,41 @@ imageStyles.textContent = `
     }
 `;
 document.head.appendChild(imageStyles); 
+=======
+// Add CSS for image previews
+const imagePreviewStyles = document.createElement('style');
+imagePreviewStyles.textContent = `
+    .preview-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .preview-image {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .preview-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .file-name {
+        font-weight: 500;
+        word-break: break-all;
+        text-align: center;
+    }
+
+    .file-size {
+        color: #888;
+    }
+`;
+document.head.appendChild(imagePreviewStyles); 
+>>>>>>> Stashed changes
