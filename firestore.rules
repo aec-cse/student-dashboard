@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    function isStudent() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/student-registrations/$(request.auth.uid));
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidStudentData() {
+      let requiredFields = ['fullName', 'email', 'internshipId', 'status'];
+      return request.resource.data.keys().hasAll(requiredFields) &&
+             request.resource.data.status in ['pending', 'approved', 'rejected'];
+    }
+    
+    function isValidAdminData() {
+      let requiredFields = ['email', 'role'];
+      return request.resource.data.keys().hasAll(requiredFields) &&
+             request.resource.data.role == 'admin';
+    }
+    
+    // Rules for student registrations collection
+    match /student-registrations/{studentId} {
+      // Allow read if user is authenticated and either admin or the student themselves
+      allow read: if isAuthenticated() && (isAdmin() || isOwner(studentId));
+      
+      // Allow create if user is authenticated and data is valid
+      allow create: if isAuthenticated() && 
+                   request.resource.data.userId == request.auth.uid &&
+                   isValidStudentData();
+      
+      // Allow update if user is admin or the student themselves (with restrictions)
+      allow update: if (isAdmin() || (isOwner(studentId) && 
+                   // Students can only update certain fields
+                   request.resource.data.diff(resource.data).affectedKeys()
+                     .hasOnly(['contact', 'address', 'zipCode']))) &&
+                   isValidStudentData();
+      
+      // Allow delete only if user is admin
+      allow delete: if isAdmin();
+    }
+    
+    // Rules for admins collection
+    match /admins/{adminId} {
+      // Allow read if user is admin
+      allow read: if isAdmin();
+      
+      // Allow create if user is admin and data is valid
+      allow create: if isAdmin() && 
+                   request.resource.data.userId == request.auth.uid &&
+                   isValidAdminData();
+      
+      // Allow update if user is admin and updating their own document
+      allow update: if isAdmin() && 
+                   adminId == request.auth.uid &&
+                   isValidAdminData();
+      
+      // Prevent deletion of admin documents
+      allow delete: if false;
+    }
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 
