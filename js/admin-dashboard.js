@@ -344,6 +344,9 @@ function renderStudentList(students) {
 =======
   if (!students || students.length === 0) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -351,6 +354,7 @@ function renderStudentList(students) {
     }
 
     return `
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
         <div class="student-grid">
@@ -365,6 +369,8 @@ function renderStudentList(students) {
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
         <div class="student-list">
             ${students.map(student => `
                 <div class="student-card" onclick="loadContent('student-detail', '${student.userId}')">
@@ -372,6 +378,9 @@ function renderStudentList(students) {
                         ${student.photograph?.url ? 
                             `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="student-image">` :
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -380,6 +389,7 @@ function renderStudentList(students) {
                     </div>
                     <div class="student-info">
                         <h3>${student.fullName}</h3>
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
                         <p><i class="fas fa-id-card"></i> ${student.internshipId || 'N/A'}</p>
@@ -398,12 +408,17 @@ function renderStudentList(students) {
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
                         <p><i class="fas fa-id-card"></i> ${student.internshipId}</p>
                         <p><i class="fas fa-envelope"></i> ${student.email}</p>
                         <p><i class="fas fa-phone"></i> ${student.contactNumber}</p>
                         <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
                     </div>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -442,6 +457,9 @@ function renderStudentDetail(student) {
                 <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
             </div>
@@ -453,11 +471,16 @@ function renderStudentDetail(student) {
                         <div class="image-container">
                             <h3>Photograph</h3>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                             ${student.photographURL ? 
                                 `<img src="${student.photographURL}" 
                                       alt="${student.fullName}'s photo" 
                                       class="detail-image"
                                       onerror="handleImageError(this, 'photo')">` :
+=======
+                            ${student.photograph?.url ? 
+                                `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="detail-image">` :
+>>>>>>> Stashed changes
 =======
                             ${student.photograph?.url ? 
                                 `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="detail-image">` :
@@ -468,11 +491,16 @@ function renderStudentDetail(student) {
                         <div class="image-container">
                             <h3>Signature</h3>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                             ${student.signatureURL ? 
                                 `<img src="${student.signatureURL}" 
                                       alt="${student.fullName}'s signature" 
                                       class="detail-image"
                                       onerror="handleImageError(this, 'signature')">` :
+=======
+                            ${student.signature?.url ? 
+                                `<img src="${student.signature.url}" alt="${student.fullName}'s signature" class="detail-image">` :
+>>>>>>> Stashed changes
 =======
                             ${student.signature?.url ? 
                                 `<img src="${student.signature.url}" alt="${student.fullName}'s signature" class="detail-image">` :
@@ -603,6 +631,7 @@ function renderStudentDetail(student) {
                                 <p>${student.whyJoin || 'N/A'}</p>
         </div>
                             <div class="detail-item">
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
                                 <label for="priorExperience">Do you have any prior internship experience? *</label>
                                 <select id="priorExperience" name="priorExperience" required>
@@ -784,6 +813,8 @@ function renderStudentDetail(student) {
                             <div class="detail-item">
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
                                 <label>Prior Experience</label>
                                 <p>${student.priorExperience || 'N/A'}</p>
                             </div>
@@ -809,6 +840,9 @@ function renderStudentDetail(student) {
             </div>
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1371,7 +1405,10 @@ async function createStudentAccount(email, password) {
 async function uploadToCloudinary(file, previewId) {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     if (!file) {
@@ -1389,6 +1426,9 @@ async function uploadToCloudinary(file, previewId) {
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1396,6 +1436,7 @@ async function uploadToCloudinary(file, previewId) {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "student_upload");
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
@@ -1417,6 +1458,8 @@ async function uploadToCloudinary(file, previewId) {
 // Update initializeRegistrationForm function
 function initializeRegistrationForm() {
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     formData.append("folder", "student_registrations"); // Add folder organization
@@ -1462,6 +1505,9 @@ function initializeRegistrationForm() {
 // Update the registration form submission to handle the new Cloudinary response
 async function initializeRegistrationForm() {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1559,10 +1605,13 @@ async function initializeRegistrationForm() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             // Upload images
             const photographURL = await uploadToCloudinary(photographFile, 'photographPreview');
             const signatureURL = await uploadToCloudinary(signatureFile, 'signaturePreview');
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
             // Upload images with better error handling
@@ -1574,6 +1623,9 @@ async function initializeRegistrationForm() {
                 throw new Error(`Image upload failed: ${uploadError.message}`);
             }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1623,10 +1675,13 @@ async function initializeRegistrationForm() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 // Add image URLs
                 photographURL: photographURL,
                 signatureURL: signatureURL,
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
                 // Update image URLs with both URL and public_id
@@ -1639,6 +1694,9 @@ async function initializeRegistrationForm() {
                     public_id: signatureData.public_id
                 },
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1784,6 +1842,7 @@ const studentImageStyles = document.createElement('style');
 studentImageStyles.textContent = `
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     .student-photo, .image-container {
         position: relative;
         min-height: 120px;
@@ -1826,10 +1885,13 @@ studentImageStyles.textContent = `
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     .student-photo {
         width: 120px;
         height: 120px;
         border-radius: 50%;
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
         margin: 0 auto 15px;
@@ -1839,6 +1901,8 @@ studentImageStyles.textContent = `
     .image-container {
         background: white;
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
         overflow: hidden;
@@ -1874,6 +1938,9 @@ studentImageStyles.textContent = `
     .image-container {
         background: #fff;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1891,7 +1958,13 @@ studentImageStyles.textContent = `
     .detail-image {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         max-height: 300px;
+=======
+        width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+>>>>>>> Stashed changes
 =======
         width: 100%;
         max-height: 300px;
@@ -1908,7 +1981,10 @@ studentImageStyles.textContent = `
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     .no-image {
@@ -1940,6 +2016,9 @@ studentImageStyles.textContent = `
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -1960,6 +2039,7 @@ studentImageStyles.textContent = `
 `;
 document.head.appendChild(studentImageStyles);
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 // Add CSS for improved image handling
@@ -2049,6 +2129,8 @@ document.head.appendChild(imageStyles);
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 // Add CSS for image previews
 const imagePreviewStyles = document.createElement('style');
 imagePreviewStyles.textContent = `
@@ -2085,6 +2167,10 @@ imagePreviewStyles.textContent = `
     }
 `;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+document.head.appendChild(imagePreviewStyles); 
+>>>>>>> Stashed changes
+=======
 document.head.appendChild(imagePreviewStyles); 
 >>>>>>> Stashed changes
 =======
