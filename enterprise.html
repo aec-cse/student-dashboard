@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enterprise Solutions - Anusaya Trading and IT Solutions</title>
+  
+  <!-- SEO & Metadata -->
+  <meta name="description" content="Enterprise-grade IT solutions, training, and consulting services for large organizations.">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .enterprise {
+      padding: 8rem 2rem 4rem;
+    }
+
+    .enterprise-header {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto 4rem;
+    }
+
+    .enterprise-header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .enterprise-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .enterprise-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .enterprise-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .enterprise-card p {
+      color: var(--gray-600);
+      margin-bottom: 1.5rem;
+    }
+
+    .enterprise-features {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .enterprise-features li {
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .enterprise-features li i {
+      color: var(--primary);
+    }
+
+    .contact-section {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 4rem 2rem;
+      background: var(--gray-100);
+      border-radius: 12px;
+    }
+
+    .contact-section h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .contact-section p {
+      color: var(--gray-600);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .contact-form {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--gray-700);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      height: 150px;
+      resize: vertical;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <img src="Logo.png" alt="Anusaya Logo">
+      <span>Anusaya Trading</span>
+    </a>
+    <div class="navbar-menu">
+      <a href="features.html">Features</a>
+      <a href="index.html#services">Services</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="enterprise.html">Enterprise</a>
+      <div class="navbar-buttons">
+        <a href="login.html" class="btn btn-secondary">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Enterprise Page -->
+  <section class="enterprise">
+    <div class="enterprise-header">
+      <h1>Enterprise Solutions</h1>
+      <p>Scalable, secure, and customized solutions for large organizations</p>
+    </div>
+
+    <div class="enterprise-grid">
+      <div class="enterprise-card">
+        <h3>Custom Development</h3>
+        <p>Enterprise-grade software solutions tailored to your organization's needs.</p>
+        <ul class="enterprise-features">
+          <li><i class="fas fa-check"></i> Scalable Architecture</li>
+          <li><i class="fas fa-check"></i> Security First</li>
+          <li><i class="fas fa-check"></i> 24/7 Support</li>
+          <li><i class="fas fa-check"></i> Dedicated Team</li>
+        </ul>
+      </div>
+      <div class="enterprise-card">
+        <h3>Enterprise Training</h3>
+        <p>Comprehensive training programs for your entire organization.</p>
+        <ul class="enterprise-features">
+          <li><i class="fas fa-check"></i> Custom Curriculum</li>
+          <li><i class="fas fa-check"></i> On-site Training</li>
+          <li><i class="fas fa-check"></i> Progress Tracking</li>
+          <li><i class="fas fa-check"></i> Certification</li>
+        </ul>
+      </div>
+      <div class="enterprise-card">
+        <h3>IT Consulting</h3>
+        <p>Strategic guidance for your technology initiatives.</p>
+        <ul class="enterprise-features">
+          <li><i class="fas fa-check"></i> Digital Transformation</li>
+          <li><i class="fas fa-check"></i> Security Audit</li>
+          <li><i class="fas fa-check"></i> Infrastructure Planning</li>
+          <li><i class="fas fa-check"></i> Risk Assessment</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="contact-section">
+      <h2>Contact Our Enterprise Team</h2>
+      <p>Get in touch with our enterprise specialists to discuss your organization's needs</p>
+      <form class="contact-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="company">Company Name</label>
+          <input type="text" id="company" name="company" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Work Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" required></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Contact Sales</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Product</h3>
+        <a href="features.html">Features</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="enterprise.html">Enterprise</a>
+        <a href="#downloads">Downloads</a>
+      </div>
+      <div class="footer-section">
+        <h3>Resources</h3>
+        <a href="#docs">Documentation</a>
+        <a href="#blog">Blog</a>
+        <a href="#forum">Forum</a>
+        <a href="#changelog">Changelog</a>
+      </div>
+      <div class="footer-section">
+        <h3>Company</h3>
+        <a href="#about">About Us</a>
+        <a href="#careers">Careers</a>
+        <a href="#contact">Contact</a>
+        <a href="#legal">Legal</a>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 2rem;">
+      <p>&copy; 2025 Anusaya Trading and IT Solutions. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html> 
