@@ -1,0 +1,268 @@
+:root {
+  --primary: #1b4f72;
+  --secondary: #2980b9;
+  --accent: #85c1e9;
+  --background: #ffffff;
+  --text: #1a1a1a;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: white;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.navbar-brand img {
+  height: 40px;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navbar-menu a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar-menu a:hover {
+  color: var(--secondary);
+}
+
+.navbar-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--gray-300);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Hero Section */
+.hero {
+  padding: 8rem 2rem 4rem;
+  text-align: center;
+  background: linear-gradient(to bottom, var(--gray-100), white);
+}
+
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+  font-size: 1.25rem;
+  color: var(--gray-600);
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+/* Features Section */
+.features {
+  padding: 4rem 2rem;
+  background: white;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  padding: 2rem;
+  border-radius: 12px;
+  background: var(--gray-100);
+  transition: transform 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+}
+
+.feature-card i {
+  font-size: 2rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Testimonials Section */
+.testimonials {
+  padding: 4rem 2rem;
+  background: var(--gray-100);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testimonial-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.testimonial-card p {
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.testimonial-author img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+/* Footer */
+footer {
+  background: var(--gray-900);
+  color: white;
+  padding: 4rem 2rem;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.footer-section h3 {
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.footer-section a {
+  color: var(--gray-400);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 0.5rem;
+  transition: color 0.2s;
+}
+
+.footer-section a:hover {
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar-menu {
+    display: none;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .features-grid,
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+} 
