@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact Us - Anusaya Trading and IT Solutions</title>
+  
+  <!-- SEO & Metadata -->
+  <meta name="description" content="Get in touch with Anusaya Trading and IT Solutions. We're here to help with your IT needs.">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .contact {
+      padding: 8rem 2rem 4rem;
+    }
+
+    .contact-header {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto 4rem;
+    }
+
+    .contact-header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .contact-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .contact-info {
+      padding: 2rem;
+    }
+
+    .contact-info h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-item i {
+      color: var(--primary);
+      font-size: 1.25rem;
+      margin-top: 0.25rem;
+    }
+
+    .info-content h3 {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+      color: var(--gray-900);
+    }
+
+    .info-content p {
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+
+    .contact-form {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--gray-700);
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-group textarea {
+      height: 150px;
+      resize: vertical;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .map-container {
+      margin-top: 4rem;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .map-container iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+    }
+
+    @media (max-width: 768px) {
+      .contact-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <img src="Logo.png" alt="Anusaya Logo">
+      <span>Anusaya Trading</span>
+    </a>
+    <div class="navbar-menu">
+      <a href="features.html">Features</a>
+      <a href="index.html#services">Services</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="enterprise.html">Enterprise</a>
+      <div class="navbar-buttons">
+        <a href="login.html" class="btn btn-secondary">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contact Page -->
+  <section class="contact">
+    <div class="contact-header">
+      <h1>Contact Us</h1>
+      <p>Get in touch with our team. We're here to help with your IT needs.</p>
+    </div>
+
+    <div class="contact-container">
+      <div class="contact-info">
+        <h2>Get in Touch</h2>
+        <div class="info-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <div class="info-content">
+            <h3>Our Location</h3>
+            <p>123 Business Street<br>Tech City, TC 12345<br>United States</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-phone"></i>
+          <div class="info-content">
+            <h3>Phone Number</h3>
+            <p>+1 (555) 123-4567<br>+1 (555) 987-6543</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-envelope"></i>
+          <div class="info-content">
+            <h3>Email Address</h3>
+            <p>info@anusayatrading.com<br>support@anusayatrading.com</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-clock"></i>
+          <div class="info-content">
+            <h3>Working Hours</h3>
+            <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 4:00 PM<br>Sunday: Closed</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <form>
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone">
+          </div>
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <select id="subject" name="subject" required>
+              <option value="">Select a subject</option>
+              <option value="general">General Inquiry</option>
+              <option value="support">Technical Support</option>
+              <option value="sales">Sales</option>
+              <option value="training">Training</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Send Message</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="map-container">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387193.30591910525!2d-74.25986432970718!3d40.697149422113014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1647043087964!5m2!1sen!2s" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Product</h3>
+        <a href="features.html">Features</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="enterprise.html">Enterprise</a>
+        <a href="#downloads">Downloads</a>
+      </div>
+      <div class="footer-section">
+        <h3>Resources</h3>
+        <a href="#docs">Documentation</a>
+        <a href="blog.html">Blog</a>
+        <a href="#forum">Forum</a>
+        <a href="#changelog">Changelog</a>
+      </div>
+      <div class="footer-section">
+        <h3>Company</h3>
+        <a href="#about">About Us</a>
+        <a href="#careers">Careers</a>
+        <a href="contact.html">Contact</a>
+        <a href="#legal">Legal</a>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 2rem;">
+      <p>&copy; 2025 Anusaya Trading and IT Solutions. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html> 
