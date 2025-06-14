@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Features - Anusaya Trading and IT Solutions</title>
+  
+  <!-- SEO & Metadata -->
+  <meta name="description" content="Discover the powerful features of our IT services, training programs, and consulting solutions.">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .features-page {
+      padding: 8rem 2rem 4rem;
+    }
+
+    .features-header {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto 4rem;
+    }
+
+    .features-header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .feature-section {
+      max-width: 1200px;
+      margin: 0 auto 6rem;
+    }
+
+    .feature-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .feature-item {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-4px);
+    }
+
+    .feature-item i {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .feature-item h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .feature-item p {
+      color: var(--gray-600);
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .section-title h2 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .section-title p {
+      color: var(--gray-600);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <img src="Logo.png" alt="Anusaya Logo">
+      <span>Anusaya Trading</span>
+    </a>
+    <div class="navbar-menu">
+      <a href="features.html">Features</a>
+      <a href="index.html#services">Services</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="index.html#about">About</a>
+      <div class="navbar-buttons">
+        <a href="login.html" class="btn btn-secondary">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Features Page -->
+  <section class="features-page">
+    <div class="features-header">
+      <h1>Powerful Features for Your Business</h1>
+      <p>Discover how our comprehensive solutions can transform your business</p>
+    </div>
+
+    <!-- Software Development Features -->
+    <div class="feature-section">
+      <div class="section-title">
+        <h2>Software Development</h2>
+        <p>Custom solutions tailored to your business needs</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <i class="fas fa-code"></i>
+          <h3>Custom Development</h3>
+          <p>Tailored software solutions designed specifically for your business requirements.</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-mobile-alt"></i>
+          <h3>Mobile Apps</h3>
+          <p>Native and cross-platform mobile applications for iOS and Android.</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-globe"></i>
+          <h3>Web Applications</h3>
+          <p>Modern, responsive web applications built with the latest technologies.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Training Features -->
+    <div class="feature-section">
+      <div class="section-title">
+        <h2>IT Training</h2>
+        <p>Comprehensive training programs for individuals and teams</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <i class="fas fa-laptop-code"></i>
+          <h3>Programming Courses</h3>
+          <p>Learn Python, Java, Web Development, and more from industry experts.</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-users"></i>
+          <h3>Team Training</h3>
+          <p>Customized training programs for corporate teams and organizations.</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-certificate"></i>
+          <h3>Certification</h3>
+          <p>Industry-recognized certifications to boost your career.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consulting Features -->
+    <div class="feature-section">
+      <div class="section-title">
+        <h2>IT Consulting</h2>
+        <p>Expert guidance for your technology needs</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <i class="fas fa-network-wired"></i>
+          <h3>Infrastructure Setup</h3>
+          <p>Complete IT infrastructure planning and implementation.</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-shield-alt"></i>
+          <h3>Security Audit</h3>
+          <p>Comprehensive security assessments and recommendations.</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-chart-line"></i>
+          <h3>Digital Transformation</h3>
+          <p>Strategic guidance for your digital transformation journey.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Product</h3>
+        <a href="features.html">Features</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="#enterprise">Enterprise</a>
+        <a href="#downloads">Downloads</a>
+      </div>
+      <div class="footer-section">
+        <h3>Resources</h3>
+        <a href="#docs">Documentation</a>
+        <a href="#blog">Blog</a>
+        <a href="#forum">Forum</a>
+        <a href="#changelog">Changelog</a>
+      </div>
+      <div class="footer-section">
+        <h3>Company</h3>
+        <a href="#about">About Us</a>
+        <a href="#careers">Careers</a>
+        <a href="#contact">Contact</a>
+        <a href="#legal">Legal</a>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 2rem;">
+      <p>&copy; 2025 Anusaya Trading and IT Solutions. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html> 
