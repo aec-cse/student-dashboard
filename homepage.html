@@ -1678,5 +1678,51 @@
   <a href="#" class="back-to-top" aria-label="Back to top">
     <i class="fas fa-arrow-up"></i>
   </a>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
+    authDomain: "admin-af1fc.firebaseapp.com",
+    projectId: "admin-af1fc",
+    storageBucket: "admin-af1fc.firebasestorage.app",
+    messagingSenderId: "1042593739824",
+    appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  document.getElementById("contactForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const message = document.getElementById("message").value.trim();
+
+    if (!name || !email || !phone || !message) {
+      alert("Please fill out all fields.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db,"enquiry"), {
+        name,
+        email,
+        phone,
+        message,
+        timestamp: new Date().toISOString()
+      });
+      alert("Message sent successfully!");
+      document.getElementById("contactForm").reset();
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("Failed to send message. Please try again.");
+    }
+  });
+</script>
+
 </body>
 </html>
