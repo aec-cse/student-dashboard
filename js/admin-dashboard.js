@@ -224,7 +224,7 @@ function renderStatusStudentList(students, isDashboard = true) {
                 <button class="delete-student-btn" data-id="${student.id}">
                     <i class="fas fa-trash"></i>
                     Delete
-            </button>
+                </button>
             </div>
         </div>
     `).join('');
@@ -316,116 +316,49 @@ async function renderDashboard() {
   }
 }
 
-// Function to handle image loading errors
-function handleImageError(imgElement, type) {
-    imgElement.onerror = null; // Prevent infinite loop
-    imgElement.style.display = 'none';
-    const container = imgElement.parentElement;
-    const fallbackDiv = document.createElement('div');
-    fallbackDiv.className = 'no-image';
-    fallbackDiv.innerHTML = `<i class="fas fa-${type === 'photo' ? 'user' : 'signature'}"></i> Image not available`;
-    container.appendChild(fallbackDiv);
-}
-
-// Function to create an image element with error handling
-function createImageWithErrorHandling(url, alt, type) {
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = alt;
-    img.className = type === 'photo' ? 'student-image' : 'detail-image';
-    img.onerror = () => handleImageError(img, type);
-    return img;
-}
-
 // Function to render the student list
 function renderStudentList(students) {
-<<<<<<< Updated upstream
-    if (!students || students.length === 0) {
-=======
   if (!students || students.length === 0) {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-        return '<div class="no-students">No students found</div>';
-    }
-
     return `
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        <div class="student-grid">
-            ${students.map(student => `
-                <div class="student-card" data-student-id="${student.userId}">
-                    <div class="student-photo">
-                        ${student.photographURL ? 
-                            `<img src="${student.photographURL}" 
-                                  alt="${student.fullName}'s photo" 
-                                  class="student-image"
-                                  onerror="handleImageError(this, 'photo')">` :
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-        <div class="student-list">
-            ${students.map(student => `
-                <div class="student-card" onclick="loadContent('student-detail', '${student.userId}')">
-                    <div class="student-photo">
-                        ${student.photograph?.url ? 
-                            `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="student-image">` :
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                            `<div class="no-photo"><i class="fas fa-user"></i></div>`
-                        }
-                    </div>
-                    <div class="student-info">
-                        <h3>${student.fullName}</h3>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                        <p><i class="fas fa-id-card"></i> ${student.internshipId || 'N/A'}</p>
-                        <p><i class="fas fa-envelope"></i> ${student.email}</p>
-                        <p><i class="fas fa-phone"></i> ${student.contactNumber}</p>
-                        <p><i class="fas fa-graduation-cap"></i> ${student.college}</p>
-                        <p><i class="fas fa-book"></i> ${student.degreeProgram} - ${student.branch || 'N/A'}</p>
-                        <p><i class="fas fa-calendar"></i> Graduation: ${student.graduationYear}</p>
-                        <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
-                    </div>
-                    <div class="student-actions">
-                        <button onclick="viewStudentDetails('${student.userId}')" class="view-btn">
-                            <i class="fas fa-eye"></i> View Details
-                        </button>
-                    </div>
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                        <p><i class="fas fa-id-card"></i> ${student.internshipId}</p>
-                        <p><i class="fas fa-envelope"></i> ${student.email}</p>
-                        <p><i class="fas fa-phone"></i> ${student.contactNumber}</p>
-                        <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
-                    </div>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                </div>
-            `).join('')}
-        </div>
+      <div class="no-students">
+        <h2>No Students Found</h2>
+        <p>There are no registered students in the system.</p>
+      </div>
     `;
+  }
+
+  const studentCards = students.map(student => `
+    <div class="student-card" data-id="${student.id}">
+      <div class="student-info">
+        <div class="student-header">
+          <h3>${student.internshipId || 'ID not provided'}</h3>
+          <span class="status-badge ${student.status || 'pending'}">${student.status || 'Pending'}</span>
+        </div>
+        <p><strong>Name:</strong> ${student.fullName || 'N/A'}</p>
+        <p><strong>Email:</strong> ${student.email || 'N/A'}</p>
+        <p><strong>College:</strong> ${student.college || 'N/A'}</p>
+        <p><strong>Branch:</strong> ${student.branch || 'N/A'}</p>
+        <p><strong>Semester:</strong> ${student.semester || 'N/A'}</p>
+        <p><strong>Submitted:</strong> ${new Date(student.submittedAt).toLocaleDateString()}</p>
+      </div>
+      <div class="student-actions">
+        <button class="view-details-btn">
+          View Details
+          <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="delete-student-btn" data-id="${student.id}">
+          <i class="fas fa-trash"></i>
+          Delete
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="student-list">
+      ${studentCards}
+    </div>
+  `;
 }
 
 // Function to update student status
@@ -447,420 +380,157 @@ async function updateStudentStatus(studentId, newStatus) {
 
 // Function to render student detail with status update controls
 function renderStudentDetail(student) {
-    return `
-        <div class="student-detail-container">
-            <div class="student-detail-header">
-                <button class="back-btn" onclick="loadContent('student-management')">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </button>
-                <h2>Student Details</h2>
-                <div class="status-badge ${student.status.toLowerCase()}">${student.status}</div>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+  if (!student) {
+    return '<div class="error-message">Student not found</div>';
+  }
+
+  const statusOptions = [
+    { value: 'pending', label: 'Pending', icon: 'clock', color: '#f1c40f' },
+    { value: 'approved', label: 'Approved', icon: 'check-circle', color: '#2ecc71' },
+    { value: 'rejected', label: 'Rejected', icon: 'times-circle', color: '#e74c3c' }
+  ];
+
+  const currentStatus = student.status?.toLowerCase() || 'pending';
+  const statusUpdateSection = `
+        <div class="status-update-section">
+            <h3>Update Status</h3>
+            <div class="status-options">
+                ${statusOptions.map(option => `
+                    <button 
+                        class="status-option ${currentStatus === option.value ? 'active' : ''}"
+                        data-status="${option.value}"
+                        style="--status-color: ${option.color}"
+                    >
+                        <i class="fas fa-${option.icon}"></i>
+                        ${option.label}
+                    </button>
+                `).join('')}
             </div>
-
-            <div class="student-detail-content">
-                <div class="student-detail-grid">
-                    <!-- Student Photo and Signature -->
-                    <div class="student-images">
-                        <div class="image-container">
-                            <h3>Photograph</h3>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                            ${student.photographURL ? 
-                                `<img src="${student.photographURL}" 
-                                      alt="${student.fullName}'s photo" 
-                                      class="detail-image"
-                                      onerror="handleImageError(this, 'photo')">` :
-=======
-                            ${student.photograph?.url ? 
-                                `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="detail-image">` :
->>>>>>> Stashed changes
-=======
-                            ${student.photograph?.url ? 
-                                `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="detail-image">` :
->>>>>>> Stashed changes
-                                `<div class="no-image"><i class="fas fa-user"></i> No photo available</div>`
-                            }
-                        </div>
-                        <div class="image-container">
-                            <h3>Signature</h3>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                            ${student.signatureURL ? 
-                                `<img src="${student.signatureURL}" 
-                                      alt="${student.fullName}'s signature" 
-                                      class="detail-image"
-                                      onerror="handleImageError(this, 'signature')">` :
-=======
-                            ${student.signature?.url ? 
-                                `<img src="${student.signature.url}" alt="${student.fullName}'s signature" class="detail-image">` :
->>>>>>> Stashed changes
-=======
-                            ${student.signature?.url ? 
-                                `<img src="${student.signature.url}" alt="${student.fullName}'s signature" class="detail-image">` :
->>>>>>> Stashed changes
-                                `<div class="no-image"><i class="fas fa-signature"></i> No signature available</div>`
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Personal Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-user"></i> Personal Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <label>Full Name</label>
-                                <p>${student.fullName}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Internship ID</label>
-                                <p>${student.internshipId || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Email</label>
-                                <p>${student.email}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Contact Number</label>
-                                <p>${student.contactNumber}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Date of Birth</label>
-                                <p>${student.dob || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Gender</label>
-                                <p>${student.gender || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item full-width">
-                                <label>Address</label>
-                                <p>${student.address || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>ZIP Code</label>
-                                <p>${student.zipCode || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Academic Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <label>College</label>
-                                <p>${student.college}</p>
-            </div>
-                            <div class="detail-item">
-                                <label>Degree Program</label>
-                                <p>${student.degreeProgram}</p>
+            <div id="statusUpdateMessage" class="status-message"></div>
         </div>
-                            <div class="detail-item">
-                                <label>Branch</label>
-                                <p>${student.branch || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Current Semester</label>
-                                <p>${student.semester || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>GPA</label>
-                                <p>${student.gpa}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Graduation Year</label>
-                                <p>${student.graduationYear}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Backlogs</label>
-                                <p>${student.hasBacklogs === 'Yes' ? student.backlogCount : 'None'}</p>
-                            </div>
-                        </div>
-                    </div>
+    `;
 
-                    <!-- Technical Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-code"></i> Technical Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item full-width">
-                                <label>Programming Languages</label>
-                                <p>${student.programmingLanguages?.join(', ') || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item full-width">
-                                <label>Tools/Software</label>
-                                <p>${student.toolsSoftware?.join(', ') || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item full-width">
-                                <label>Area of Interest</label>
-                                <p>${student.areaOfInterest?.join(', ') || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Internship Details -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-briefcase"></i> Internship Details</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <label>Preferred Domain</label>
-                                <p>${student.preferredDomain || 'N/A'}</p>
+  // Add photo and signature section
+  const photoAndSignatureSection = `
+    <div class="form-section">
+      <h3><i class="fas fa-id-card"></i> Student Photo & Signature</h3>
+      <div class="photo-signature-grid">
+        <div class="photo-container">
+          <h4>Photograph</h4>
+          ${student.photographURL ? 
+            `<img src="${student.photographURL}" alt="Student Photo" class="student-photo">` : 
+            '<p class="no-image">No photo available</p>'}
         </div>
-                            <div class="detail-item">
-                                <label>Duration</label>
-                                <p>${student.preferredDuration} Months</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Start Date</label>
-                                <p>${student.preferredStartDate || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Additional Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item full-width">
-                                <label>Why Join</label>
-                                <p>${student.whyJoin || 'N/A'}</p>
+        <div class="signature-container">
+          <h4>Signature</h4>
+          ${student.signatureURL ? 
+            `<img src="${student.signatureURL}" alt="Student Signature" class="student-signature">` : 
+            '<p class="no-image">No signature available</p>'}
         </div>
-                            <div class="detail-item">
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                                <label for="priorExperience">Do you have any prior internship experience? *</label>
-                                <select id="priorExperience" name="priorExperience" required>
-                                  <option value="">Select Option</option>
-                                  <option value="No">No</option>
-                                  <option value="Yes">Yes</option>
-                                </select>
-                            </div>
-                            <div id="experienceDetails" style="display: none;">
-                                <div class="form-group">
-                                    <label for="expCompany">Company</label>
-                                    <input type="text" id="expCompany" name="expCompany">
-                                </div>
-                                <div class="form-group">
-                                    <label for="expDuration">Duration</label>
-                                    <input type="text" id="expDuration" name="expDuration" placeholder="e.g., 3 months">
-                                </div>
-                                <div class="form-group">
-                                    <label for="expRole">Role</label>
-                                    <input type="text" id="expRole" name="expRole">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="hearAbout">How did you hear about us? *</label>
-                                <select id="hearAbout" name="hearAbout" required>
-                                  <option value="">Select Option</option>
-                                  <option value="College">College</option>
-                                  <option value="Friend/Family">Friend/Family</option>
-                                  <option value="Social Media">Social Media</option>
-                                  <option value="Other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-            </div>
+      </div>
+    </div>
+  `;
 
-=======
-            </div>
+  // Helper to render details safely, handling missing data
+  const renderDetail = (label, value) => `
+        <p>
+            <strong>${label}</strong>
+            ${value || 'N/A'}
+        </p>
+    `;
 
-            <div class="student-detail-content">
-                <div class="student-detail-grid">
-                    <!-- Student Photo and Signature -->
-                    <div class="student-images">
-                        <div class="image-container">
-                            <h3>Photograph</h3>
-                            ${student.photograph?.url ? 
-                                `<img src="${student.photograph.url}" alt="${student.fullName}'s photo" class="detail-image">` :
-                                `<div class="no-image"><i class="fas fa-user"></i> No photo available</div>`
-                            }
-                        </div>
-                        <div class="image-container">
-                            <h3>Signature</h3>
-                            ${student.signature?.url ? 
-                                `<img src="${student.signature.url}" alt="${student.fullName}'s signature" class="detail-image">` :
-                                `<div class="no-image"><i class="fas fa-signature"></i> No signature available</div>`
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Personal Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-user"></i> Personal Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <label>Full Name</label>
-                                <p>${student.fullName}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Internship ID</label>
-                                <p>${student.internshipId || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Email</label>
-                                <p>${student.email}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Contact Number</label>
-                                <p>${student.contactNumber}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Date of Birth</label>
-                                <p>${student.dob || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Gender</label>
-                                <p>${student.gender || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item full-width">
-                                <label>Address</label>
-                                <p>${student.address || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>ZIP Code</label>
-                                <p>${student.zipCode || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Academic Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <label>College</label>
-                                <p>${student.college}</p>
-            </div>
-                            <div class="detail-item">
-                                <label>Degree Program</label>
-                                <p>${student.degreeProgram}</p>
+  // Helper to render section details
+  const renderSection = (title, icon, details) => `
+        <div class="form-section">
+            <h3>
+                <i class="fas fa-${icon}"></i>
+                ${title}
+            </h3>
+            ${details}
         </div>
-                            <div class="detail-item">
-                                <label>Branch</label>
-                                <p>${student.branch || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Current Semester</label>
-                                <p>${student.semester || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>GPA</label>
-                                <p>${student.gpa}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Graduation Year</label>
-                                <p>${student.graduationYear}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Backlogs</label>
-                                <p>${student.hasBacklogs === 'Yes' ? student.backlogCount : 'None'}</p>
-                            </div>
-                        </div>
-                    </div>
+    `;
 
-                    <!-- Technical Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-code"></i> Technical Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item full-width">
-                                <label>Programming Languages</label>
-                                <p>${student.programmingLanguages?.join(', ') || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item full-width">
-                                <label>Tools/Software</label>
-                                <p>${student.toolsSoftware?.join(', ') || 'N/A'}</p>
-                            </div>
-                            <div class="detail-item full-width">
-                                <label>Area of Interest</label>
-                                <p>${student.areaOfInterest?.join(', ') || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
+  const personalInfo = `
+        ${renderDetail('Full Name', student.fullName)}
+        ${renderDetail('Date of Birth', student.dob)}
+        ${renderDetail('Gender', student.gender)}
+        ${renderDetail('Email', student.email)}
+        ${renderDetail('Contact Number', student.contact)}
+        ${renderDetail('Current Address', student.address)}
+        ${renderDetail('ZIP Code', student.zipCode)}
+    `;
 
-                    <!-- Internship Details -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-briefcase"></i> Internship Details</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <label>Preferred Domain</label>
-                                <p>${student.preferredDomain || 'N/A'}</p>
+  const academicDetails = `
+        ${renderDetail('College', student.college)}
+        ${renderDetail('Degree Program', student.degreeProgram)}
+        ${renderDetail('Branch/Specialization', student.branch)}
+        ${renderDetail('Current Semester', student.semester)}
+        ${renderDetail('Aggregate GPA', student.gpa)}
+        ${renderDetail('Year of Graduation', student.graduationYear)}
+        ${renderDetail('Active Backlogs', student.hasBacklogs)}
+        ${student.hasBacklogs === 'Yes' ? renderDetail('Number of Active Backlogs', student.backlogCount) : ''}
+    `;
+
+  const technicalDetails = `
+        ${renderDetail('Programming Languages Known', student.programmingLanguages)}
+        ${renderDetail('Tools/Software', student.toolsSoftware)}
+        ${renderDetail('Area of Interest', student.areaOfInterest)}
+    `;
+
+  const internshipPreference = `
+        ${renderDetail('Preferred Start Date', student.startDate)}
+        ${renderDetail('Duration Available', student.duration)}
+        ${renderDetail('Preferred Domain', student.preferredDomain)}
+    `;
+
+  const additionalInfo = `
+        <div class="form-group full-width">
+            <p>
+                <strong>Why do you want to join this internship?</strong>
+                ${student.whyJoin || 'N/A'}
+            </p>
         </div>
-                            <div class="detail-item">
-                                <label>Duration</label>
-                                <p>${student.preferredDuration} Months</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Start Date</label>
-                                <p>${student.preferredStartDate || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Additional Information -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item full-width">
-                                <label>Why Join</label>
-                                <p>${student.whyJoin || 'N/A'}</p>
-        </div>
-                            <div class="detail-item">
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                                <label>Prior Experience</label>
-                                <p>${student.priorExperience || 'N/A'}</p>
-                            </div>
+        ${renderDetail('Prior Internship Experience', student.priorExperience)}
         ${student.priorExperience === 'Yes' ? `
-                                <div class="detail-item">
-                                    <label>Company</label>
-                                    <p>${student.expCompany || 'N/A'}</p>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Duration</label>
-                                    <p>${student.expDuration || 'N/A'}</p>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Role</label>
-                                    <p>${student.expRole || 'N/A'}</p>
+            <div id="experienceDetails">
+                ${renderDetail('Company', student.expCompany)}
+                ${renderDetail('Duration', student.expDuration)}
+                ${renderDetail('Role', student.expRole)}
             </div>
         ` : ''}
-                            <div class="detail-item">
-                                <label>How did you hear about us?</label>
-                                <p>${student.hearAbout || 'N/A'}</p>
-                            </div>
-                        </div>
-            </div>
+        ${renderDetail('How did you hear about us?', student.hearAbout)}
+    `;
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                    <!-- Metadata -->
-                    <div class="detail-section">
-                        <h3><i class="fas fa-database"></i> Registration Information</h3>
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <label>Registration Date</label>
-                                <p>${new Date(student.registeredAt).toLocaleDateString()}</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Registered By</label>
-                                <p>Admin ID: ${student.registeredBy}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  const documentChecklist = `
+        <p>
+            <strong>Documents Provided</strong>
+            ${student.documents && student.documents.length > 0 ? student.documents.join(', ') : 'None'}
+        </p>
+    `;
+
+  const officeUse = `
+        ${renderDetail('Application Received On', student.applicationDate)}
+        ${renderDetail('Application Status', student.applicationStatus)}
+        ${renderDetail('Internship ID', student.internshipId)}
+        ${renderDetail('Assigned Mentor', student.assignedMentor)}
+    `;
+
+  return `
+        <div class="student-detail-container">
+            <button id="back-to-list" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to List
+            </button>
+            <div class="student-detail-content">
+                ${photoAndSignatureSection}
+                ${renderSection('Personal Information', 'user', personalInfo)}
+                ${renderSection('Academic Information', 'graduation-cap', academicDetails)}
+                ${renderSection('Technical Details', 'code', technicalDetails)}
+                ${renderSection('Internship Preference', 'briefcase', internshipPreference)}
+                ${renderSection('Additional Information', 'info-circle', additionalInfo)}
+                ${renderSection('Document Checklist', 'file-alt', documentChecklist)}
+                ${renderSection('Office Use', 'building', officeUse)}
+                ${statusUpdateSection}
             </div>
         </div>
     `;
@@ -1403,42 +1073,10 @@ async function createStudentAccount(email, password) {
 
 // Cloudinary upload function
 async function uploadToCloudinary(file, previewId) {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-    if (!file) {
-        throw new Error('No file provided for upload');
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-        throw new Error('Only image files are allowed');
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        throw new Error('File size should be less than 5MB');
-    }
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     const url = `https://api.cloudinary.com/v1_1/deksu6n47/upload`;
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "student_upload");
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
     const response = await fetch(url, {
         method: "POST",
@@ -1457,60 +1095,6 @@ async function uploadToCloudinary(file, previewId) {
 
 // Update initializeRegistrationForm function
 function initializeRegistrationForm() {
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-    formData.append("folder", "student_registrations"); // Add folder organization
-
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Failed to upload image');
-        }
-
-        const data = await response.json();
-
-        // Show preview
-        if (previewId && document.getElementById(previewId)) {
-            const previewContainer = document.getElementById(previewId);
-            previewContainer.innerHTML = `
-                <div class="preview-container">
-                    <img src="${data.secure_url}" alt="Uploaded Image" class="preview-image">
-                    <div class="preview-info">
-                        <span class="file-name">${file.name}</span>
-                        <span class="file-size">${(file.size / 1024).toFixed(1)}KB</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Return both secure_url and public_id for better tracking
-        return {
-            url: data.secure_url,
-            public_id: data.public_id
-        };
-    } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        throw new Error(`Failed to upload image: ${error.message}`);
-    }
-}
-
-// Update the registration form submission to handle the new Cloudinary response
-async function initializeRegistrationForm() {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     const registrationForm = document.getElementById('studentRegistrationForm');
     if (!registrationForm) return;
 
@@ -1603,32 +1187,9 @@ async function initializeRegistrationForm() {
                 throw new Error('Please upload both photograph and signature');
             }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
             // Upload images
             const photographURL = await uploadToCloudinary(photographFile, 'photographPreview');
             const signatureURL = await uploadToCloudinary(signatureFile, 'signaturePreview');
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-            // Upload images with better error handling
-            let photographData, signatureData;
-            try {
-                photographData = await uploadToCloudinary(photographFile, 'photographPreview');
-                signatureData = await uploadToCloudinary(signatureFile, 'signaturePreview');
-            } catch (uploadError) {
-                throw new Error(`Image upload failed: ${uploadError.message}`);
-            }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
             const studentData = {
                 // Personal Information
@@ -1673,33 +1234,9 @@ async function initializeRegistrationForm() {
                 registeredAt: new Date().toISOString(),
                 status: 'pending',
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
                 // Add image URLs
                 photographURL: photographURL,
                 signatureURL: signatureURL,
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                // Update image URLs with both URL and public_id
-                photograph: {
-                    url: photographData.url,
-                    public_id: photographData.public_id
-                },
-                signature: {
-                    url: signatureData.url,
-                    public_id: signatureData.public_id
-                },
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
             };
 
             // Generate internship ID
@@ -1835,344 +1372,4 @@ style.textContent = `
         outline: none;
     }
 `;
-document.head.appendChild(style);
-
-// Add CSS for student images
-const studentImageStyles = document.createElement('style');
-studentImageStyles.textContent = `
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    .student-photo, .image-container {
-        position: relative;
-        min-height: 120px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8f9fa;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .student-image, .detail-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: opacity 0.3s ease;
-    }
-
-    .no-image, .no-photo {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        text-align: center;
-        color: #6c757d;
-        background: #f8f9fa;
-        border-radius: 8px;
-        width: 100%;
-        height: 100%;
-    }
-
-    .no-image i, .no-photo i {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        color: #adb5bd;
-    }
-
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-    .student-photo {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        margin: 0 auto 15px;
-        border: 3px solid #4CAF50;
-    }
-
-    .image-container {
-        background: white;
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-        overflow: hidden;
-        margin: 0 auto 15px;
-        border: 3px solid #4CAF50;
-        background: #f8f9fa;
-    }
-
-    .student-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .no-photo {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8f9fa;
-        color: #6c757d;
-        font-size: 2rem;
-    }
-
-    .student-images {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    .image-container {
-        background: #fff;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .image-container h3 {
-        margin-bottom: 15px;
-        color: #2c3e50;
-        font-size: 1.1rem;
-    }
-
-    .detail-image {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        max-height: 300px;
-=======
-        width: 100%;
-        max-height: 300px;
-        object-fit: contain;
->>>>>>> Stashed changes
-=======
-        width: 100%;
-        max-height: 300px;
-        object-fit: contain;
->>>>>>> Stashed changes
-=======
-        width: 100%;
-        max-height: 300px;
-        object-fit: contain;
->>>>>>> Stashed changes
-        border-radius: 8px;
-        border: 1px solid #e1e8ed;
-    }
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-    .no-image {
-        padding: 40px;
-        text-align: center;
-        background: #f8f9fa;
-        border-radius: 8px;
-        color: #6c757d;
-        font-size: 1.2rem;
-    }
-
-    .no-image i {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        display: block;
-    }
-
-    .student-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 20px;
-    }
-
-    .student-info {
-        width: 100%;
-        margin-top: 15px;
-    }
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-    @media (max-width: 768px) {
-        .student-photo {
-            width: 100px;
-            height: 100px;
-        }
-
-        .student-images {
-            grid-template-columns: 1fr;
-        }
-
-        .detail-image {
-            max-height: 200px;
-        }
-    }
-`;
-document.head.appendChild(studentImageStyles);
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-// Add CSS for improved image handling
-const imageStyles = document.createElement('style');
-imageStyles.textContent = `
-    .student-photo, .image-container {
-        position: relative;
-        min-height: 120px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8f9fa;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .student-image, .detail-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: opacity 0.3s ease;
-    }
-
-    .no-image, .no-photo {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        text-align: center;
-        color: #6c757d;
-        background: #f8f9fa;
-        border-radius: 8px;
-        width: 100%;
-        height: 100%;
-    }
-
-    .no-image i, .no-photo i {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        color: #adb5bd;
-    }
-
-    .student-photo {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        margin: 0 auto 15px;
-        border: 3px solid #4CAF50;
-    }
-
-    .image-container {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .image-container h3 {
-        margin-bottom: 15px;
-        color: #2c3e50;
-        font-size: 1.1rem;
-    }
-
-    .detail-image {
-        max-height: 300px;
-        border-radius: 8px;
-        border: 1px solid #e1e8ed;
-    }
-
-    @media (max-width: 768px) {
-        .student-photo {
-            width: 100px;
-            height: 100px;
-        }
-
-        .student-images {
-            grid-template-columns: 1fr;
-        }
-
-        .detail-image {
-            max-height: 200px;
-        }
-    }
-`;
-document.head.appendChild(imageStyles); 
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-// Add CSS for image previews
-const imagePreviewStyles = document.createElement('style');
-imagePreviewStyles.textContent = `
-    .preview-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .preview-image {
-        max-width: 200px;
-        max-height: 200px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .preview-info {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.8rem;
-        color: #666;
-    }
-
-    .file-name {
-        font-weight: 500;
-        word-break: break-all;
-        text-align: center;
-    }
-
-    .file-size {
-        color: #888;
-    }
-`;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-document.head.appendChild(imagePreviewStyles); 
->>>>>>> Stashed changes
-=======
-document.head.appendChild(imagePreviewStyles); 
->>>>>>> Stashed changes
-=======
-document.head.appendChild(imagePreviewStyles); 
->>>>>>> Stashed changes
+document.head.appendChild(style); 
