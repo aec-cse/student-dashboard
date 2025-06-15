@@ -43,7 +43,12 @@
                     </div>
                     <div class="form-group">
                         <label for="contact">Contact Number *</label>
-                        <input type="tel" id="contact" name="contact" required autocomplete="tel">
+                        <input type="tel" id="contact" name="contact" required 
+                            pattern="[6-9][0-9]{9}"
+                            maxlength="10"
+                            placeholder="Enter your 10-digit contact number"
+                            title="Please enter a valid 10-digit contact number starting with 6, 7, 8, or 9"
+                            autocomplete="tel">
                     </div>
                     <div class="form-group full-width">
                         <label for="address">Current Address *</label>

@@ -5,6 +5,7 @@
 // Add your Firebase imports here, for example:
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 // ... (add any other Firebase imports you need)
 
 // Add your registration logic here, using direct Firebase calls.
@@ -23,10 +24,12 @@ const firebaseConfig = {
 // Initialize Firebase
 let app;
 let db;
+let auth;
 
 try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
+    auth = getAuth(app);
     console.log('Firebase initialized successfully');
 } catch (error) {
     console.error('Error initializing Firebase:', error);
@@ -123,6 +126,12 @@ form.addEventListener('submit', async (e) => {
     loadingOverlay.style.display = 'flex';
     
     try {
+        // Validate contact number
+        const contact = form.contact.value.trim();
+        if (!/^[6-9]\d{9}$/.test(contact)) {
+            throw new Error('Please enter a valid 10-digit contact number starting with 6, 7, 8, or 9');
+        }
+
         // Generate internship ID
         const internshipId = await generateInternshipId();
         
@@ -133,7 +142,7 @@ form.addEventListener('submit', async (e) => {
             dob: form.dob.value,
             gender: form.gender.value,
             email: form.email.value.trim(),
-            contact: form.contact.value.trim(),
+            contact: contact,
             address: form.address.value.trim(),
             zipCode: form.zipCode.value.trim(),
             college: form.college.value.trim(),
@@ -175,6 +184,18 @@ form.addEventListener('submit', async (e) => {
         } catch (uploadError) {
             console.error('Error uploading files:', uploadError);
             throw new Error('Failed to upload files. Please try again.');
+        }
+
+        // Create Firebase Authentication account
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.contact);
+            formData.userId = userCredential.user.uid;
+        } catch (authError) {
+            console.error('Error creating authentication account:', authError);
+            if (authError.code === 'auth/email-already-in-use') {
+                throw new Error('An account with this email already exists. Please use a different email or try logging in.');
+            }
+            throw new Error('Failed to create account. Please try again.');
         }
 
         // Save to Firestore

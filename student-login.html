@@ -27,8 +27,11 @@
             </div>
             <div class="form-group">
                 <label for="password">Password (Contact Number)</label>
-                <input type="password" id="password" name="password" pattern="[0-9]{10}" maxlength="10"
-                    placeholder="Enter your 10-digit contact number" title="Please enter your 10-digit contact number"
+                <input type="password" id="password" name="password" 
+                    pattern="[6-9][0-9]{9}"
+                    maxlength="10"
+                    placeholder="Enter your 10-digit contact number"
+                    title="Please enter a valid 10-digit contact number starting with 6, 7, 8, or 9"
                     autocomplete="current-password" required>
             </div>
             <button type="submit" class="login-btn">Login</button>
