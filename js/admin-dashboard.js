@@ -1,70 +1,45 @@
-import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
   authDomain: "admin-af1fc.firebaseapp.com",
   projectId: "admin-af1fc",
-  storageBucket: "admin-af1fc.appspot.com",
+  storageBucket: "admin-af1fc.firebasestorage.app",
   messagingSenderId: "1042593739824",
   appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
 };
 
 // Initialize Firebase
-let app;
-let db;
-let auth;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Add registration state tracking
 let isRegistrationInProgress = false;
 
-// Initialize Firebase
-function initializeFirebase() {
-    try {
-        // Check if Firebase is already initialized
-        if (getApps().length > 0) {
-            console.log('Using existing Firebase instance');
-            app = getApp();
-            db = getFirestore(app);
-            auth = getAuth(app);
-            return;
-        }
-
-        // Initialize new instance
-        console.log('Initializing new Firebase instance');
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-        console.log('Firebase initialized successfully');
-    } catch (error) {
-        console.error('Error initializing Firebase:', error);
-        utils.showMessage('Failed to initialize application. Please refresh the page.', 'error');
-        throw error;
-    }
-}
-
-// Initialize Firebase immediately
-initializeFirebase();
-
 // Add utils object
 const utils = {
-    showMessage(message, type) {
+    showMessage: function(message, type = 'info') {
         const messageDiv = document.createElement('div');
-        messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
-        messageDiv.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            ${message}
-        `;
-
-        const contentArea = document.getElementById('content-area');
-        if (contentArea) {
-            contentArea.insertBefore(messageDiv, contentArea.firstChild);
-            setTimeout(() => messageDiv.remove(), 5000);
-        } else {
-            console.error('Content area not found for message display');
+        messageDiv.className = `message ${type}`;
+        messageDiv.textContent = message;
+        
+        // Remove any existing messages
+        const existingMessage = document.querySelector('.message');
+        if (existingMessage) {
+            existingMessage.remove();
         }
+        
+        // Add the new message
+        document.body.appendChild(messageDiv);
+        
+        // Remove the message after 3 seconds
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
     },
     generateApplicationId() {
         const timestamp = Date.now();
@@ -467,57 +442,73 @@ async function renderStudentList(students) {
     return studentListContainer;
 }
 
-// Make functions globally available
-window.updateStudentStatus = async function(studentId, newStatus) {
+// Function to delete a student
+async function deleteStudent(studentId) {
     try {
-        const studentRef = doc(db, 'student-registrations', studentId);
-    await updateDoc(studentRef, {
-      status: newStatus,
-            updatedAt: serverTimestamp()
+        // Verify admin status before proceeding
+        const isAdmin = await checkAdminAccess();
+        if (!isAdmin) {
+            throw new Error('You do not have permission to delete students');
+        }
+
+        if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
+            return;
+        }
+
+        console.log('Deleting student:', studentId);
+
+        // Delete student document
+        await deleteDoc(doc(db, 'students', studentId));
+
+        // Delete related documents
+        const batch = writeBatch(db);
+
+        // Delete enrollments
+        const enrollmentsQuery = query(
+            collection(db, 'enrollments'),
+            where('studentId', '==', studentId)
+        );
+        const enrollmentsSnapshot = await getDocs(enrollmentsQuery);
+        enrollmentsSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
         });
 
-        // Show success message
-        alert(`Student status updated to ${newStatus}`);
-        
-        // Close the modal
-        const modal = document.querySelector('.student-details-modal');
-        if (modal) {
-            modal.remove();
-        }
+        // Delete attendance records
+        const attendanceQuery = query(
+            collection(db, 'attendance'),
+            where('studentId', '==', studentId)
+        );
+        const attendanceSnapshot = await getDocs(attendanceQuery);
+        attendanceSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
 
-        // Refresh the student list
-        await loadContent('student-management');
-  } catch (error) {
-    console.error('Error updating student status:', error);
-        alert('Failed to update student status. Please try again.');
-    }
-};
+        // Delete grades
+        const gradesQuery = query(
+            collection(db, 'grades'),
+            where('studentId', '==', studentId)
+        );
+        const gradesSnapshot = await getDocs(gradesQuery);
+        gradesSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
 
-window.deleteStudent = async function(studentId) {
-    if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-        return;
-    }
+        // Commit the batch
+        await batch.commit();
 
-    try {
-        const studentRef = doc(db, 'student-registrations', studentId);
-        await deleteDoc(studentRef);
+        console.log('Student and related data deleted successfully');
+        utils.showMessage('Student deleted successfully', 'success');
 
-        // Show success message
-        alert('Student deleted successfully');
-        
-        // Close the modal
-        const modal = document.querySelector('.student-details-modal');
-        if (modal) {
-            modal.remove();
-        }
-
-        // Refresh the student list
-        await loadContent('student-management');
+        // Reload the student list
+        await loadStudents();
     } catch (error) {
         console.error('Error deleting student:', error);
-        alert('Failed to delete student. Please try again.');
+        utils.showMessage(error.message || 'Error deleting student', 'error');
     }
-};
+}
+
+// Make deleteStudent available globally
+window.deleteStudent = deleteStudent;
 
 // Helper function to format array or string data
 function formatListData(data) {
@@ -838,116 +829,118 @@ async function handleStudentRegistration(event) {
 
 // Update the loadContent function to handle logout section
 async function loadContent(section, studentId = null) {
-  const contentArea = document.getElementById('content-area');
-    
-    if (section === 'logout') {
-        if (isRegistrationInProgress) {
-            utils.showMessage('Cannot logout during student registration. Please wait.', 'error');
-            return;
-        }
-        e.preventDefault();
-        showModal();
-        return;
-    }
-    
-  const mainContent = document.querySelector('.main');
-  if (!contentArea) return;
+    const contentArea = document.getElementById('content-area');
+    if (!contentArea) return;
 
-  try {
-    // Update main content section attribute
-    mainContent.setAttribute('data-section', section);
+    try {
+        // Update main content section attribute
+        const mainContent = document.querySelector('.main');
+        mainContent.setAttribute('data-section', section);
 
-    let content = '';
-    switch (section) {
-      case 'dashboard':
-        content = await renderDashboard();
-        break;
-      case 'student-management':
-        content = await renderStudentManagement();
-        break;
-      case 'student-detail':
-        if (!studentId) {
-          console.error('No student ID provided for detail view');
-          return;
-        }
-        const student = await getStudentById(studentId);
-        if (student) {
-          content = renderStudentDetail(student);
-        } else {
-          utils.showMessage('Student not found', 'error');
-          return;
-        }
-        break;
-      case 'register-student':
-        const template = document.getElementById('register-student-template');
-        if (template) {
-          content = template.content.cloneNode(true);
-          const iframe = content.querySelector('#registration-frame');
-          if (iframe) {
-            // Set up message listener for iframe communication
-            const messageHandler = async (event) => {
-              // Only handle messages from our iframe
-              if (event.source === iframe.contentWindow) {
-                if (event.data && event.data.type === 'registration-complete') {
-                  // Remove the message listener to prevent duplicates
-                  window.removeEventListener('message', messageHandler);
-                  // Refresh the student list after successful registration
-                  await loadContent('student-management');
+        let content = '';
+        switch (section) {
+            case 'dashboard':
+                content = await renderDashboard();
+                break;
+            case 'student-management':
+                content = await renderStudentManagement();
+                break;
+            case 'student-detail':
+                if (!studentId) {
+                    console.error('No student ID provided for detail view');
+                    return;
                 }
-              }
-            };
-            window.addEventListener('message', messageHandler);
+                const student = await getStudentById(studentId);
+                if (student) {
+                    content = renderStudentDetail(student);
+                } else {
+                    utils.showMessage('Student not found', 'error');
+                    return;
+                }
+                break;
+            case 'register-student':
+                const template = document.getElementById('register-student-template');
+                if (template) {
+                    content = template.content.cloneNode(true);
+                    const iframe = content.querySelector('#registration-frame');
+                    if (iframe) {
+                        // Set up message listener for iframe communication
+                        const messageHandler = async (event) => {
+                            // Only handle messages from our iframe
+                            if (event.source === iframe.contentWindow) {
+                                if (event.data && event.data.type === 'registration-complete') {
+                                    // Remove the message listener to prevent duplicates
+                                    window.removeEventListener('message', messageHandler);
+                                    // Refresh the student list after successful registration
+                                    await loadContent('student-management');
+                                }
+                            }
+                        };
+                        window.addEventListener('message', messageHandler);
 
-            iframe.onload = () => {
-              // Send auth state and Firebase config to iframe
-              const authState = {
-                type: 'auth-state',
-                user: auth.currentUser ? {
-                  uid: auth.currentUser.uid,
-                  email: auth.currentUser.email,
-                  emailVerified: auth.currentUser.emailVerified,
-                  isAnonymous: auth.currentUser.isAnonymous,
-                  metadata: {
-                    creationTime: auth.currentUser.metadata.creationTime,
-                    lastSignInTime: auth.currentUser.metadata.lastSignInTime
-                  }
-                } : null,
-                firebaseConfig: firebaseConfig // Share the Firebase config
-              };
-              iframe.contentWindow.postMessage(authState, '*');
-            };
-          }
+                        iframe.onload = () => {
+                            // Send auth state and Firebase config to iframe
+                            const authState = {
+                                type: 'auth-state',
+                                user: auth.currentUser ? {
+                                    uid: auth.currentUser.uid,
+                                    email: auth.currentUser.email,
+                                    emailVerified: auth.currentUser.emailVerified,
+                                    isAnonymous: auth.currentUser.isAnonymous,
+                                    metadata: {
+                                        creationTime: auth.currentUser.metadata.creationTime,
+                                        lastSignInTime: auth.currentUser.metadata.lastSignInTime
+                                    }
+                                } : null,
+                                firebaseConfig: firebaseConfig // Share the Firebase config
+                            };
+                            iframe.contentWindow.postMessage(authState, '*');
+                        };
+                    }
+                }
+                break;
+            case 'notifications':
+                const notificationsTemplate = document.getElementById('notifications-template');
+                if (notificationsTemplate) {
+                    content = notificationsTemplate.content.cloneNode(true);
+                    // Set up event listeners after content is added to DOM
+                    setTimeout(() => {
+                        document.getElementById('add-notification-btn')?.addEventListener('click', () => showNotificationModal());
+                        document.querySelector('.close-modal')?.addEventListener('click', hideNotificationModal);
+                        document.getElementById('notification-form')?.addEventListener('submit', handleNotificationSubmit);
+                        loadNotifications();
+                    }, 0);
+                }
+                break;
+            default:
+                console.log('Unknown section:', section);
+                return;
         }
-        break;
-      default:
-        console.log('Unknown section:', section);
-        return;
+
+        // Update the content area with the rendered content
+        if (typeof content === 'string') {
+            contentArea.innerHTML = content;
+        } else {
+            contentArea.innerHTML = '';
+            contentArea.appendChild(content);
+        }
+
+        // Attach handlers based on the section
+        if (section === 'student-management') {
+            attachStudentCardHandlers();
+        } else if (section === 'student-detail') {
+            attachStudentDetailHandlers();
+        }
+
+        // Update active state in sidebar
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.classList.toggle('active', link.getAttribute('data-section') === section);
+        });
+
+    } catch (error) {
+        console.error('Error loading content:', error);
+        utils.showMessage('Error loading content. Please try again.', 'error');
     }
-
-    // Update the content area with the rendered content
-    if (typeof content === 'string') {
-      contentArea.innerHTML = content;
-    } else {
-      contentArea.innerHTML = '';
-      contentArea.appendChild(content);
-    }
-
-    // Attach handlers based on the section
-    if (section === 'student-management') {
-      attachStudentCardHandlers();
-    } else if (section === 'student-detail') {
-      attachStudentDetailHandlers();
-    }
-
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar a').forEach(link => {
-      link.classList.toggle('active', link.getAttribute('data-section') === section);
-    });
-
-  } catch (error) {
-    console.error('Error loading content:', error);
-    utils.showMessage('Error loading content. Please try again.', 'error');
-  }
 }
 
 // Function to attach click handlers to student cards
@@ -1077,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // Check admin status
-      const isAdmin = await checkAdminStatus();
+      const isAdmin = await checkAdminAccess();
       console.log('Admin status check result:', isAdmin);
 
       if (!isAdmin) {
@@ -1329,4 +1322,283 @@ async function viewStudentDetails(studentId) {
     } catch (error) {
         console.error('Error viewing student details:', error);
     }
-} 
+}
+
+// Check if user is admin
+async function checkAdminAccess() {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            console.log('No user logged in');
+            return false;
+        }
+
+        console.log('Checking admin access for user:', user.uid);
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        const isAdmin = adminDoc.exists();
+        console.log('Admin status:', isAdmin);
+        
+        if (isAdmin) {
+            console.log('Admin data:', adminDoc.data());
+        }
+        
+        return isAdmin;
+    } catch (error) {
+        console.error('Error checking admin access:', error);
+        return false;
+    }
+}
+
+// Load notifications with search and filter functionality
+async function loadNotifications() {
+    try {
+        const notificationsList = document.getElementById('notifications-list');
+        const template = document.getElementById('notification-item-template');
+        const searchInput = document.getElementById('notification-search');
+        const priorityFilter = document.getElementById('priority-filter');
+
+        if (!notificationsList || !template) {
+            console.error('Required elements not found');
+            return;
+        }
+
+        // Clear existing notifications
+        notificationsList.innerHTML = '';
+
+        // Get notifications from Firestore
+        const notificationsRef = collection(db, 'notifications');
+        const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            notificationsList.innerHTML = `
+                <div class="no-notifications">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No notifications found</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Add search and filter event listeners
+        searchInput.addEventListener('input', filterNotifications);
+        priorityFilter.addEventListener('change', filterNotifications);
+
+        // Store notifications for filtering
+        window.notifications = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        // Initial render
+        renderNotifications(window.notifications);
+
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        utils.showMessage('Error loading notifications', 'error');
+    }
+}
+
+// Render notifications with search and filter
+function renderNotifications(notifications) {
+    const notificationsList = document.getElementById('notifications-list');
+    const template = document.getElementById('notification-item-template');
+    const searchTerm = document.getElementById('notification-search').value.toLowerCase();
+    const priorityFilter = document.getElementById('priority-filter').value;
+
+    // Clear existing notifications
+    notificationsList.innerHTML = '';
+
+    // Filter notifications
+    const filteredNotifications = notifications.filter(notification => {
+        const matchesSearch = notification.title.toLowerCase().includes(searchTerm) ||
+                            notification.message.toLowerCase().includes(searchTerm);
+        const matchesPriority = priorityFilter === 'all' || notification.priority === priorityFilter;
+        return matchesSearch && matchesPriority;
+    });
+
+    if (filteredNotifications.length === 0) {
+        notificationsList.innerHTML = `
+            <div class="no-notifications">
+                <i class="fas fa-search"></i>
+                <p>No notifications match your search</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Render filtered notifications
+    filteredNotifications.forEach(notification => {
+        const clone = template.content.cloneNode(true);
+        
+        // Set notification content
+        clone.querySelector('.notification-title').textContent = notification.title;
+        clone.querySelector('.notification-message').textContent = notification.message;
+        clone.querySelector('.notification-priority').textContent = notification.priority;
+        clone.querySelector('.notification-priority').classList.add(notification.priority);
+        clone.querySelector('.notification-date').textContent = formatDate(notification.createdAt);
+        clone.querySelector('.notification-author').textContent = `By ${notification.author || 'Admin'}`;
+
+        // Add event listeners
+        clone.querySelector('.edit-notification').addEventListener('click', () => editNotification(notification));
+        clone.querySelector('.delete-notification').addEventListener('click', () => deleteNotification(notification.id));
+
+        notificationsList.appendChild(clone);
+    });
+}
+
+// Filter notifications based on search and priority
+function filterNotifications() {
+    if (window.notifications) {
+        renderNotifications(window.notifications);
+    }
+}
+
+// Format date for display
+function formatDate(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate();
+    return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(date);
+}
+
+// Handle notification form submission
+async function handleNotificationSubmit(event) {
+    event.preventDefault();
+    
+    try {
+        // Verify admin status before proceeding
+        const isAdmin = await checkAdminAccess();
+        if (!isAdmin) {
+            throw new Error('You do not have permission to create notifications');
+        }
+
+        const title = document.getElementById('notification-title').value.trim();
+        const message = document.getElementById('notification-message').value.trim();
+        const priority = document.getElementById('notification-priority').value;
+        const notificationId = document.getElementById('notification-form').dataset.notificationId;
+
+        if (!title || !message || !priority) {
+            utils.showMessage('Please fill in all fields', 'error');
+            return;
+        }
+
+        const notificationData = {
+            title,
+            message,
+            priority,
+            updatedAt: serverTimestamp(),
+            updatedBy: auth.currentUser.email
+        };
+
+        if (notificationId) {
+            // Update existing notification
+            const notificationRef = doc(db, 'notifications', notificationId);
+            await updateDoc(notificationRef, notificationData);
+            utils.showMessage('Notification updated successfully', 'success');
+        } else {
+            // Create new notification
+            notificationData.createdAt = serverTimestamp();
+            notificationData.createdBy = auth.currentUser.email;
+            await addDoc(collection(db, 'notifications'), notificationData);
+            utils.showMessage('Notification created successfully', 'success');
+        }
+
+        hideNotificationModal();
+        loadNotifications();
+
+    } catch (error) {
+        console.error('Error saving notification:', error);
+        utils.showMessage(error.message || 'Error saving notification', 'error');
+    }
+}
+
+// Edit notification
+function editNotification(notification) {
+    const form = document.getElementById('notification-form');
+    const modalTitle = document.getElementById('notification-modal-title');
+    
+    form.dataset.notificationId = notification.id;
+    document.getElementById('notification-title').value = notification.title;
+    document.getElementById('notification-message').value = notification.message;
+    document.getElementById('notification-priority').value = notification.priority;
+    
+    modalTitle.textContent = 'Edit Notification';
+    showNotificationModal();
+}
+
+// Delete notification
+async function deleteNotification(notificationId) {
+    try {
+        // Verify admin status before proceeding
+        const isAdmin = await checkAdminAccess();
+        if (!isAdmin) {
+            throw new Error('You do not have permission to delete notifications');
+        }
+
+        if (!confirm('Are you sure you want to delete this notification?')) {
+            return;
+        }
+
+        const notificationRef = doc(db, 'notifications', notificationId);
+        await deleteDoc(notificationRef);
+        utils.showMessage('Notification deleted successfully', 'success');
+        loadNotifications();
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+        utils.showMessage(error.message || 'Error deleting notification', 'error');
+    }
+}
+
+// Show notification modal
+function showNotificationModal() {
+    const modal = document.getElementById('notification-modal');
+    modal.style.display = 'block';
+}
+
+// Hide notification modal
+function hideNotificationModal() {
+    const modal = document.getElementById('notification-modal');
+    const form = document.getElementById('notification-form');
+    
+    modal.style.display = 'none';
+    form.reset();
+    form.dataset.notificationId = '';
+    document.getElementById('notification-modal-title').textContent = 'Add New Notification';
+}
+
+// Add event listeners for notification modal
+document.addEventListener('DOMContentLoaded', () => {
+    const addNotificationBtn = document.getElementById('add-notification-btn');
+    const notificationForm = document.getElementById('notification-form');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const modal = document.getElementById('notification-modal');
+
+    if (addNotificationBtn) {
+        addNotificationBtn.addEventListener('click', () => {
+            document.getElementById('notification-modal-title').textContent = 'Add New Notification';
+            showNotificationModal();
+        });
+    }
+
+    if (notificationForm) {
+        notificationForm.addEventListener('submit', handleNotificationSubmit);
+    }
+
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', hideNotificationModal);
+    }
+
+    if (modal) {
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                hideNotificationModal();
+            }
+        });
+    }
+}); 

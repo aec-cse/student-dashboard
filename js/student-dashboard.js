@@ -1,7 +1,7 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -65,7 +65,7 @@ confirmLogoutBtn.addEventListener('click', async () => {
         window.location.href = 'student-login.html';
     } catch (error) {
         console.error('Error signing out:', error);
-}
+    }
 });
 
 // Load student data
@@ -148,18 +148,123 @@ async function loadAttendance(studentId) {
 }
 
 // Load notifications
-async function loadNotifications(studentId) {
+async function loadNotifications() {
     try {
-        const notificationsQuery = query(
-            collection(db, 'notifications'),
-            where('studentId', '==', studentId)
-        );
-        const notificationsSnapshot = await getDocs(notificationsQuery);
-        return notificationsSnapshot.docs.length;
+        const notificationsList = document.getElementById('notifications-list');
+        const template = document.getElementById('notification-item-template');
+        const searchInput = document.getElementById('notification-search');
+        const priorityFilter = document.getElementById('priority-filter');
+        const notificationsCount = document.getElementById('notifications-count');
+
+        if (!notificationsList || !template) {
+            console.error('Required elements not found');
+            return;
+        }
+
+        // Clear existing notifications
+        notificationsList.innerHTML = '';
+
+        // Get notifications from Firestore
+        const notificationsRef = collection(db, 'notifications');
+        const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+
+        // Update notifications count
+        if (notificationsCount) {
+            notificationsCount.textContent = querySnapshot.size;
+        }
+
+        if (querySnapshot.empty) {
+            notificationsList.innerHTML = `
+                <div class="no-notifications">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No notifications found</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Add search and filter event listeners
+        searchInput.addEventListener('input', filterNotifications);
+        priorityFilter.addEventListener('change', filterNotifications);
+
+        // Store notifications for filtering
+        window.notifications = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        // Initial render
+        renderNotifications(window.notifications);
+
     } catch (error) {
         console.error('Error loading notifications:', error);
-        return 0;
+        utils.showMessage('Error loading notifications', 'error');
     }
+}
+
+// Render notifications with search and filter
+function renderNotifications(notifications) {
+    const notificationsList = document.getElementById('notifications-list');
+    const template = document.getElementById('notification-item-template');
+    const searchTerm = document.getElementById('notification-search').value.toLowerCase();
+    const priorityFilter = document.getElementById('priority-filter').value;
+
+    // Clear existing notifications
+    notificationsList.innerHTML = '';
+
+    // Filter notifications
+    const filteredNotifications = notifications.filter(notification => {
+        const matchesSearch = notification.title.toLowerCase().includes(searchTerm) ||
+                            notification.message.toLowerCase().includes(searchTerm);
+        const matchesPriority = priorityFilter === 'all' || notification.priority === priorityFilter;
+        return matchesSearch && matchesPriority;
+    });
+
+    if (filteredNotifications.length === 0) {
+        notificationsList.innerHTML = `
+            <div class="no-notifications">
+                <i class="fas fa-search"></i>
+                <p>No notifications match your search</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Render filtered notifications
+    filteredNotifications.forEach(notification => {
+        const clone = template.content.cloneNode(true);
+        
+        // Set notification content
+        clone.querySelector('.notification-title').textContent = notification.title;
+        clone.querySelector('.notification-message').textContent = notification.message;
+        clone.querySelector('.notification-priority').textContent = notification.priority;
+        clone.querySelector('.notification-priority').classList.add(notification.priority);
+        clone.querySelector('.notification-date').textContent = formatDate(notification.createdAt);
+        clone.querySelector('.notification-author').textContent = `By ${notification.createdBy || 'Admin'}`;
+
+        notificationsList.appendChild(clone);
+    });
+}
+
+// Filter notifications based on search and priority
+function filterNotifications() {
+    if (window.notifications) {
+        renderNotifications(window.notifications);
+    }
+}
+
+// Format date for display
+function formatDate(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate();
+    return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(date);
 }
 
 // Update dashboard data
@@ -173,7 +278,7 @@ async function updateDashboard(studentData) {
         const courses = await loadCourses(studentData.userId);
         const grades = await loadGrades(studentData.userId);
         const attendance = await loadAttendance(studentData.userId);
-        const notifications = await loadNotifications(studentData.userId);
+        const notifications = await loadNotifications();
 
         enrolledCoursesCount.textContent = courses;
         averageGrade.textContent = grades;
@@ -191,25 +296,50 @@ let isInitializing = true;
 onAuthStateChanged(auth, async (user) => {
     if (isInitializing) {
         isInitializing = false;
-        }
+    }
 
-        if (!user) {
-            window.location.href = 'student-login.html';
-            return;
-        }
+    if (!user) {
+        window.location.href = 'student-login.html';
+        return;
+    }
 
-        try {
-            const studentData = await loadStudentData(user.uid);
+    try {
+        const studentData = await loadStudentData(user.uid);
         if (!studentData) {
             throw new Error('Student data not found');
         }
         await updateDashboard(studentData);
-        } catch (error) {
-            console.error('Error initializing dashboard:', error);
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
         // Only redirect if it's not the initial load
         if (!isInitializing) {
             await signOut(auth);
             window.location.href = 'student-login.html';
         }
     }
-}); 
+});
+
+// Utility functions
+const utils = {
+    showMessage: (message, type = 'info') => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.textContent = message;
+        document.body.appendChild(messageDiv);
+        setTimeout(() => messageDiv.remove(), 3000);
+    }
+};
+
+// Initialize the dashboard
+async function initDashboard() {
+    try {
+        await checkAuth();
+        await loadNotifications();
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        utils.showMessage('Error loading dashboard', 'error');
+    }
+}
+
+// Start the dashboard when the page loads
+document.addEventListener('DOMContentLoaded', initDashboard); 

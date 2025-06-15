@@ -36,50 +36,90 @@
                 </div>
             </div>
 
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="stat-info">
+            <!-- Dashboard Overview -->
+            <div class="dashboard-overview">
+                <div class="overview-card">
+                    <i class="fas fa-book"></i>
+                    <div class="overview-info">
                         <h3>Enrolled Courses</h3>
                         <p id="enrolled-courses-count">0</p>
                     </div>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="stat-info">
+                <div class="overview-card">
+                    <i class="fas fa-chart-line"></i>
+                    <div class="overview-info">
                         <h3>Average Grade</h3>
-                        <p id="average-grade">0.0</p>
+                        <p id="average-grade">0%</p>
                     </div>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="stat-info">
+                <div class="overview-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <div class="overview-info">
                         <h3>Attendance Rate</h3>
                         <p id="attendance-rate">0%</p>
                     </div>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div class="stat-info">
+                <div class="overview-card">
+                    <i class="fas fa-bell"></i>
+                    <div class="overview-info">
                         <h3>Notifications</h3>
-                        <p id="notification-count">0</p>
+                        <p id="notifications-count">0</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="notifications-section">
+                <div class="section-header">
+                    <h2>Recent Notifications</h2>
+                    <div class="notifications-filters">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="notification-search" placeholder="Search notifications...">
+                        </div>
+                        <div class="filter-options">
+                            <select id="priority-filter">
+                                <option value="all">All Priorities</option>
+                                <option value="high">High Priority</option>
+                                <option value="medium">Medium Priority</option>
+                                <option value="low">Low Priority</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="notifications-list" id="notifications-list">
+                    <!-- Notifications will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Course Progress -->
+            <div class="course-progress">
+                <h2>Course Progress</h2>
+                <div class="progress-list" id="course-progress-list">
+                    <!-- Course progress will be loaded here -->
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- Notification Item Template -->
+    <template id="notification-item-template">
+        <div class="notification-item">
+            <div class="notification-header">
+                <div class="notification-title-section">
+                    <h3 class="notification-title"></h3>
+                    <span class="notification-priority"></span>
+                </div>
+            </div>
+            <div class="notification-content">
+                <p class="notification-message"></p>
+                <div class="notification-meta">
+                    <span class="notification-date"></span>
+                    <span class="notification-author"></span>
+                </div>
+            </div>
+        </div>
+    </template>
 
     <!-- Logout Confirmation Modal -->
     <div id="logout-modal" class="modal">
