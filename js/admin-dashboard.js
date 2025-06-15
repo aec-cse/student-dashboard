@@ -971,13 +971,27 @@ document.addEventListener('DOMContentLoaded', () => {
 // Function to handle logout
 async function handleLogout() {
   try {
+    // Show confirmation dialog
+    const confirmed = await new Promise((resolve) => {
+      const result = confirm('Are you sure you want to logout?');
+      resolve(result);
+    });
+
+    if (!confirmed) {
+      return; // User cancelled logout
+    }
+
+    // Sign out from Firebase
     await signOut(auth);
+    console.log('User signed out successfully');
+    
+    // Redirect to login page
     window.location.href = 'admin-login.html';
   } catch (error) {
-    console.error("Error logging out:", error);
-    utils.showMessage("Logout failed. Please try again.", "error");
+    console.error('Error signing out:', error);
+    utils.showMessage('Error signing out. Please try again.', 'error');
   }
-} 
+}
 
 // Function to view student details
 async function viewStudentDetails(studentId) {
