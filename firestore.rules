@@ -14,7 +14,7 @@ service cloud.firestore {
     
     function isStudent() {
       return isAuthenticated() && 
-        exists(/databases/$(database)/documents/student-registrations/$(request.auth.uid));
+        exists(/databases/$(database)/documents/students/$(request.auth.uid));
     }
     
     function isOwner(userId) {
@@ -22,9 +22,8 @@ service cloud.firestore {
     }
     
     function isValidStudentData() {
-      let requiredFields = ['fullName', 'email', 'internshipId', 'status'];
-      return request.resource.data.keys().hasAll(requiredFields) &&
-             request.resource.data.status in ['pending', 'approved', 'rejected'];
+      let requiredFields = ['name', 'email', 'studentId', 'department', 'semester'];
+      return request.resource.data.keys().hasAll(requiredFields);
     }
     
     function isValidAdminData() {
@@ -32,44 +31,83 @@ service cloud.firestore {
       return request.resource.data.keys().hasAll(requiredFields) &&
              request.resource.data.role == 'admin';
     }
+
+    function isValidCourseData() {
+      let requiredFields = ['courseName', 'courseCode', 'instructor', 'schedule'];
+      return request.resource.data.keys().hasAll(requiredFields);
+    }
+
+    function isValidGradeData() {
+      let requiredFields = ['studentId', 'courseId', 'midterm', 'final', 'assignment', 'total', 'letterGrade'];
+      return request.resource.data.keys().hasAll(requiredFields);
+    }
+
+    function isValidAttendanceData() {
+      let requiredFields = ['studentId', 'courseId', 'date', 'status'];
+      return request.resource.data.keys().hasAll(requiredFields) &&
+             request.resource.data.status in ['present', 'absent', 'late'];
+    }
+
+    function isValidNotificationData() {
+      let requiredFields = ['studentId', 'title', 'message', 'type', 'timestamp'];
+      return request.resource.data.keys().hasAll(requiredFields) &&
+             request.resource.data.type in ['info', 'warning', 'important'];
+    }
     
-    // Rules for student registrations collection
-    match /student-registrations/{studentId} {
-      // Allow read if user is authenticated and either admin or the student themselves
+    // Rules for students collection
+    match /students/{studentId} {
       allow read: if isAuthenticated() && (isAdmin() || isOwner(studentId));
-      
-      // Allow create if user is authenticated and data is valid
-      allow create: if isAuthenticated() && 
-                   request.resource.data.userId == request.auth.uid &&
-                   isValidStudentData();
-      
-      // Allow update if user is admin or the student themselves (with restrictions)
-      allow update: if (isAdmin() || (isOwner(studentId) && 
-                   // Students can only update certain fields
-                   request.resource.data.diff(resource.data).affectedKeys()
-                     .hasOnly(['contact', 'address', 'zipCode']))) &&
-                   isValidStudentData();
-      
-      // Allow delete only if user is admin
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (isOwner(studentId) && isValidStudentData());
       allow delete: if isAdmin();
+    }
+
+    // Rules for courses collection
+    match /courses/{courseId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidCourseData();
+    }
+
+    // Rules for enrollments collection
+    match /enrollments/{enrollmentId} {
+      allow read: if isAuthenticated() && 
+        (isAdmin() || resource.data.studentId == request.auth.uid);
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Rules for grades collection
+    match /grades/{gradeId} {
+      allow read: if isAuthenticated() && 
+        (isAdmin() || resource.data.studentId == request.auth.uid);
+      allow write: if isAdmin() && isValidGradeData();
+    }
+
+    // Rules for attendance collection
+    match /attendance/{recordId} {
+      allow read: if isAuthenticated() && 
+        (isAdmin() || resource.data.studentId == request.auth.uid);
+      allow create: if isAdmin() && isValidAttendanceData();
+      allow update: if isAdmin() && isValidAttendanceData();
+      allow delete: if isAdmin();
+    }
+
+    // Rules for notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && 
+        (isAdmin() || resource.data.studentId == request.auth.uid);
+      allow create: if isAdmin() && isValidNotificationData();
+      allow update: if isAdmin() && isValidNotificationData();
+      allow delete: if isAdmin() || 
+        (isOwner(resource.data.studentId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']));
     }
     
     // Rules for admins collection
     match /admins/{adminId} {
-      // Allow read if user is admin
       allow read: if isAdmin();
-      
-      // Allow create if user is admin and data is valid
-      allow create: if isAdmin() && 
-                   request.resource.data.userId == request.auth.uid &&
-                   isValidAdminData();
-      
-      // Allow update if user is admin and updating their own document
-      allow update: if isAdmin() && 
-                   adminId == request.auth.uid &&
-                   isValidAdminData();
-      
-      // Prevent deletion of admin documents
+      allow create: if isAdmin() && isValidAdminData();
+      allow update: if isAdmin() && adminId == request.auth.uid && isValidAdminData();
       allow delete: if false;
     }
     

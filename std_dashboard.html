@@ -202,116 +202,193 @@
     color: white; 
     }
 
+    /* Additional styles for dynamic content */
+    .profile-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .profile-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .course-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .course-progress {
+        margin-top: 15px;
+        background: #f0f0f0;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 10px;
+        background: #1abc9c;
+        transition: width 0.3s ease;
+    }
+
+    .attendance-table, .grades-table {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+
+    .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .notification-item {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #1abc9c;
+    }
+
+    .notification-item.important {
+        border-left-color: #e74c3c;
+    }
+
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .notification-title {
+        font-weight: 600;
+    }
+
+    .notification-date {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .no-notifications {
+        text-align: center;
+        color: #7f8c8d;
+        padding: 20px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #7f8c8d;
+    }
+
+    .error-message {
+        background: #e74c3c;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        display: none;
+    }
+
   </style>
 </head>
 <body>
   <!-- Sidebar -->
   <div class="sidebar">
-    <h2>Student Dashboard</h2>
-    <a href="#" data-section="home" class="active"><i class="fas fa-home"></i> Home</a>
-     <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <h2>Student Portal</h2>
+    <nav>
+      <a href="#" data-section="profile" class="active">
+        <i class="fas fa-user"></i> Profile
+      </a>
+      <a href="#" data-section="courses">
+        <i class="fas fa-book"></i> Courses
+      </a>
+      <a href="#" data-section="attendance">
+        <i class="fas fa-calendar-check"></i> Attendance
+      </a>
+      <a href="#" data-section="grades">
+        <i class="fas fa-graduation-cap"></i> Grades
+      </a>
+      <a href="#" data-section="notifications">
+        <i class="fas fa-bell"></i> Notifications
+      </a>
+      <a href="#" id="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </nav>
   </div>
 
   <!-- Main Content -->
   <div class="main">
     <div id="content-area">
-      <h1>Welcome, Student!</h1>
-      <div class="card-container">
-        <div class="card"><h3>Upcoming Events</h3><p>No events scheduled.</p></div>
-        <div class="card"><h3>Tasks</h3><p>You have 3 pending tasks.</p></div>
-        <div class="card"><h3>Progress</h3><p>75% of courses completed.</p></div>
-        <div class="card"><h3>Notifications</h3><p>No new notifications.</p></div>
+      <!-- Profile Section -->
+      <div id="profile-section" class="dashboard-section">
+        <h1>Student Profile</h1>
+        <div class="loading">Loading profile...</div>
+        <div class="error-message"></div>
+        <!-- Profile content will be dynamically loaded here -->
+      </div>
+
+      <!-- Courses Section -->
+      <div id="courses-section" class="dashboard-section" style="display: none;">
+        <h1>My Courses</h1>
+        <div class="loading">Loading courses...</div>
+        <div class="error-message"></div>
+        <!-- Courses content will be dynamically loaded here -->
+      </div>
+
+      <!-- Attendance Section -->
+      <div id="attendance-section" class="dashboard-section" style="display: none;">
+        <h1>Attendance Record</h1>
+        <div class="loading">Loading attendance records...</div>
+        <div class="error-message"></div>
+        <!-- Attendance content will be dynamically loaded here -->
+      </div>
+
+      <!-- Grades Section -->
+      <div id="grades-section" class="dashboard-section" style="display: none;">
+        <h1>Academic Performance</h1>
+        <div class="loading">Loading grades...</div>
+        <div class="error-message"></div>
+        <!-- Grades content will be dynamically loaded here -->
+      </div>
+
+      <!-- Notifications Section -->
+      <div id="notifications-section" class="dashboard-section" style="display: none;">
+        <h1>Notifications</h1>
+        <div class="loading">Loading notifications...</div>
+        <div class="error-message"></div>
+        <!-- Notifications content will be dynamically loaded here -->
       </div>
     </div>
   </div>
 
-  <!-- Logout Modal -->
-  <div class="logout-warning" id="logout-warning">
-    <h3>Are you sure you want to logout?</h3>
-    <button class="confirm" id="confirm-logout">Yes, Logout</button>
-    <button class="cancel" id="cancel-logout">Cancel</button>
+  <!-- Logout Warning Modal -->
+  <div class="logout-warning">
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to logout?</p>
+    <button class="confirm">Yes, Logout</button>
+    <button class="cancel">Cancel</button>
   </div>
 
-  <!-- JavaScript -->
-  <script>
-    // Sidebar Navigation
-    document.querySelectorAll('.sidebar a').forEach(link => {
-      link.addEventListener('click', event => {
-        event.preventDefault();
-        const target = link.getAttribute('data-section');
-        if (target === null) return;
-        document.querySelectorAll('.sidebar a').forEach(item => item.classList.remove('active'));
-        link.classList.add('active');
-        loadContent(target);
-      });
-    });
-
-    function loadContent(section) {
-      const area = document.getElementById('content-area');
-      switch (section) {
-        case 'home':
-          area.innerHTML = `
-            <h1>Home</h1>
-            <div class="card-container">
-              <div class="card"><h3>Upcoming Events</h3><p>No events scheduled.</p></div>
-              <div class="card"><h3>Tasks</h3><p>You have 3 pending tasks.</p></div>
-              <div class="card"><h3>Progress</h3><p>75% of courses completed.</p></div>
-              <div class="card"><h3>Notifications</h3><p>No new notifications.</p></div>
-            </div>`;
-          break;
-        case 'assignments':
-          area.innerHTML = `
-            <h1>Assignments</h1>
-            <p>Submit and track your assignments here.</p>
-            <form>
-              <input type="text" placeholder="Assignment Name" required>
-              <input type="file" required>
-              <button type="submit">Submit Assignment</button>
-            </form>`;
-          break;
-        case 'results':
-          area.innerHTML = `
-            <h1>Results</h1>
-            <p>Check your academic results below:</p>
-            <table>
-              <thead><tr><th>Subject</th><th>Grade</th></tr></thead>
-              <tbody>
-                <tr><td>Skills</td><td>A</td></tr>
-                <tr><td>Group Project</td><td>B+</td></tr>
-                <tr><td>Individual Project</td><td>A-</td></tr>
-              </tbody>
-            </table>`;
-          break;
-        case 'profile':
-          area.innerHTML = `
-            <h1>Profile</h1>
-            <p>Update your profile information below:</p>
-            <form>
-              <input type="text" placeholder="Full Name" required>
-              <input type="email" placeholder="Email" required>
-              <select required>
-                <option value="" disabled selected>Choose your Year</option>
-                <option value="1st yr">1st yr</option>
-                <option value="2nd yr">2nd yr</option>
-                <option value="3rd yr">3rd yr</option>
-                <option value="4th yr">4th yr</option>
-                <option value="Passed Out">Passed Out</option>
-              </select>
-              <button type="submit">Save Changes</button>
-            </form>`;
-          break;
-      }
-    }
-
-    // Logout Modal Logic
-    const logoutBtn = document.getElementById('logout-btn');
-    const modal = document.getElementById('logout-warning');
-    const confirmBtn = document.getElementById('confirm-logout');
-    const cancelBtn = document.getElementById('cancel-logout');
-
-    logoutBtn.addEventListener('click', () => modal.style.display = 'block');
-    cancelBtn.addEventListener('click', () => modal.style.display = 'none');
-    confirmBtn.addEventListener('click', () => window.location.href = 'login.html');
-  </script>
+  <!-- Firebase SDK -->
+  <script type="module" src="js/student-dashboard.js"></script>
 </body>
 </html>
+

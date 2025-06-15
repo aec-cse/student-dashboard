@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize Database</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #1abc9c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #16a085;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Database Initialization</h1>
+        <p>This page will initialize your Firebase database with sample data. Make sure you have:</p>
+        <ul>
+            <li>Updated the Firebase configuration in both JavaScript files</li>
+            <li>Enabled Firestore in your Firebase Console</li>
+            <li>Set up the security rules</li>
+        </ul>
+        <button id="initButton">Initialize Database</button>
+        <div id="status"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
+            authDomain: "admin-af1fc.firebaseapp.com",
+            projectId: "admin-af1fc",
+            storageBucket: "admin-af1fc.appspot.com",
+            messagingSenderId: "1042593739824",
+            appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const statusDiv = document.getElementById('status');
+        const initButton = document.getElementById('initButton');
+
+        // Test Firebase connection
+        async function testConnection() {
+            try {
+                statusDiv.className = 'loading';
+                statusDiv.textContent = 'Testing Firebase connection...';
+                
+                // Try to get a reference to the database and list collections
+                const testCollection = collection(db, 'test');
+                const querySnapshot = await getDocs(testCollection);
+                
+                statusDiv.className = 'success';
+                statusDiv.textContent = 'Firebase connection successful!';
+                return true;
+            } catch (error) {
+                console.error('Connection error:', error);
+                statusDiv.className = 'error';
+                statusDiv.textContent = `Connection error: ${error.message}. Please make sure Firestore is enabled in your Firebase Console.`;
+                return false;
+            }
+        }
+
+        // Initialize database
+        async function initializeDatabase() {
+            try {
+                statusDiv.className = 'loading';
+                statusDiv.textContent = 'Initializing database...';
+                initButton.disabled = true;
+
+                // Import the initialization function
+                const { initializeDatabase } = await import('./js/init-database.js');
+                await initializeDatabase();
+
+                statusDiv.className = 'success';
+                statusDiv.textContent = 'Database initialized successfully!';
+            } catch (error) {
+                console.error('Initialization error:', error);
+                statusDiv.className = 'error';
+                statusDiv.textContent = `Initialization error: ${error.message}`;
+            } finally {
+                initButton.disabled = false;
+            }
+        }
+
+        // Event listeners
+        initButton.addEventListener('click', async () => {
+            const isConnected = await testConnection();
+            if (isConnected) {
+                if (confirm('Are you sure you want to initialize the database? This will add sample data.')) {
+                    await initializeDatabase();
+                }
+            }
+        });
+
+        // Test connection on page load
+        testConnection();
+    </script>
+</body>
+</html> 
