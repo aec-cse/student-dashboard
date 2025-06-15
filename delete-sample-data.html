@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Sample Data</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #c82333;
+        }
+        button:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Delete Sample Data</h1>
+        <p>This page will delete all sample data from the database. This action cannot be undone.</p>
+        <p>The following collections will be cleared:</p>
+        <ul>
+            <li>students</li>
+            <li>courses</li>
+            <li>enrollments</li>
+            <li>grades</li>
+            <li>attendance</li>
+            <li>notifications</li>
+            <li>student-registrations</li>
+        </ul>
+        <button id="deleteButton">Delete All Sample Data</button>
+        <div id="status"></div>
+    </div>
+
+    <script type="module">
+        import { deleteAllSampleData } from './js/delete-sample-data.js';
+
+        const statusDiv = document.getElementById('status');
+        const deleteButton = document.getElementById('deleteButton');
+
+        deleteButton.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete all sample data? This action cannot be undone.')) {
+                try {
+                    statusDiv.className = 'loading';
+                    statusDiv.textContent = 'Deleting sample data...';
+                    deleteButton.disabled = true;
+
+                    await deleteAllSampleData();
+
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = 'All sample data deleted successfully!';
+                } catch (error) {
+                    console.error('Deletion error:', error);
+                    statusDiv.className = 'error';
+                    statusDiv.textContent = `Error deleting sample data: ${error.message}`;
+                } finally {
+                    deleteButton.disabled = false;
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
