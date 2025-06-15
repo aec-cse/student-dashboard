@@ -16,15 +16,37 @@
       {
         "source": "**/*.woff2",
         "headers": [
-          { "key": "Content-Type", "value": "font/woff2" }
+          {
+            "key": "Content-Type",
+            "value": "font/woff2"
+          }
         ]
       },
       {
         "source": "**/*.html",
         "headers": [
-          { "key": "Content-Security-Policy", "value": "default-src 'self'; frame-ancestors 'self';" }
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; frame-ancestors 'self';"
+          }
         ]
       }
     ]
-  }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
 }

@@ -17,6 +17,9 @@ let app;
 let db;
 let auth;
 
+// Add registration state tracking
+let isRegistrationInProgress = false;
+
 // Initialize Firebase
 function initializeFirebase() {
     try {
@@ -726,6 +729,12 @@ logoutModal.addEventListener('click', (e) => {
 
 // Handle logout confirmation
 confirmLogoutBtn.addEventListener('click', async () => {
+    if (isRegistrationInProgress) {
+        utils.showMessage('Cannot logout during student registration. Please wait.', 'error');
+        hideModal();
+        return;
+    }
+
     try {
         await signOut(auth);
         window.location.href = 'admin-login.html';
@@ -735,114 +744,210 @@ confirmLogoutBtn.addEventListener('click', async () => {
     }
 });
 
+// Function to handle student registration
+async function handleStudentRegistration(event) {
+    event.preventDefault();
+    
+    if (isRegistrationInProgress) {
+        utils.showMessage('A registration is already in progress. Please wait.', 'error');
+        return;
+    }
+
+    try {
+        isRegistrationInProgress = true;
+        const form = event.target;
+        const formData = new FormData(form);
+        
+        // Get form data
+        const email = formData.get('email');
+        const password = formData.get('password');
+        const firstName = formData.get('firstName');
+        const lastName = formData.get('lastName');
+        const dateOfBirth = formData.get('dateOfBirth');
+        const gender = formData.get('gender');
+        const address = formData.get('address');
+        const phone = formData.get('phone');
+        const course = formData.get('course');
+        const enrollmentDate = formData.get('enrollmentDate');
+
+        // Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Create student document in Firestore
+        const studentData = {
+            uid: user.uid,
+            email,
+            firstName,
+            lastName,
+            dateOfBirth,
+            gender,
+            address,
+            phone,
+            course,
+            enrollmentDate,
+            createdAt: serverTimestamp(),
+            status: 'active'
+        };
+
+        await setDoc(doc(db, 'students', user.uid), studentData);
+
+        // Create initial attendance record
+        const attendanceData = {
+            studentId: user.uid,
+            totalClasses: 0,
+            presentClasses: 0,
+            lastUpdated: serverTimestamp()
+        };
+        await setDoc(doc(db, 'attendance', user.uid), attendanceData);
+
+        // Create initial grades record
+        const gradesData = {
+            studentId: user.uid,
+            courses: {},
+            lastUpdated: serverTimestamp()
+        };
+        await setDoc(doc(db, 'grades', user.uid), gradesData);
+
+        // Show success message
+        utils.showMessage('Student registered successfully!', 'success');
+        form.reset();
+        
+        // Refresh student list
+        loadContent('student-management');
+    } catch (error) {
+        console.error('Error registering student:', error);
+        
+        // If Firebase Auth succeeded but Firestore failed, clean up the auth user
+        if (error.code === 'firestore/error') {
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    await deleteUser(user);
+                }
+            } catch (cleanupError) {
+                console.error('Error cleaning up incomplete registration:', cleanupError);
+            }
+        }
+        
+        utils.showMessage(error.message, 'error');
+    } finally {
+        isRegistrationInProgress = false;
+    }
+}
+
 // Update the loadContent function to handle logout section
 async function loadContent(section, studentId = null) {
-    const contentArea = document.getElementById('content-area');
+  const contentArea = document.getElementById('content-area');
     
     if (section === 'logout') {
+        if (isRegistrationInProgress) {
+            utils.showMessage('Cannot logout during student registration. Please wait.', 'error');
+            return;
+        }
         e.preventDefault();
         showModal();
         return;
     }
     
-    const mainContent = document.querySelector('.main');
-    if (!contentArea) return;
+  const mainContent = document.querySelector('.main');
+  if (!contentArea) return;
 
-    try {
-        // Update main content section attribute
-        mainContent.setAttribute('data-section', section);
+  try {
+    // Update main content section attribute
+    mainContent.setAttribute('data-section', section);
 
-        let content = '';
-        switch (section) {
-            case 'dashboard':
-                content = await renderDashboard();
-                break;
-            case 'student-management':
-                content = await renderStudentManagement();
-                break;
-            case 'student-detail':
-                if (!studentId) {
-                    console.error('No student ID provided for detail view');
-                    return;
-                }
-                const student = await getStudentById(studentId);
-                if (student) {
-                    content = renderStudentDetail(student);
-                } else {
-                    utils.showMessage('Student not found', 'error');
-                    return;
-                }
-                break;
-            case 'register-student':
-                const template = document.getElementById('register-student-template');
-                if (template) {
-                    content = template.content.cloneNode(true);
-                    const iframe = content.querySelector('#registration-frame');
-                    if (iframe) {
-                        // Set up message listener for iframe communication
-                        const messageHandler = async (event) => {
-                            // Only handle messages from our iframe
-                            if (event.source === iframe.contentWindow) {
-                                if (event.data && event.data.type === 'registration-complete') {
-                                    // Remove the message listener to prevent duplicates
-                                    window.removeEventListener('message', messageHandler);
-                                    // Refresh the student list after successful registration
-                                    await loadContent('student-management');
-                                }
-                            }
-                        };
-                        window.addEventListener('message', messageHandler);
-
-                        iframe.onload = () => {
-                            // Send auth state and Firebase config to iframe
-                            const authState = {
-                                type: 'auth-state',
-                                user: auth.currentUser ? {
-                                    uid: auth.currentUser.uid,
-                                    email: auth.currentUser.email,
-                                    emailVerified: auth.currentUser.emailVerified,
-                                    isAnonymous: auth.currentUser.isAnonymous,
-                                    metadata: {
-                                        creationTime: auth.currentUser.metadata.creationTime,
-                                        lastSignInTime: auth.currentUser.metadata.lastSignInTime
-                                    }
-                                } : null,
-                                firebaseConfig: firebaseConfig // Share the Firebase config
-                            };
-                            iframe.contentWindow.postMessage(authState, '*');
-                        };
-                    }
-                }
-                break;
-            default:
-                console.log('Unknown section:', section);
-                return;
+    let content = '';
+    switch (section) {
+      case 'dashboard':
+        content = await renderDashboard();
+        break;
+      case 'student-management':
+        content = await renderStudentManagement();
+        break;
+      case 'student-detail':
+        if (!studentId) {
+          console.error('No student ID provided for detail view');
+          return;
         }
-
-        // Update the content area with the rendered content
-        if (typeof content === 'string') {
-            contentArea.innerHTML = content;
+        const student = await getStudentById(studentId);
+        if (student) {
+          content = renderStudentDetail(student);
         } else {
-            contentArea.innerHTML = '';
-            contentArea.appendChild(content);
+          utils.showMessage('Student not found', 'error');
+          return;
         }
+        break;
+      case 'register-student':
+        const template = document.getElementById('register-student-template');
+        if (template) {
+          content = template.content.cloneNode(true);
+          const iframe = content.querySelector('#registration-frame');
+          if (iframe) {
+            // Set up message listener for iframe communication
+            const messageHandler = async (event) => {
+              // Only handle messages from our iframe
+              if (event.source === iframe.contentWindow) {
+                if (event.data && event.data.type === 'registration-complete') {
+                  // Remove the message listener to prevent duplicates
+                  window.removeEventListener('message', messageHandler);
+                  // Refresh the student list after successful registration
+                  await loadContent('student-management');
+                }
+              }
+            };
+            window.addEventListener('message', messageHandler);
 
-        // Attach handlers based on the section
-        if (section === 'student-management') {
-            attachStudentCardHandlers();
-        } else if (section === 'student-detail') {
-            attachStudentDetailHandlers();
+            iframe.onload = () => {
+              // Send auth state and Firebase config to iframe
+              const authState = {
+                type: 'auth-state',
+                user: auth.currentUser ? {
+                  uid: auth.currentUser.uid,
+                  email: auth.currentUser.email,
+                  emailVerified: auth.currentUser.emailVerified,
+                  isAnonymous: auth.currentUser.isAnonymous,
+                  metadata: {
+                    creationTime: auth.currentUser.metadata.creationTime,
+                    lastSignInTime: auth.currentUser.metadata.lastSignInTime
+                  }
+                } : null,
+                firebaseConfig: firebaseConfig // Share the Firebase config
+              };
+              iframe.contentWindow.postMessage(authState, '*');
+            };
+          }
         }
-
-        // Update active state in sidebar
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.classList.toggle('active', link.getAttribute('data-section') === section);
-        });
-
-    } catch (error) {
-        console.error('Error loading content:', error);
-        utils.showMessage('Error loading content. Please try again.', 'error');
+        break;
+      default:
+        console.log('Unknown section:', section);
+        return;
     }
+
+    // Update the content area with the rendered content
+    if (typeof content === 'string') {
+      contentArea.innerHTML = content;
+    } else {
+      contentArea.innerHTML = '';
+      contentArea.appendChild(content);
+    }
+
+    // Attach handlers based on the section
+    if (section === 'student-management') {
+      attachStudentCardHandlers();
+    } else if (section === 'student-detail') {
+      attachStudentDetailHandlers();
+    }
+
+    // Update active state in sidebar
+    document.querySelectorAll('.sidebar a').forEach(link => {
+      link.classList.toggle('active', link.getAttribute('data-section') === section);
+    });
+
+  } catch (error) {
+    console.error('Error loading content:', error);
+    utils.showMessage('Error loading content. Please try again.', 'error');
+  }
 }
 
 // Function to attach click handlers to student cards

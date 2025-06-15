@@ -65,7 +65,7 @@ confirmLogoutBtn.addEventListener('click', async () => {
         window.location.href = 'student-login.html';
     } catch (error) {
         console.error('Error signing out:', error);
-    }
+}
 });
 
 // Load student data
@@ -191,21 +191,21 @@ let isInitializing = true;
 onAuthStateChanged(auth, async (user) => {
     if (isInitializing) {
         isInitializing = false;
-    }
+        }
 
-    if (!user) {
-        window.location.href = 'student-login.html';
-        return;
-    }
+        if (!user) {
+            window.location.href = 'student-login.html';
+            return;
+        }
 
-    try {
-        const studentData = await loadStudentData(user.uid);
+        try {
+            const studentData = await loadStudentData(user.uid);
         if (!studentData) {
             throw new Error('Student data not found');
         }
         await updateDashboard(studentData);
-    } catch (error) {
-        console.error('Error initializing dashboard:', error);
+        } catch (error) {
+            console.error('Error initializing dashboard:', error);
         // Only redirect if it's not the initial load
         if (!isInitializing) {
             await signOut(auth);
