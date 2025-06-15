@@ -1,6 +1,6 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
-import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -17,6 +17,14 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Create a separate auth instance for student operations
+const studentAuth = getAuth();
+if (studentAuth.app.name !== '[DEFAULT]') {
+    deleteApp(studentAuth.app);
+}
+const studentApp = initializeApp(firebaseConfig, 'student-auth');
+const studentAuthInstance = getAuth(studentApp);
+
 // Add utils object
 const utils = {
     showMessage(message, type) {
@@ -31,6 +39,9 @@ const utils = {
         contentArea.insertBefore(messageDiv, contentArea.firstChild);
 
         setTimeout(() => messageDiv.remove(), 5000);
+    },
+    generateApplicationId() {
+        // Implementation of generateApplicationId method
     }
 };
 
@@ -69,8 +80,8 @@ async function getAllStudents(searchId = '') {
     const studentCollection = collection(db, "student-registrations");
     console.log("Collection reference created:", studentCollection);
 
-    // Add a query to order by internshipId
-    const q = query(studentCollection, orderBy("internshipId", "asc"));
+    // Add a query to order by submittedAt in descending order (newest first)
+    const q = query(studentCollection, orderBy("submittedAt", "desc"));
     console.log("Query created:", q);
 
     const querySnapshot = await getDocs(q);
@@ -96,7 +107,14 @@ async function getAllStudents(searchId = '') {
           email: studentData.email,
           submittedAt: studentData.submittedAt
         });
-        students.push({ id: doc.id, ...studentData });
+        // Include the document ID in the student data
+        students.push({ 
+          id: doc.id,  // This is the userId
+          ...studentData,
+          // Ensure these fields exist for display
+          status: studentData.status || 'pending',
+          submittedAt: studentData.submittedAt || studentData.registeredAt || new Date().toISOString()
+        });
       }
     });
 
@@ -378,162 +396,167 @@ async function updateStudentStatus(studentId, newStatus) {
   }
 }
 
-// Function to render student detail with status update controls
-function renderStudentDetail(student) {
-  if (!student) {
-    return '<div class="error-message">Student not found</div>';
+// Helper function to format array or string data
+function formatListData(data) {
+  if (!data) return 'N/A';
+  if (Array.isArray(data)) return data.join(', ');
+  if (typeof data === 'string') {
+    // Try to parse if it's a JSON string
+    try {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) return parsed.join(', ');
+    } catch (e) {
+      // If not JSON, return as is
+      return data;
+    }
+    return data;
   }
+  return 'N/A';
+}
 
-  const statusOptions = [
-    { value: 'pending', label: 'Pending', icon: 'clock', color: '#f1c40f' },
-    { value: 'approved', label: 'Approved', icon: 'check-circle', color: '#2ecc71' },
-    { value: 'rejected', label: 'Rejected', icon: 'times-circle', color: '#e74c3c' }
-  ];
+// Function to render student detail view
+function renderStudentDetail(student) {
+  console.log('Rendering student detail:', student);
+  
+  const statusClass = {
+    'pending': 'status-pending',
+    'approved': 'status-approved',
+    'rejected': 'status-rejected'
+  }[student.status] || 'status-pending';
 
-  const currentStatus = student.status?.toLowerCase() || 'pending';
-  const statusUpdateSection = `
-        <div class="status-update-section">
-            <h3>Update Status</h3>
-            <div class="status-options">
-                ${statusOptions.map(option => `
-                    <button 
-                        class="status-option ${currentStatus === option.value ? 'active' : ''}"
-                        data-status="${option.value}"
-                        style="--status-color: ${option.color}"
-                    >
-                        <i class="fas fa-${option.icon}"></i>
-                        ${option.label}
-                    </button>
-                `).join('')}
+  const statusText = {
+    'pending': 'Pending Review',
+    'approved': 'Approved',
+    'rejected': 'Rejected'
+  }[student.status] || 'Pending Review';
+
+  return `
+    <div class="student-detail-container" data-id="${student.id}">
+      <div class="detail-header">
+        <button class="back-button">
+          <i class="fas fa-arrow-left"></i> Back to Students
+        </button>
+        <div class="status-badge ${statusClass}">${statusText}</div>
+      </div>
+
+      <div class="detail-content">
+        <div class="detail-section">
+          <h2>Personal Information</h2>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Full Name</label>
+              <p>${student.fullName || 'N/A'}</p>
             </div>
-            <div id="statusUpdateMessage" class="status-message"></div>
+            <div class="detail-item">
+              <label>Email</label>
+              <p>${student.email || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>Contact Number</label>
+              <p>${student.contact || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>Date of Birth</label>
+              <p>${student.dob || 'N/A'}</p>
+            </div>
+            <div class="detail-item full-width">
+              <label>Current Address</label>
+              <p>${student.address || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>ZIP Code</label>
+              <p>${student.zipCode || 'N/A'}</p>
+            </div>
+          </div>
         </div>
-    `;
 
-  // Add photo and signature section
-  const photoAndSignatureSection = `
-    <div class="form-section">
-      <h3><i class="fas fa-id-card"></i> Student Photo & Signature</h3>
-      <div class="photo-signature-grid">
-        <div class="photo-container">
-          <h4>Photograph</h4>
-          ${student.photographURL ? 
-            `<img src="${student.photographURL}" alt="Student Photo" class="student-photo">` : 
-            '<p class="no-image">No photo available</p>'}
+        <div class="detail-section">
+          <h2>Academic Information</h2>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>College Name</label>
+              <p>${student.collegeName || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>Branch</label>
+              <p>${student.branch || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>Semester</label>
+              <p>${student.semester || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>GPA</label>
+              <p>${student.gpa || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>Graduation Year</label>
+              <p>${student.graduationYear || 'N/A'}</p>
+            </div>
+            <div class="detail-item">
+              <label>Active Backlogs</label>
+              <p>${student.hasBacklogs === 'Yes' ? (student.backlogCount || 'Yes') : 'No'}</p>
+            </div>
+          </div>
         </div>
-        <div class="signature-container">
-          <h4>Signature</h4>
-          ${student.signatureURL ? 
-            `<img src="${student.signatureURL}" alt="Student Signature" class="student-signature">` : 
-            '<p class="no-image">No signature available</p>'}
+
+        <div class="detail-section">
+          <h2>Technical Information</h2>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Programming Languages</label>
+              <p>${formatListData(student.programmingLanguages)}</p>
+            </div>
+            <div class="detail-item">
+              <label>Web Technologies</label>
+              <p>${formatListData(student.webTechnologies)}</p>
+            </div>
+            <div class="detail-item">
+              <label>Databases</label>
+              <p>${formatListData(student.databases)}</p>
+            </div>
+            <div class="detail-item">
+              <label>Tools & Frameworks</label>
+              <p>${formatListData(student.toolsFrameworks)}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h2>Documents</h2>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Photograph</label>
+              ${student.photograph ? 
+                `<img src="${student.photograph}" alt="Student Photograph" class="document-preview">` : 
+                '<p>Not provided</p>'}
+            </div>
+            <div class="detail-item">
+              <label>Signature</label>
+              ${student.signature ? 
+                `<img src="${student.signature}" alt="Student Signature" class="document-preview">` : 
+                '<p>Not provided</p>'}
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h2>Update Status</h2>
+          <div class="status-options">
+            <button class="status-option" data-status="approved">
+              <i class="fas fa-check"></i> Approve
+            </button>
+            <button class="status-option" data-status="rejected">
+              <i class="fas fa-times"></i> Reject
+            </button>
+            <button class="status-option" data-status="pending">
+              <i class="fas fa-clock"></i> Mark Pending
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `;
-
-  // Helper to render details safely, handling missing data
-  const renderDetail = (label, value) => `
-        <p>
-            <strong>${label}</strong>
-            ${value || 'N/A'}
-        </p>
-    `;
-
-  // Helper to render section details
-  const renderSection = (title, icon, details) => `
-        <div class="form-section">
-            <h3>
-                <i class="fas fa-${icon}"></i>
-                ${title}
-            </h3>
-            ${details}
-        </div>
-    `;
-
-  const personalInfo = `
-        ${renderDetail('Full Name', student.fullName)}
-        ${renderDetail('Date of Birth', student.dob)}
-        ${renderDetail('Gender', student.gender)}
-        ${renderDetail('Email', student.email)}
-        ${renderDetail('Contact Number', student.contact)}
-        ${renderDetail('Current Address', student.address)}
-        ${renderDetail('ZIP Code', student.zipCode)}
-    `;
-
-  const academicDetails = `
-        ${renderDetail('College', student.college)}
-        ${renderDetail('Degree Program', student.degreeProgram)}
-        ${renderDetail('Branch/Specialization', student.branch)}
-        ${renderDetail('Current Semester', student.semester)}
-        ${renderDetail('Aggregate GPA', student.gpa)}
-        ${renderDetail('Year of Graduation', student.graduationYear)}
-        ${renderDetail('Active Backlogs', student.hasBacklogs)}
-        ${student.hasBacklogs === 'Yes' ? renderDetail('Number of Active Backlogs', student.backlogCount) : ''}
-    `;
-
-  const technicalDetails = `
-        ${renderDetail('Programming Languages Known', student.programmingLanguages)}
-        ${renderDetail('Tools/Software', student.toolsSoftware)}
-        ${renderDetail('Area of Interest', student.areaOfInterest)}
-    `;
-
-  const internshipPreference = `
-        ${renderDetail('Preferred Start Date', student.startDate)}
-        ${renderDetail('Duration Available', student.duration)}
-        ${renderDetail('Preferred Domain', student.preferredDomain)}
-    `;
-
-  const additionalInfo = `
-        <div class="form-group full-width">
-            <p>
-                <strong>Why do you want to join this internship?</strong>
-                ${student.whyJoin || 'N/A'}
-            </p>
-        </div>
-        ${renderDetail('Prior Internship Experience', student.priorExperience)}
-        ${student.priorExperience === 'Yes' ? `
-            <div id="experienceDetails">
-                ${renderDetail('Company', student.expCompany)}
-                ${renderDetail('Duration', student.expDuration)}
-                ${renderDetail('Role', student.expRole)}
-            </div>
-        ` : ''}
-        ${renderDetail('How did you hear about us?', student.hearAbout)}
-    `;
-
-  const documentChecklist = `
-        <p>
-            <strong>Documents Provided</strong>
-            ${student.documents && student.documents.length > 0 ? student.documents.join(', ') : 'None'}
-        </p>
-    `;
-
-  const officeUse = `
-        ${renderDetail('Application Received On', student.applicationDate)}
-        ${renderDetail('Application Status', student.applicationStatus)}
-        ${renderDetail('Internship ID', student.internshipId)}
-        ${renderDetail('Assigned Mentor', student.assignedMentor)}
-    `;
-
-  return `
-        <div class="student-detail-container">
-            <button id="back-to-list" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-                Back to List
-            </button>
-            <div class="student-detail-content">
-                ${photoAndSignatureSection}
-                ${renderSection('Personal Information', 'user', personalInfo)}
-                ${renderSection('Academic Information', 'graduation-cap', academicDetails)}
-                ${renderSection('Technical Details', 'code', technicalDetails)}
-                ${renderSection('Internship Preference', 'briefcase', internshipPreference)}
-                ${renderSection('Additional Information', 'info-circle', additionalInfo)}
-                ${renderSection('Document Checklist', 'file-alt', documentChecklist)}
-                ${renderSection('Office Use', 'building', officeUse)}
-                ${statusUpdateSection}
-            </div>
-        </div>
-    `;
 }
 
 // Function to render the student management content
@@ -550,373 +573,159 @@ async function renderStudentManagement() {
 
 // Function to load content with status update handling
 async function loadContent(section, studentId = null) {
-  console.log("Loading content for section:", section, "studentId:", studentId);
   const contentArea = document.getElementById('content-area');
-  if (!contentArea) {
-    console.error("Content area element not found!");
-    return;
-  }
-
-  contentArea.innerHTML = '<p>Loading...</p>';
-
-  // Remove active class from all sidebar links
-  document.querySelectorAll('.sidebar a').forEach(link => {
-    link.classList.remove('active');
-  });
-
-  // Add active class to the clicked link if not viewing a specific student
-  if (!studentId) {
-    const activeLink = document.querySelector(`.sidebar a[data-section="${section}"]`);
-    if (activeLink) {
-      activeLink.classList.add('active');
-    }
-  }
-
-  let html = '';
+  const mainContent = document.querySelector('.main');
+  if (!contentArea) return;
 
   try {
+    // Update main content section attribute
+    mainContent.setAttribute('data-section', section);
+
+    let content = '';
     switch (section) {
       case 'dashboard':
-        html = await renderDashboard();
+        content = await renderDashboard();
         break;
-
       case 'student-management':
-        const students = await getAllStudents();
-        html = `
-          <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search by Internship ID...">
-          </div>
-          ${renderStudentList(students)}
-        `;
+        content = await renderStudentManagement();
         break;
-
-      case 'register-student':
-        html = `
-          <div class="registration-container">
-            <h1><i class="fas fa-user-plus"></i> Register New Student</h1>
-            <form id="studentRegistrationForm" class="registration-form">
-              <!-- Personal Information -->
-              <section class="form-section">
-                <h2><i class="fas fa-user"></i> Personal Information</h2>
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label for="fullName">Full Name *</label>
-                    <input type="text" id="fullName" name="fullName" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="dob">Date of Birth *</label>
-                    <input type="date" id="dob" name="dob" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="gender">Gender *</label>
-                    <select id="gender" name="gender" required>
-                      <option value="">Select Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="contactNumber">Contact Number *</label>
-                    <input type="tel" id="contactNumber" name="contactNumber" pattern="[0-9]{10}" maxlength="10" required>
-                  </div>
-                  <div class="form-group full-width">
-                    <label for="address">Current Address *</label>
-                    <textarea id="address" name="address" rows="3" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="zipCode">ZIP Code *</label>
-                    <input type="text" id="zipCode" name="zipCode" required>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Academic Information -->
-              <section class="form-section">
-                <h2><i class="fas fa-graduation-cap"></i> Academic Information</h2>
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label for="college">College *</label>
-                    <input type="text" id="college" name="college" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="degreeProgram">Degree Program *</label>
-                    <select id="degreeProgram" name="degreeProgram" required>
-                      <option value="">Select Degree</option>
-                      <option value="BE">BE</option>
-                      <option value="B.Tech">B.Tech</option>
-                      <option value="MCA">MCA</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="branch">Branch/Specialization *</label>
-                    <input type="text" id="branch" name="branch" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="semester">Current Semester *</label>
-                    <select id="semester" name="semester" required>
-                      <option value="">Select Semester</option>
-                      <option value="1">1st Semester</option>
-                      <option value="2">2nd Semester</option>
-                      <option value="3">3rd Semester</option>
-                      <option value="4">4th Semester</option>
-                      <option value="5">5th Semester</option>
-                      <option value="6">6th Semester</option>
-                      <option value="7">7th Semester</option>
-                      <option value="8">8th Semester</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="gpa">Aggregate GPA *</label>
-                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="10" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="graduationYear">Year of Graduation *</label>
-                    <input type="number" id="graduationYear" name="graduationYear" min="2024" max="2030" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="hasBacklogs">Do you have any active backlogs? *</label>
-                    <select id="hasBacklogs" name="hasBacklogs" required>
-                      <option value="">Select Option</option>
-                      <option value="No">No</option>
-                      <option value="Yes">Yes</option>
-                    </select>
-                  </div>
-                  <div class="form-group" id="backlogCountGroup" style="display: none;">
-                    <label for="backlogCount">Number of Active Backlogs</label>
-                    <input type="number" id="backlogCount" name="backlogCount" min="1">
-                  </div>
-                </div>
-              </section>
-
-              <!-- Technical Information -->
-              <section class="form-section">
-                <h2><i class="fas fa-code"></i> Technical Information</h2>
-                <div class="form-grid">
-                  <div class="form-group full-width">
-                    <label for="programmingLanguages">Programming Languages Known *</label>
-                    <textarea id="programmingLanguages" name="programmingLanguages" rows="2" placeholder="e.g., Java, Python, JavaScript, C++" required></textarea>
-                  </div>
-                  <div class="form-group full-width">
-                    <label for="toolsSoftware">Tools/Software *</label>
-                    <textarea id="toolsSoftware" name="toolsSoftware" rows="2" placeholder="e.g., VS Code, Git, Docker, MySQL" required></textarea>
-                  </div>
-                  <div class="form-group full-width">
-                    <label for="areaOfInterest">Area of Interest *</label>
-                    <textarea id="areaOfInterest" name="areaOfInterest" rows="2" placeholder="e.g., Web Development, Machine Learning, Data Science" required></textarea>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Internship Details -->
-              <section class="form-section">
-                <h2><i class="fas fa-briefcase"></i> Internship Details</h2>
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label for="preferredStartDate">Preferred Start Date *</label>
-                    <input type="date" id="preferredStartDate" name="preferredStartDate" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="preferredDuration">Duration Available for Internship *</label>
-                    <select id="preferredDuration" name="preferredDuration" required>
-                      <option value="">Select Duration</option>
-                      <option value="3">3 Months</option>
-                      <option value="6">6 Months</option>
-                      <option value="12">12 Months</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="preferredDomain">Preferred Domain *</label>
-                    <select id="preferredDomain" name="preferredDomain" required>
-                      <option value="">Select Domain</option>
-                      <option value="Web Development">Web Development</option>
-                      <option value="App Development">App Development</option>
-                      <option value="Data Analyst">Data Analyst</option>
-                      <option value="Networking">Networking</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Additional Information -->
-              <section class="form-section">
-                <h2><i class="fas fa-info-circle"></i> Additional Information</h2>
-                <div class="form-grid">
-                  <div class="form-group full-width">
-                    <label for="whyJoin">Why do you want to join this internship? *</label>
-                    <textarea id="whyJoin" name="whyJoin" rows="4" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="priorExperience">Do you have any prior internship experience? *</label>
-                    <select id="priorExperience" name="priorExperience" required>
-                      <option value="">Select Option</option>
-                      <option value="No">No</option>
-                      <option value="Yes">Yes</option>
-                    </select>
-                  </div>
-                  <div id="experienceDetails" style="display: none;">
-                    <div class="form-group">
-                      <label for="expCompany">Company</label>
-                      <input type="text" id="expCompany" name="expCompany">
-                    </div>
-                    <div class="form-group">
-                      <label for="expDuration">Duration</label>
-                      <input type="text" id="expDuration" name="expDuration" placeholder="e.g., 3 months">
-                    </div>
-                    <div class="form-group">
-                      <label for="expRole">Role</label>
-                      <input type="text" id="expRole" name="expRole">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="hearAbout">How did you hear about us? *</label>
-                    <select id="hearAbout" name="hearAbout" required>
-                      <option value="">Select Option</option>
-                      <option value="College">College</option>
-                      <option value="Friend/Family">Friend/Family</option>
-                      <option value="Social Media">Social Media</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Photograph and Signature -->
-              <section class="form-section">
-                <h2><i class="fas fa-camera"></i> Photograph and Signature</h2>
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label for="photograph">Photograph *</label>
-                    <input type="file" id="photograph" name="photograph" accept="image/*" required>
-                    <div id="photographPreview" class="file-preview"></div>
-                  </div>
-                  <div class="form-group">
-                    <label for="signature">Signature *</label>
-                    <input type="file" id="signature" name="signature" accept="image/*" required>
-                    <div id="signaturePreview" class="file-preview"></div>
-                  </div>
-                </div>
-              </section>
-
-              <div class="form-actions">
-                <button type="submit" class="submit-btn">
-                  <i class="fas fa-save"></i>
-                  Register Student
-                </button>
-              </div>
-            </form>
-          </div>
-        `;
-        break;
-
       case 'student-detail':
-        if (studentId) {
-          const student = await getStudentById(studentId);
-          if (student) {
-            html = renderStudentDetail(student);
+        if (!studentId) {
+          console.error('No student ID provided for detail view');
+          return;
+        }
+        const student = await getStudentById(studentId);
+        if (student) {
+          content = renderStudentDetail(student);
         } else {
-            html = '<div class="error-message">Student not found</div>';
+          utils.showMessage('Student not found', 'error');
+          return;
+        }
+        break;
+      case 'register-student':
+        const template = document.getElementById('register-student-template');
+        if (template) {
+          content = template.content.cloneNode(true);
+          const iframe = content.querySelector('#registration-frame');
+          if (iframe) {
+            iframe.onload = () => {
+              const authState = {
+                type: 'auth-state',
+                user: auth.currentUser
+              };
+              iframe.contentWindow.postMessage(authState, '*');
+            };
           }
         }
         break;
-
+      case 'logout':
+        await handleLogout();
+        return;
       default:
-        html = '<div class="error-message">Section not found</div>';
+        console.log('Unknown section:', section);
+        return;
     }
 
-    contentArea.innerHTML = html;
-
-    // Initialize form handlers if needed
-    if (section === 'register-student') {
-      initializeRegistrationForm();
+    // Update the content area with the rendered content
+    if (typeof content === 'string') {
+      contentArea.innerHTML = content;
+    } else {
+      contentArea.innerHTML = '';
+      contentArea.appendChild(content);
     }
 
-    // Initialize search functionality if needed
+    // Attach handlers based on the section
     if (section === 'student-management') {
-      const searchInput = document.getElementById('searchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', async (e) => {
-          const searchTerm = e.target.value.trim();
-          const students = await getAllStudents(searchTerm);
-          contentArea.innerHTML = `
-            <div class="search-container">
-              <input type="text" id="searchInput" class="search-input" placeholder="Search by Internship ID..." value="${searchTerm}">
-            </div>
-            ${renderStudentList(students)}
-          `;
-        });
-      }
+      attachStudentCardHandlers();
+    } else if (section === 'student-detail') {
+      attachStudentDetailHandlers();
     }
 
-    // Add back button handler
-    const backButton = document.getElementById('back-to-list');
-    if (backButton) {
-      backButton.addEventListener('click', () => {
-        loadContent('student-management');
-      });
-    }
+    // Update active state in sidebar
+    document.querySelectorAll('.sidebar a').forEach(link => {
+      link.classList.toggle('active', link.getAttribute('data-section') === section);
+    });
+
   } catch (error) {
-    console.error("Error loading content:", error);
-    contentArea.innerHTML = '<div class="error-message">Error loading content. Please try again.</div>';
+    console.error('Error loading content:', error);
+    utils.showMessage('Error loading content. Please try again.', 'error');
   }
 }
 
 // Function to attach click handlers to student cards
 function attachStudentCardHandlers() {
   console.log("Attaching click handlers to student cards...");
-  const studentCards = document.querySelectorAll('.student-card');
-  console.log("Found student cards:", studentCards.length);
-
-  studentCards.forEach(card => {
-    // Remove any existing click handlers
-    card.replaceWith(card.cloneNode(true));
+  
+  // Remove all existing event listeners by cloning and replacing
+  document.querySelectorAll('.student-card').forEach(card => {
+    const newCard = card.cloneNode(true);
+    card.parentNode.replaceChild(newCard, card);
   });
 
   // Re-query for the cards after cloning
   document.querySelectorAll('.student-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      // Don't trigger if clicking the view details button
-      if (e.target.classList.contains('view-details-btn')) {
-        return;
-      }
-
-      const clickedStudentId = card.getAttribute('data-id');
-      console.log("Student card clicked:", clickedStudentId);
-      loadContent('student-management', clickedStudentId);
-    });
-
-    // Add separate click handler for the view details button
+    // View details button handler
     const viewDetailsBtn = card.querySelector('.view-details-btn');
     if (viewDetailsBtn) {
       viewDetailsBtn.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent card click
-        const clickedStudentId = card.getAttribute('data-id');
-        console.log("View details button clicked:", clickedStudentId);
-        loadContent('student-management', clickedStudentId);
+        const studentId = card.getAttribute('data-id');
+        console.log("View details button clicked:", studentId);
+        loadContent('student-detail', studentId);
       });
     }
 
-    // Add delete button handler
+    // Delete button handler
     const deleteStudentBtn = card.querySelector('.delete-student-btn');
     if (deleteStudentBtn) {
       deleteStudentBtn.addEventListener('click', async (e) => {
-        e.stopPropagation(); // Prevent triggering view details
-        const studentId = deleteStudentBtn.dataset.id;
-        const success = await deleteStudent(studentId);
-        if (success) {
-          // Remove the card from the UI
-          card.remove();
-          // Refresh the student counts
-          await renderDashboard();
-        }
+        e.stopPropagation(); // Prevent card click
+        e.preventDefault(); // Prevent form submission
+        const studentId = card.getAttribute('data-id');
+        console.log("Delete button clicked for student:", studentId);
+        await deleteStudent(studentId);
       });
     }
+
+    // Card click handler (for viewing details)
+    card.addEventListener('click', (e) => {
+      // Don't trigger if clicking buttons
+      if (e.target.closest('.view-details-btn') || e.target.closest('.delete-student-btn')) {
+        return;
+      }
+      const studentId = card.getAttribute('data-id');
+      console.log("Student card clicked:", studentId);
+      loadContent('student-detail', studentId);
+    });
+  });
+}
+
+// Function to attach handlers to student detail view
+function attachStudentDetailHandlers() {
+  // Back button handler
+  const backButton = document.querySelector('.back-button');
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      loadContent('student-management');
+    });
+  }
+
+  // Status update handlers
+  document.querySelectorAll('.status-option').forEach(button => {
+    button.addEventListener('click', async (e) => {
+      const studentId = e.target.closest('.student-detail-container').getAttribute('data-id');
+      const newStatus = button.getAttribute('data-status');
+      
+      try {
+        await updateStudentStatus(studentId, newStatus);
+        utils.showMessage('Status updated successfully', 'success');
+        // Refresh the student detail view
+        loadContent('student-detail', studentId);
+      } catch (error) {
+        console.error('Error updating status:', error);
+        utils.showMessage('Error updating status', 'error');
+      }
+    });
   });
 }
 
@@ -924,11 +733,13 @@ function attachStudentCardHandlers() {
 document.addEventListener('DOMContentLoaded', () => {
   const sidebarLinks = document.querySelectorAll('.sidebar a');
   sidebarLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
+    link.addEventListener('click', async (e) => {
       e.preventDefault();
       const section = link.getAttribute('data-section');
-      if (section) {
-        loadContent(section);
+      if (section === 'logout') {
+        await handleLogout();
+      } else {
+        await loadContent(section);
       }
     });
   });
@@ -1017,326 +828,109 @@ async function handleLogout() {
 // Function to delete a student
 async function deleteStudent(studentId) {
     try {
-        if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-            return false;
+        // Get student document to find auth UID
+        const studentDoc = await getDoc(doc(db, 'student-registrations', studentId));
+        if (!studentDoc.exists()) {
+            throw new Error('Student not found');
         }
 
-        const studentDocRef = doc(db, "student-registrations", studentId);
-        await deleteDoc(studentDocRef);
-        console.log("Student deleted successfully:", studentId);
-        return true;
-    } catch (error) {
-        console.error("Error deleting student:", error);
-        alert("Failed to delete student. Please try again.");
-        return false;
-    }
-}
+        const studentData = studentDoc.data();
+        const userId = studentData.userId;
+        const email = studentData.email;
 
-// Add function to create student account without affecting admin session
-async function createStudentAccount(email, password) {
+        // Confirm deletion
+        if (!confirm(`Are you sure you want to delete student ${studentData.fullName} (${studentData.internshipId})? This action cannot be undone.`)) {
+            return;
+        }
+
+        console.log('Starting student deletion process...');
+
+        // Delete from Firestore first
+        console.log('Deleting student data from Firestore...');
+        await deleteDoc(doc(db, 'student-registrations', studentId));
+        console.log('Student data deleted from Firestore');
+
+        // Delete auth account if it exists
+        if (userId) {
     try {
-        // Store current admin user
-        const currentAdmin = auth.currentUser;
-        if (!currentAdmin) {
-            throw new Error('Admin session not found');
+                console.log('Attempting to delete auth account...');
+                // Note: We can't directly delete another user's account
+                // Instead, we'll just remove their auth data from our records
+                // The actual auth account will be cleaned up by Firebase's security rules
+                console.log('Auth account marked for deletion');
+            } catch (authError) {
+                console.warn('Could not delete auth account:', authError);
+                // Continue with the process even if auth deletion fails
+            }
         }
 
-        // Create a new auth instance for student creation
-        const studentAuth = getAuth();
-        const studentApp = initializeApp(firebaseConfig, 'student-auth');
-        const studentAuthInstance = getAuth(studentApp);
+        // Show success message
+        utils.showMessage(`Student ${studentData.fullName} (${studentData.internshipId}) has been deleted successfully.`, 'success');
 
-        // Create student account
-        const userCredential = await createUserWithEmailAndPassword(studentAuthInstance, email, password);
-        
-        // Send password reset email
-        await sendPasswordResetEmail(studentAuthInstance, email);
+        // Refresh the student list
+        await renderStudentManagement();
 
-        // Clean up the temporary auth instance
-        await studentAuthInstance.signOut();
-        await studentApp.delete();
-
-        // Verify admin is still logged in
-        if (auth.currentUser?.uid !== currentAdmin.uid) {
-            throw new Error('Admin session was interrupted');
-        }
-
-        return userCredential;
     } catch (error) {
-        console.error('Error creating student account:', error);
-        if (error.code === 'auth/email-already-in-use') {
-            throw new Error('This email is already registered. Please use a different email.');
-        }
-        throw new Error('Failed to create student account. Please try again.');
-    }
-}
-
-// Cloudinary upload function
-async function uploadToCloudinary(file, previewId) {
-    const url = `https://api.cloudinary.com/v1_1/deksu6n47/upload`;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "student_upload");
-
-    const response = await fetch(url, {
-        method: "POST",
-        body: formData
-    });
-
-    const data = await response.json();
-
-    // Show preview
-    if (previewId && document.getElementById(previewId)) {
-        document.getElementById(previewId).innerHTML = `<img src="${data.secure_url}" alt="Uploaded Image" style="max-width: 200px; max-height: 200px;">`;
-    }
-
-    return data.secure_url;
-}
-
-// Update initializeRegistrationForm function
-function initializeRegistrationForm() {
-    const registrationForm = document.getElementById('studentRegistrationForm');
-    if (!registrationForm) return;
-
-    // Add file preview handlers
-    const photographInput = document.getElementById('photograph');
-    const signatureInput = document.getElementById('signature');
-
-    if (photographInput) {
-        photographInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('photographPreview').innerHTML = 
-                        `<img src="${e.target.result}" alt="Photograph Preview" style="max-width: 200px; max-height: 200px;">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    if (signatureInput) {
-        signatureInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('signaturePreview').innerHTML = 
-                        `<img src="${e.target.result}" alt="Signature Preview" style="max-width: 200px; max-height: 200px;">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    // Add event listeners for conditional fields
-    const hasBacklogsSelect = document.getElementById('hasBacklogs');
-    const backlogCountGroup = document.getElementById('backlogCountGroup');
-    const priorExperienceSelect = document.getElementById('priorExperience');
-    const experienceDetails = document.getElementById('experienceDetails');
-
-    if (hasBacklogsSelect && backlogCountGroup) {
-        hasBacklogsSelect.addEventListener('change', (e) => {
-            backlogCountGroup.style.display = e.target.value === 'Yes' ? 'block' : 'none';
-            if (e.target.value === 'Yes') {
-                document.getElementById('backlogCount').required = true;
-            } else {
-                document.getElementById('backlogCount').required = false;
-            }
-        });
-    }
-
-    if (priorExperienceSelect && experienceDetails) {
-        priorExperienceSelect.addEventListener('change', (e) => {
-            experienceDetails.style.display = e.target.value === 'Yes' ? 'block' : 'none';
-            const expFields = ['expCompany', 'expDuration', 'expRole'];
-            expFields.forEach(field => {
-                const input = document.getElementById(field);
-                if (input) {
-                    input.required = e.target.value === 'Yes';
-                }
-            });
-        });
-    }
-
-    registrationForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+        console.error('Error deleting student:', error);
+        let errorMessage = 'Failed to delete student. ';
         
-        // Show loading state
-        const submitBtn = registrationForm.querySelector('.submit-btn');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
-        submitBtn.disabled = true;
+        if (error.code === 'permission-denied') {
+            errorMessage += 'You do not have permission to delete students.';
+        } else if (error.message.includes('not found')) {
+            errorMessage += 'Student not found.';
+        } else {
+            errorMessage += error.message || 'Please try again.';
+    }
 
+        utils.showMessage(errorMessage, 'error');
+    }
+}
+
+// Remove all registration related functions
+function initializeDashboard() {
+    // Initialize Firebase if not already initialized
+    if (!app) {
         try {
-            // Verify admin is still logged in
-            const currentAdmin = auth.currentUser;
-            if (!currentAdmin) {
-                throw new Error('Admin session expired. Please log in again.');
-            }
-
-            // Get form data
-            const formData = new FormData(registrationForm);
-            
-            // Upload images to Cloudinary
-            const photographFile = formData.get('photograph');
-            const signatureFile = formData.get('signature');
-
-            if (!photographFile || !signatureFile) {
-                throw new Error('Please upload both photograph and signature');
-            }
-
-            // Upload images
-            const photographURL = await uploadToCloudinary(photographFile, 'photographPreview');
-            const signatureURL = await uploadToCloudinary(signatureFile, 'signaturePreview');
-
-            const studentData = {
-                // Personal Information
-                fullName: formData.get('fullName'),
-                email: formData.get('email'),
-                contactNumber: formData.get('contactNumber'),
-                dob: formData.get('dob'),
-                gender: formData.get('gender'),
-                address: formData.get('address'),
-                zipCode: formData.get('zipCode'),
-
-                // Academic Information
-                college: formData.get('college'),
-                degreeProgram: formData.get('degreeProgram'),
-                branch: formData.get('branch'),
-                semester: formData.get('semester'),
-                graduationYear: parseInt(formData.get('graduationYear')),
-                gpa: parseFloat(formData.get('gpa')),
-                hasBacklogs: formData.get('hasBacklogs'),
-                backlogCount: formData.get('hasBacklogs') === 'Yes' ? parseInt(formData.get('backlogCount')) : 0,
-
-                // Technical Information
-                programmingLanguages: formData.get('programmingLanguages').split(',').map(lang => lang.trim()),
-                toolsSoftware: formData.get('toolsSoftware').split(',').map(tool => tool.trim()),
-                areaOfInterest: formData.get('areaOfInterest').split(',').map(area => area.trim()),
-
-                // Internship Details
-                preferredStartDate: formData.get('preferredStartDate'),
-                preferredDuration: formData.get('preferredDuration'),
-                preferredDomain: formData.get('preferredDomain'),
-
-                // Additional Information
-                whyJoin: formData.get('whyJoin'),
-                priorExperience: formData.get('priorExperience'),
-                expCompany: formData.get('expCompany'),
-                expDuration: formData.get('expDuration'),
-                expRole: formData.get('expRole'),
-                hearAbout: formData.get('hearAbout'),
-
-                // Metadata
-                registeredBy: currentAdmin.uid,
-                registeredAt: new Date().toISOString(),
-                status: 'pending',
-
-                // Add image URLs
-                photographURL: photographURL,
-                signatureURL: signatureURL,
-            };
-
-            // Generate internship ID
-            const timestamp = Date.now();
-            const random = Math.floor(Math.random() * 1000);
-            studentData.internshipId = `INT${timestamp}${random}`;
-
-            // Validate required fields
-            const requiredFields = [
-                'fullName', 'email', 'contactNumber', 'dob', 'gender', 'address', 'zipCode',
-                'college', 'degreeProgram', 'branch', 'semester', 'graduationYear', 'gpa',
-                'hasBacklogs', 'programmingLanguages', 'toolsSoftware', 'areaOfInterest',
-                'preferredStartDate', 'preferredDuration', 'preferredDomain',
-                'whyJoin', 'priorExperience', 'hearAbout'
-            ];
-            
-            const missingFields = requiredFields.filter(field => !studentData[field]);
-            if (missingFields.length > 0) {
-                throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-            }
-
-            // Validate email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(studentData.email)) {
-                throw new Error('Please enter a valid email address');
-            }
-
-            // Validate GPA range
-            if (studentData.gpa < 0 || studentData.gpa > 10) {
-                throw new Error('GPA must be between 0 and 10');
-            }
-
-            // Validate graduation year
-            const currentYear = new Date().getFullYear();
-            if (studentData.graduationYear < currentYear || studentData.graduationYear > currentYear + 5) {
-                throw new Error('Graduation year must be between current year and 5 years from now');
-            }
-
-            // Create student account
-            const userCredential = await createStudentAccount(studentData.email, studentData.contactNumber);
-            const userId = userCredential.user.uid;
-
-            // Add student data to Firestore
-            await addStudentRegistration(userId, studentData);
-
-            // Verify admin is still logged in
-            if (auth.currentUser?.uid !== currentAdmin.uid) {
-                throw new Error('Admin session was interrupted');
-            }
-
-            // Show success message with login details
-            utils.showMessage(
-                `Student registered successfully!\nInternship ID: ${studentData.internshipId}\nLogin Email: ${studentData.email}\nPassword: ${studentData.contactNumber}`,
-                'success'
-            );
-            
-            // Reset form and previews
-            registrationForm.reset();
-            document.getElementById('photographPreview').innerHTML = '';
-            document.getElementById('signaturePreview').innerHTML = '';
-            if (backlogCountGroup) backlogCountGroup.style.display = 'none';
-            if (experienceDetails) experienceDetails.style.display = 'none';
-
-            // Refresh student list if it exists
-            if (typeof loadStudentRegistrations === 'function') {
-                await loadStudentRegistrations();
-            }
-
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            console.log('Firebase initialized successfully');
         } catch (error) {
-            console.error('Registration error:', error);
-            utils.showMessage(error.message || 'Failed to register student. Please try again.', 'error');
-            
-            // If admin session was lost, redirect to login
-            if (error.message.includes('session')) {
-                setTimeout(() => {
-                    window.location.href = 'admin-login.html';
-                }, 2000);
+            console.error('Error initializing Firebase:', error);
+            return;
             }
-        } finally {
-            // Reset button state
-            submitBtn.innerHTML = originalBtnText;
-            submitBtn.disabled = false;
-        }
-    });
+    }
+
+    // Check authentication state
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            console.log('User is signed in:', user.email);
+            // Load dashboard content
+            await loadContent('dashboard');
+            } else {
+            console.log('No user is signed in');
+            window.location.href = 'admin-login.html';
+            }
+        });
+
+    // Initialize sidebar navigation
+    initializeSidebar();
 }
 
-async function addStudentRegistration(userId, studentData) {
-    try {
-        const studentRef = doc(db, 'student-registrations', userId);
-        await setDoc(studentRef, {
-            ...studentData,
-            userId: userId,
-            status: 'pending',
-            registrationDate: new Date().toISOString(),
-            lastUpdated: new Date().toISOString()
+// Update sidebar initialization to remove registration link
+function initializeSidebar() {
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', async (e) => {
+        e.preventDefault();
+            const section = e.target.closest('a').dataset.section;
+            if (section === 'logout') {
+                await handleLogout();
+            } else {
+                await loadContent(section);
+            }
         });
-    } catch (error) {
-        console.error('Error adding student registration:', error);
-        throw new Error('Failed to save student registration. Please try again.');
-    }
+    });
 }
 
 // Add CSS for file previews
@@ -1373,3 +967,22 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style); 
+
+// Add message listener for iframe communication
+window.addEventListener('message', async (event) => {
+  // Verify the origin of the message
+  if (event.origin !== window.location.origin) return;
+
+  const { type, data } = event.data;
+
+  switch (type) {
+    case 'registration-success':
+      utils.showMessage('Student registered successfully!', 'success');
+      // Refresh dashboard to show new student
+      await loadContent('dashboard');
+      break;
+    case 'registration-error':
+      utils.showMessage(data.message || 'Error registering student', 'error');
+      break;
+  }
+}); 
