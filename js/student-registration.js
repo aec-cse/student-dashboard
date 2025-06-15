@@ -4,14 +4,14 @@
 
 // Add your Firebase imports here, for example:
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 // ... (add any other Firebase imports you need)
 
 // Add your registration logic here, using direct Firebase calls.
 // If you need help rewriting the registration logic, let me know!
 
-// Firebase config
+// Initialize Firebase with the correct configuration
 const firebaseConfig = {
     apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
     authDomain: "admin-af1fc.firebaseapp.com",
@@ -135,8 +135,25 @@ form.addEventListener('submit', async (e) => {
         // Generate internship ID
         const internshipId = await generateInternshipId();
         
+        // Create Firebase Authentication account first
+        let userCredential;
+        try {
+            userCredential = await createUserWithEmailAndPassword(auth, form.email.value.trim(), contact);
+            console.log('Firebase Auth account created successfully:', userCredential.user.uid);
+        } catch (authError) {
+            console.error('Error creating authentication account:', authError);
+            if (authError.code === 'auth/email-already-in-use') {
+                throw new Error('An account with this email already exists. Please use a different email or try logging in.');
+            }
+            throw new Error('Failed to create account. Please try again.');
+        }
+
+        // Wait for a short delay to ensure Firebase Auth is ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // Collect form data
         const formData = {
+            userId: userCredential.user.uid,
             internshipId,
             fullName: form.fullName.value.trim(),
             dob: form.dob.value,
@@ -186,24 +203,12 @@ form.addEventListener('submit', async (e) => {
             throw new Error('Failed to upload files. Please try again.');
         }
 
-        // Create Firebase Authentication account
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.contact);
-            formData.userId = userCredential.user.uid;
-        } catch (authError) {
-            console.error('Error creating authentication account:', authError);
-            if (authError.code === 'auth/email-already-in-use') {
-                throw new Error('An account with this email already exists. Please use a different email or try logging in.');
-            }
-            throw new Error('Failed to create account. Please try again.');
-        }
-
         // Save to Firestore
         try {
             console.log('Attempting to save registration to Firestore...');
-            const studentRegistrationsRef = collection(db, 'student-registrations');
-            const docRef = await addDoc(studentRegistrationsRef, formData);
-            console.log('Registration saved successfully with ID:', docRef.id);
+            const studentRegistrationsRef = doc(db, 'student-registrations', userCredential.user.uid);
+            await setDoc(studentRegistrationsRef, formData);
+            console.log('Registration saved successfully with ID:', userCredential.user.uid);
 
             // Show success message
             loadingOverlay.style.display = 'none';
@@ -226,6 +231,14 @@ form.addEventListener('submit', async (e) => {
                 message: firestoreError.message,
                 stack: firestoreError.stack
             });
+            
+            // If Firestore save fails, delete the Firebase Auth account
+            try {
+                await userCredential.user.delete();
+                console.log('Deleted Firebase Auth account due to Firestore save failure');
+            } catch (deleteError) {
+                console.error('Error deleting Firebase Auth account:', deleteError);
+            }
             
             let errorMessage = 'Failed to save registration. ';
             switch (firestoreError.code) {

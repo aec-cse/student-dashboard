@@ -63,49 +63,45 @@ service cloud.firestore {
     match /students/{studentId} {
       allow read: if isAuthenticated() && (isAdmin() || isOwner(studentId));
       allow create: if isAdmin();
-      allow update: if isAdmin() || (isOwner(studentId));
+      allow update: if isAdmin() || isOwner(studentId);
       allow delete: if isAdmin();
     }
 
     // Rules for courses collection
     match /courses/{courseId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin() && isValidCourseData();
+      allow write: if isAdmin();
     }
 
     // Rules for enrollments collection
     match /enrollments/{enrollmentId} {
       allow read: if isAuthenticated() && 
         (isAdmin() || resource.data.studentId == request.auth.uid);
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
     // Rules for grades collection
     match /grades/{gradeId} {
       allow read: if isAuthenticated() && 
         (isAdmin() || resource.data.studentId == request.auth.uid);
-      allow write: if isAdmin() && isValidGradeData();
+      allow write: if isAdmin();
     }
 
     // Rules for attendance collection
     match /attendance/{recordId} {
       allow read: if isAuthenticated() && 
         (isAdmin() || resource.data.studentId == request.auth.uid);
-      allow create: if isAdmin() && isValidAttendanceData();
-      allow update: if isAdmin() && isValidAttendanceData();
-      allow delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
     // Rules for notifications collection
     match /notifications/{notificationId} {
       allow read: if isAuthenticated() && 
         (isAdmin() || resource.data.studentId == request.auth.uid);
-      allow create: if isAdmin() && isValidNotificationData();
-      allow update: if isAdmin() && isValidNotificationData();
-      allow delete: if isAdmin() || 
+      allow create: if isAdmin();
+      allow update: if isAdmin() || 
         (isOwner(resource.data.studentId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']));
+      allow delete: if isAdmin();
     }
     
     // Rules for admins collection
@@ -118,10 +114,9 @@ service cloud.firestore {
 
     // Rules for student-registrations collection
     match /student-registrations/{registrationId} {
-      // Allow public read/write access for registrations
       allow read: if true;
       allow create: if true;
-      allow update: if isAdmin();
+      allow update: if isAdmin() || (isOwner(registrationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
       allow delete: if isAdmin();
     }
 

@@ -43,14 +43,16 @@ async function loadStudentData(userId) {
         const registrationDoc = await getDoc(doc(db, 'student-registrations', userId));
         if (registrationDoc.exists()) {
             const data = registrationDoc.data();
-            // If student is approved, check students collection
-            if (data.status === 'approved') {
-                const studentDoc = await getDoc(doc(db, 'students', userId));
-                if (studentDoc.exists()) {
-                    return studentDoc.data();
-                }
+            // If student is not approved, redirect to login
+            if (data.status !== 'approved') {
+                throw new Error(`Your registration is ${data.status}. Please wait for admin approval.`);
             }
-            // If not approved or not in students collection, return registration data
+            // If student is approved, check students collection
+            const studentDoc = await getDoc(doc(db, 'students', userId));
+            if (studentDoc.exists()) {
+                return studentDoc.data();
+            }
+            // If not in students collection, return registration data
             return data;
         }
 
@@ -392,40 +394,11 @@ function getStatusClass(status) {
     }
 }
 
-// Handle navigation
-document.querySelectorAll('.sidebar-nav a').forEach(link => {
-    link.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const section = e.target.closest('a').getAttribute('data-section');
-        
-        if (section === 'logout') {
-            try {
-                await signOut(auth);
-                window.location.href = 'student-login.html';
-            } catch (error) {
-                console.error('Error signing out:', error);
-                showMessage('Error signing out. Please try again.');
-            }
-            return;
-        }
-
-        // Update active state
-        document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-        e.target.closest('a').classList.add('active');
-
-        // Load content
-        const user = auth.currentUser;
-        if (user) {
-            const studentData = await loadStudentData(user.uid);
-            await loadContent(section, studentData);
-        }
-    });
-});
-
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', async () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (!user) {
+            console.log('No authenticated user, redirecting to login...');
             window.location.href = 'student-login.html';
             return;
         }
@@ -434,6 +407,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Load student data
             const studentData = await loadStudentData(user.uid);
             
+            if (!studentData) {
+                console.error('Student data not found');
+                showMessage('Error: Student data not found. Please contact support.', 'error');
+                await signOut(auth);
+                window.location.href = 'student-login.html';
+                return;
+            }
+
             // Update header
             welcomeMessage.textContent = `Welcome, ${studentData.fullName}`;
             studentName.textContent = studentData.fullName;
@@ -441,9 +422,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Load initial content (overview)
             await loadContent('overview', studentData);
+
+            // Set up navigation handlers
+            document.querySelectorAll('.sidebar-nav a').forEach(link => {
+                link.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const section = e.target.closest('a').getAttribute('data-section');
+                    
+                    if (section === 'logout') {
+                        try {
+                            await signOut(auth);
+                            window.location.href = 'student-login.html';
+                        } catch (error) {
+                            console.error('Error signing out:', error);
+                            showMessage('Error signing out. Please try again.');
+                        }
+                        return;
+                    }
+
+                    // Update active state
+                    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+                    e.target.closest('a').classList.add('active');
+
+                    // Load content
+                    await loadContent(section, studentData);
+                });
+            });
+
         } catch (error) {
             console.error('Error initializing dashboard:', error);
-            showMessage('Error loading dashboard. Please try again.');
+            showMessage(error.message || 'Error loading dashboard. Please try again.');
             await signOut(auth);
             window.location.href = 'student-login.html';
         }
