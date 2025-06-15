@@ -22,15 +22,15 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="fullName">Full Name *</label>
-                        <input type="text" id="fullName" name="fullName" required>
+                        <input type="text" id="fullName" name="fullName" required autocomplete="name">
                     </div>
                     <div class="form-group">
                         <label for="dob">Date of Birth *</label>
-                        <input type="date" id="dob" name="dob" required>
+                        <input type="date" id="dob" name="dob" required autocomplete="bday">
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender *</label>
-                        <select id="gender" name="gender" required>
+                        <select id="gender" name="gender" required autocomplete="sex">
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
@@ -39,19 +39,19 @@
                     </div>
                     <div class="form-group">
                         <label for="email">Email *</label>
-                        <input type="email" id="email" name="email" required>
+                        <input type="email" id="email" name="email" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <label for="contact">Contact Number *</label>
-                        <input type="tel" id="contact" name="contact" required>
+                        <input type="tel" id="contact" name="contact" required autocomplete="tel">
                     </div>
                     <div class="form-group full-width">
                         <label for="address">Current Address *</label>
-                        <textarea id="address" name="address" rows="3" required></textarea>
+                        <textarea id="address" name="address" rows="3" required autocomplete="street-address"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="zipCode">ZIP Code *</label>
-                        <input type="text" id="zipCode" name="zipCode" required>
+                        <input type="text" id="zipCode" name="zipCode" required autocomplete="postal-code">
                     </div>
                 </div>
             </section>
@@ -62,11 +62,11 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="college">College *</label>
-                        <input type="text" id="college" name="college" required>
+                        <input type="text" id="college" name="college" required autocomplete="organization">
                     </div>
                     <div class="form-group">
                         <label for="degreeProgram">Degree Program *</label>
-                        <select id="degreeProgram" name="degreeProgram" required>
+                        <select id="degreeProgram" name="degreeProgram" required autocomplete="off">
                             <option value="">Select Degree</option>
                             <option value="BE">BE</option>
                             <option value="B.Tech">B.Tech</option>
@@ -76,11 +76,11 @@
                     </div>
                     <div class="form-group">
                         <label for="branch">Branch/Specialization *</label>
-                        <input type="text" id="branch" name="branch" required>
+                        <input type="text" id="branch" name="branch" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="semester">Current Semester *</label>
-                        <select id="semester" name="semester" required>
+                        <select id="semester" name="semester" required autocomplete="off">
                             <option value="">Select Semester</option>
                             <option value="1">1st Semester</option>
                             <option value="2">2nd Semester</option>
@@ -94,15 +94,15 @@
                     </div>
                     <div class="form-group">
                         <label for="gpa">Aggregate GPA *</label>
-                        <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="10" required>
+                        <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="10" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="graduationYear">Year of Graduation *</label>
-                        <input type="number" id="graduationYear" name="graduationYear" min="2020" max="2030" required>
+                        <input type="number" id="graduationYear" name="graduationYear" min="2020" max="2030" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="hasBacklogs">Do you have any active backlogs? *</label>
-                        <select id="hasBacklogs" name="hasBacklogs" required>
+                        <select id="hasBacklogs" name="hasBacklogs" required autocomplete="off">
                             <option value="">Select Option</option>
                             <option value="No">No</option>
                             <option value="Yes">Yes</option>
@@ -110,7 +110,7 @@
                     </div>
                     <div class="form-group" id="backlogCountGroup" style="display: none;">
                         <label for="backlogCount">Number of Active Backlogs</label>
-                        <input type="number" id="backlogCount" name="backlogCount" min="1">
+                        <input type="number" id="backlogCount" name="backlogCount" min="1" autocomplete="off">
                     </div>
                 </div>
             </section>
@@ -121,18 +121,15 @@
                 <div class="form-grid">
                     <div class="form-group full-width">
                         <label for="programmingLanguages">Programming Languages Known *</label>
-                        <textarea id="programmingLanguages" name="programmingLanguages" rows="2"
-                            placeholder="e.g., Java, Python, JavaScript, C++" required></textarea>
+                        <textarea id="programmingLanguages" name="programmingLanguages" rows="2" required autocomplete="off"></textarea>
                     </div>
                     <div class="form-group full-width">
                         <label for="toolsSoftware">Tools/Software *</label>
-                        <textarea id="toolsSoftware" name="toolsSoftware" rows="2"
-                            placeholder="e.g., VS Code, Git, Docker, MySQL" required></textarea>
+                        <textarea id="toolsSoftware" name="toolsSoftware" rows="2" required autocomplete="off"></textarea>
                     </div>
                     <div class="form-group full-width">
                         <label for="areaOfInterest">Area of Interest *</label>
-                        <textarea id="areaOfInterest" name="areaOfInterest" rows="2"
-                            placeholder="e.g., Web Development, Machine Learning, Data Science" required></textarea>
+                        <textarea id="areaOfInterest" name="areaOfInterest" rows="2" required autocomplete="off"></textarea>
                     </div>
                 </div>
             </section>
@@ -143,11 +140,11 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="startDate">Preferred Start Date *</label>
-                        <input type="date" id="startDate" name="startDate" required>
+                        <input type="date" id="startDate" name="startDate" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="duration">Duration Available for Internship *</label>
-                        <select id="duration" name="duration" required>
+                        <select id="duration" name="duration" required autocomplete="off">
                             <option value="">Select Duration</option>
                             <option value="3">3 Months</option>
                             <option value="6">6 Months</option>
@@ -156,7 +153,7 @@
                     </div>
                     <div class="form-group">
                         <label for="preferredDomain">Preferred Domain *</label>
-                        <select id="preferredDomain" name="preferredDomain" required>
+                        <select id="preferredDomain" name="preferredDomain" required autocomplete="off">
                             <option value="">Select Domain</option>
                             <option value="Web Development">Web Development</option>
                             <option value="App Development">App Development</option>
@@ -174,11 +171,11 @@
                 <div class="form-grid">
                     <div class="form-group full-width">
                         <label for="whyJoin">Why do you want to join this internship? *</label>
-                        <textarea id="whyJoin" name="whyJoin" rows="4" required></textarea>
+                        <textarea id="whyJoin" name="whyJoin" rows="4" required autocomplete="off"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="priorExperience">Do you have any prior internship experience? *</label>
-                        <select id="priorExperience" name="priorExperience" required>
+                        <select id="priorExperience" name="priorExperience" required autocomplete="off">
                             <option value="">Select Option</option>
                             <option value="No">No</option>
                             <option value="Yes">Yes</option>
@@ -187,20 +184,20 @@
                     <div id="experienceDetails" style="display: none;">
                         <div class="form-group">
                             <label for="expCompany">Company</label>
-                            <input type="text" id="expCompany" name="expCompany">
+                            <input type="text" id="expCompany" name="expCompany" autocomplete="organization">
                         </div>
                         <div class="form-group">
                             <label for="expDuration">Duration</label>
-                            <input type="text" id="expDuration" name="expDuration" placeholder="e.g., 3 months">
+                            <input type="text" id="expDuration" name="expDuration" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="expRole">Role</label>
-                            <input type="text" id="expRole" name="expRole">
+                            <input type="text" id="expRole" name="expRole" autocomplete="off">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="hearAbout">How did you hear about us? *</label>
-                        <select id="hearAbout" name="hearAbout" required>
+                        <select id="hearAbout" name="hearAbout" required autocomplete="off">
                             <option value="">Select Option</option>
                             <option value="College">College</option>
                             <option value="Friend/Family">Friend/Family</option>
@@ -217,12 +214,12 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="photograph">Photograph *</label>
-                        <input type="file" id="photograph" name="photograph" accept="image/*" required>
+                        <input type="file" id="photograph" name="photograph" accept="image/*" required autocomplete="off">
                         <div id="photographPreview" class="file-preview"></div>
                     </div>
                     <div class="form-group">
                         <label for="signature">Signature *</label>
-                        <input type="file" id="signature" name="signature" accept="image/*" required>
+                        <input type="file" id="signature" name="signature" accept="image/*" required autocomplete="off">
                         <div id="signaturePreview" class="file-preview"></div>
                     </div>
                 </div>

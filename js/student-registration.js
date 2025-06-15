@@ -1,147 +1,151 @@
-import { initializeFirebase } from './services/firebase-config.js';
-import { saveRegistration } from './services/student-service.js';
-import { collectFormData, handleError, showMessage } from './utils/common.js';
+// import { initializeFirebase } from './services/firebase-config.js';
+// import { saveRegistration } from './services/student-service.js';
+// import { collectFormData, handleError, showMessage } from './utils/common.js';
 
-// Initialize Firebase when the script loads
-initializeFirebase().catch(error => {
-    console.error('Failed to initialize Firebase:', error);
-    showMessage('Failed to initialize the application. Please refresh the page.', 'error');
+// Add your Firebase imports here, for example:
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+// ... (add any other Firebase imports you need)
+
+// Add your registration logic here, using direct Firebase calls.
+// If you need help rewriting the registration logic, let me know!
+
+// Firebase config
+const firebaseConfig = {
+    apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
+    authDomain: "admin-af1fc.firebaseapp.com",
+    projectId: "admin-af1fc",
+    storageBucket: "admin-af1fc.appspot.com",
+    messagingSenderId: "1042593739824",
+    appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const form = document.getElementById('studentForm');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+// Show/hide backlog count
+const hasBacklogs = document.getElementById('hasBacklogs');
+const backlogCountGroup = document.getElementById('backlogCountGroup');
+hasBacklogs.addEventListener('change', () => {
+    backlogCountGroup.style.display = hasBacklogs.value === 'Yes' ? 'block' : 'none';
+});
+
+// Show/hide prior experience details
+const priorExperience = document.getElementById('priorExperience');
+const experienceDetails = document.getElementById('experienceDetails');
+priorExperience.addEventListener('change', () => {
+    experienceDetails.style.display = priorExperience.value === 'Yes' ? 'block' : 'none';
 });
 
 // Preview image before upload
 function previewImage(input, previewId) {
     const preview = document.getElementById(previewId);
-    const file = input.files[0];
-    
-    if (file) {
+    preview.innerHTML = '';
+    if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = e => preview.src = e.target.result;
-        reader.readAsDataURL(file);
-    } else {
-        preview.src = '';
+        reader.onload = e => {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = '120px';
+            img.style.maxHeight = '120px';
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(input.files[0]);
     }
 }
+document.getElementById('photograph').addEventListener('change', function() {
+    previewImage(this, 'photographPreview');
+});
+document.getElementById('signature').addEventListener('change', function() {
+    previewImage(this, 'signaturePreview');
+});
 
-// Handle form submission
-async function handleFormSubmit(event) {
-    event.preventDefault();
-    
+// Helper: upload file to Cloudinary and return download URL
+async function uploadToCloudinary(file) {
+    const url = 'https://api.cloudinary.com/v1_1/deksu6n47/upload';
+    const preset = 'student_upload';
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', preset);
+    const response = await fetch(url, {
+        method: 'POST',
+        body: formData
+    });
+    if (!response.ok) throw new Error('Cloudinary upload failed');
+    const data = await response.json();
+    return data.secure_url;
+}
+
+// Helper: collect checked documents
+function getCheckedDocuments() {
+    return Array.from(document.querySelectorAll('input[name="documents"]:checked')).map(cb => cb.value);
+}
+
+// Form submit handler
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loadingOverlay.style.display = 'flex';
     try {
-        // Validate form
-        if (!validateForm()) {
-            return;
+        // Collect form data
+        const data = {
+            fullName: form.fullName.value.trim(),
+            dob: form.dob.value,
+            gender: form.gender.value,
+            email: form.email.value.trim(),
+            contact: form.contact.value.trim(),
+            address: form.address.value.trim(),
+            zipCode: form.zipCode.value.trim(),
+            college: form.college.value.trim(),
+            degreeProgram: form.degreeProgram.value,
+            branch: form.branch.value.trim(),
+            semester: form.semester.value,
+            gpa: form.gpa.value,
+            graduationYear: form.graduationYear.value,
+            hasBacklogs: form.hasBacklogs.value,
+            backlogCount: form.hasBacklogs.value === 'Yes' ? form.backlogCount.value : '',
+            programmingLanguages: form.programmingLanguages.value.trim(),
+            toolsSoftware: form.toolsSoftware.value.trim(),
+            areaOfInterest: form.areaOfInterest.value.trim(),
+            startDate: form.startDate.value,
+            duration: form.duration.value,
+            preferredDomain: form.preferredDomain.value,
+            whyJoin: form.whyJoin.value.trim(),
+            priorExperience: form.priorExperience.value,
+            expCompany: form.priorExperience.value === 'Yes' ? form.expCompany.value.trim() : '',
+            expDuration: form.priorExperience.value === 'Yes' ? form.expDuration.value.trim() : '',
+            expRole: form.priorExperience.value === 'Yes' ? form.expRole.value.trim() : '',
+            hearAbout: form.hearAbout.value,
+            documents: getCheckedDocuments(),
+            submittedAt: serverTimestamp(),
+            status: 'pending'
+        };
+
+        // Upload files to Cloudinary
+        const photographFile = form.photograph.files[0];
+        const signatureFile = form.signature.files[0];
+        if (!photographFile || !signatureFile) throw new Error('Photograph and signature are required.');
+        data.photograph = await uploadToCloudinary(photographFile);
+        data.signature = await uploadToCloudinary(signatureFile);
+
+        // Save to Firestore
+        await addDoc(collection(db, 'student-registrations'), data);
+
+        loadingOverlay.style.display = 'none';
+        alert('Registration submitted successfully!');
+        form.reset();
+        document.getElementById('photographPreview').innerHTML = '';
+        document.getElementById('signaturePreview').innerHTML = '';
+        backlogCountGroup.style.display = 'none';
+        experienceDetails.style.display = 'none';
+        // Optionally, notify parent window (for admin dashboard modal)
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'registration-complete' }, '*');
         }
-
-        // Get form data
-        const formData = await collectFormData(event.target);
-        const photographFile = event.target.querySelector('#photograph').files[0];
-        const signatureFile = event.target.querySelector('#signature').files[0];
-
-        // Validate required files
-        if (!photographFile || !signatureFile) {
-            throw new Error('Please upload both photograph and signature');
-        }
-
-        // Save registration
-        const result = await saveRegistration(formData, photographFile, signatureFile);
-        
-        // Show success message
-        showMessage(
-            `Registration successful! Your Internship ID is ${result.internshipId}. ` +
-            `You can now log in using your email (${result.email}) and mobile number (${result.contact}).`,
-            'success'
-        );
-
-        // Reset form and clear previews
-        event.target.reset();
-        clearPreviews();
-
     } catch (error) {
-        handleError(error, 'submitting registration');
-    }
-}
-
-// Validate form fields
-function validateForm() {
-    const form = document.getElementById('registrationForm');
-    if (!form) return false;
-
-    // Required fields
-    const requiredFields = [
-        'fullName', 'email', 'contact', 'college', 'course',
-        'semester', 'startDate', 'endDate', 'photograph', 'signature'
-    ];
-
-    for (const fieldId of requiredFields) {
-        const field = form.querySelector(`#${fieldId}`);
-        if (!field || !field.value.trim()) {
-            showMessage(`Please fill in the ${fieldId.replace(/([A-Z])/g, ' $1').toLowerCase()}`, 'error');
-            field.focus();
-            return false;
-        }
-    }
-
-    // Validate email format
-    const email = form.querySelector('#email').value;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showMessage('Please enter a valid email address', 'error');
-        form.querySelector('#email').focus();
-        return false;
-    }
-
-    // Validate contact number
-    const contact = form.querySelector('#contact').value;
-    if (!/^\d{10}$/.test(contact.replace(/\D/g, ''))) {
-        showMessage('Please enter a valid 10-digit mobile number', 'error');
-        form.querySelector('#contact').focus();
-        return false;
-    }
-
-    // Validate dates
-    const startDate = new Date(form.querySelector('#startDate').value);
-    const endDate = new Date(form.querySelector('#endDate').value);
-    const today = new Date();
-
-    if (startDate < today) {
-        showMessage('Start date cannot be in the past', 'error');
-        form.querySelector('#startDate').focus();
-        return false;
-    }
-
-    if (endDate <= startDate) {
-        showMessage('End date must be after start date', 'error');
-        form.querySelector('#endDate').focus();
-        return false;
-    }
-
-    return true;
-}
-
-// Clear image previews
-function clearPreviews() {
-    const photographPreview = document.getElementById('photographPreview');
-    const signaturePreview = document.getElementById('signaturePreview');
-    
-    if (photographPreview) photographPreview.src = '';
-    if (signaturePreview) signaturePreview.src = '';
-}
-
-// Initialize form when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('registrationForm');
-    if (form) {
-        form.addEventListener('submit', handleFormSubmit);
-    }
-
-    // Add image preview handlers
-    const photographInput = document.getElementById('photograph');
-    const signatureInput = document.getElementById('signature');
-    
-    if (photographInput) {
-        photographInput.addEventListener('change', () => previewImage(photographInput, 'photographPreview'));
-    }
-    
-    if (signatureInput) {
-        signatureInput.addEventListener('change', () => previewImage(signatureInput, 'signaturePreview'));
+        loadingOverlay.style.display = 'none';
+        alert('Error submitting registration: ' + (error.message || error));
     }
 });

@@ -10,5 +10,21 @@
   },
   "dataconnect": {
     "source": "dataconnect"
+  },
+  "hosting": {
+    "headers": [
+      {
+        "source": "**/*.woff2",
+        "headers": [
+          { "key": "Content-Type", "value": "font/woff2" }
+        ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          { "key": "Content-Security-Policy", "value": "default-src 'self'; frame-ancestors 'self';" }
+        ]
+      }
+    ]
   }
 }

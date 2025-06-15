@@ -26,9 +26,85 @@
     <!-- Student Registration Form Template -->
     <template id="register-student-template">
         <div class="registration-container">
-            <iframe id="registration-frame" src="student-registration.html" frameborder="0"></iframe>
+            <div class="registration-wrapper">
+                <button class="close-registration-btn" onclick="closeRegistration()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <iframe id="registration-frame" src="student-registration.html" frameborder="0"></iframe>
+            </div>
         </div>
     </template>
+
+    <script>
+        function closeRegistration() {
+            const container = document.querySelector('.registration-container');
+            if (container) {
+                container.remove();
+            }
+            // Return to previous section
+            loadContent('student-management');
+        }
+
+        // Close registration form when clicking outside
+        document.addEventListener('click', (e) => {
+            const container = document.querySelector('.registration-container');
+            if (container && e.target === container) {
+                closeRegistration();
+            }
+        });
+
+        // Close registration form on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeRegistration();
+            }
+        });
+    </script>
+
+    <style>
+        .registration-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .close-registration-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            transition: all 0.2s ease;
+        }
+
+        .close-registration-btn:hover {
+            background: #f8f9fa;
+            transform: scale(1.1);
+        }
+
+        .close-registration-btn i {
+            color: #666;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .close-registration-btn {
+                top: -35px;
+                right: 10px;
+            }
+        }
+    </style>
 
     <script type="module" src="js/admin-dashboard.js"></script>
 </body>
