@@ -2,11 +2,6 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Temporary test rules - REMOVE THESE IN PRODUCTION
-    match /{document=**} {
-      allow read, write: if true;  // WARNING: This allows anyone to read/write. Only for testing!
-    }
-
     // Helper functions - Keep these for later use
     function isAuthenticated() {
       return request.auth != null;
@@ -59,8 +54,6 @@ service cloud.firestore {
              request.resource.data.type in ['info', 'warning', 'important'];
     }
 
-    // These rules will be used after initial setup
-    /*
     // Rules for students collection
     match /students/{studentId} {
       allow read: if isAuthenticated() && (isAdmin() || isOwner(studentId));
@@ -115,8 +108,15 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow create: if isAdmin() && isValidAdminData();
       allow update: if isAdmin() && adminId == request.auth.uid && isValidAdminData();
-      allow delete: if false;
+      allow delete: if false;  // Prevent admin deletion for security
     }
-    */
+
+    // Rules for student-registrations collection (pending registrations)
+    match /student-registrations/{registrationId} {
+      allow read: if isAdmin();
+      allow create: if true;  // Allow new registrations
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 } 

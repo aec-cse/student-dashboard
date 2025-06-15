@@ -363,19 +363,40 @@ function renderStudentList(students) {
 
 // Function to update student status
 async function updateStudentStatus(studentId, newStatus) {
-  try {
-    console.log(`Updating status for student ${studentId} to ${newStatus}`);
-    const studentRef = doc(db, "student-registrations", studentId);
-    await updateDoc(studentRef, {
-      status: newStatus,
-      statusUpdatedAt: new Date().toISOString()
-    });
-    console.log('Status updated successfully');
-    return true;
-  } catch (error) {
-    console.error('Error updating student status:', error);
-    throw error;
-  }
+    try {
+        console.log(`Updating status for student ${studentId} to ${newStatus}`);
+        const studentRef = doc(db, "student-registrations", studentId);
+        const studentDoc = await getDoc(studentRef);
+        
+        if (!studentDoc.exists()) {
+            throw new Error('Student not found');
+        }
+
+        const studentData = studentDoc.data();
+
+        // Update status in student-registrations
+        await updateDoc(studentRef, {
+            status: newStatus,
+            statusUpdatedAt: new Date().toISOString()
+        });
+
+        // If student is approved, add to students collection
+        if (newStatus === 'approved') {
+            const approvedStudentRef = doc(db, 'students', studentId);
+            await setDoc(approvedStudentRef, {
+                ...studentData,
+                status: 'approved',
+                approvedAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            });
+        }
+
+        console.log('Status updated successfully');
+        return true;
+    } catch (error) {
+        console.error('Error updating student status:', error);
+        throw error;
+    }
 }
 
 // Function to render student detail with status update controls

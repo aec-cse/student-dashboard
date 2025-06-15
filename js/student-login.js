@@ -32,7 +32,7 @@ loginForm.addEventListener('submit', async (e) => {
     errorMessage.style.display = 'none';
 
     try {
-        const internshipId = document.getElementById('internshipId').value.trim();
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
 
         // Validate password length
@@ -41,8 +41,12 @@ loginForm.addEventListener('submit', async (e) => {
             return;
         }
 
-        // Create email from internship ID
-        const email = `${internshipId}@anusaya.intern`;
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showError('Please enter a valid email address');
+            return;
+        }
 
         // Attempt login
         await signInWithEmailAndPassword(auth, email, password);
@@ -52,11 +56,11 @@ loginForm.addEventListener('submit', async (e) => {
         let errorMessage = 'Login failed. ';
 
         if (error.code === 'auth/user-not-found') {
-            errorMessage += 'Internship ID not found.';
+            errorMessage += 'Email not found.';
         } else if (error.code === 'auth/wrong-password') {
             errorMessage += 'Incorrect contact number.';
         } else if (error.code === 'auth/invalid-email') {
-            errorMessage += 'Invalid login format.';
+            errorMessage += 'Invalid email format.';
         } else {
             errorMessage += 'Please try again.';
         }

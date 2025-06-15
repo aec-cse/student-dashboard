@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="max-age=31536000, immutable">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com">
+    <title>Student Dashboard - Anusaya Intern</title>
+    <link rel="stylesheet" href="css/student-dashboard.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Student Dashboard</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" data-section="overview" class="active">
+                    <i class="fas fa-home"></i> Overview
+                </a>
+                <a href="#" data-section="courses">
+                    <i class="fas fa-book"></i> My Courses
+                </a>
+                <a href="#" data-section="grades">
+                    <i class="fas fa-chart-bar"></i> Grades
+                </a>
+                <a href="#" data-section="attendance">
+                    <i class="fas fa-calendar-check"></i> Attendance
+                </a>
+                <a href="#" data-section="profile">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="#" data-section="logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <h1 id="welcome-message">Welcome, Student</h1>
+                    <div class="user-info">
+                        <span id="student-name">Loading...</span>
+                        <span id="student-id">ID: Loading...</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="content-area">
+                <!-- Dynamic content will be loaded here -->
+                <div class="loading-message">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Loading dashboard...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="overview-template">
+        <div class="overview-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-book"></i>
+                    <h3>Enrolled Courses</h3>
+                    <p id="enrolled-courses-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Average Grade</h3>
+                    <p id="average-grade">N/A</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Attendance Rate</h3>
+                    <p id="attendance-rate">0%</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-bell"></i>
+                    <h3>Notifications</h3>
+                    <p id="notification-count">0</p>
+                </div>
+            </div>
+
+            <div class="recent-activity">
+                <h2>Recent Activity</h2>
+                <div id="activity-list">
+                    <!-- Activity items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="courses-template">
+        <div class="courses-section">
+            <h2>My Courses</h2>
+            <div class="courses-grid" id="courses-list">
+                <!-- Course cards will be loaded here -->
+            </div>
+        </div>
+    </template>
+
+    <template id="grades-template">
+        <div class="grades-section">
+            <h2>Academic Performance</h2>
+            <div class="grades-container">
+                <div class="grades-table-container">
+                    <table class="grades-table">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Midterm</th>
+                                <th>Final</th>
+                                <th>Assignments</th>
+                                <th>Total</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body">
+                            <!-- Grade rows will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="attendance-template">
+        <div class="attendance-section">
+            <h2>Attendance Record</h2>
+            <div class="attendance-container">
+                <div class="attendance-summary">
+                    <div class="summary-card">
+                        <h3>Overall Attendance</h3>
+                        <p id="overall-attendance">0%</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Present Days</h3>
+                        <p id="present-days">0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Absent Days</h3>
+                        <p id="absent-days">0</p>
+                    </div>
+                </div>
+                <div class="attendance-table-container">
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Course</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-table-body">
+                            <!-- Attendance records will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="profile-template">
+        <div class="profile-section">
+            <h2>Student Profile</h2>
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-image">
+                        <img id="student-photo" src="images/default-avatar.png" alt="Student Photo">
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="profile-name">Loading...</h3>
+                        <p id="profile-id">Student ID: Loading...</p>
+                        <p id="profile-email">Email: Loading...</p>
+                    </div>
+                </div>
+                <div class="profile-details">
+                    <div class="detail-group">
+                        <h4>Personal Information</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Full Name</label>
+                                <p id="profile-full-name">Loading...</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Date of Birth</label>
+                                <p id="profile-dob">Loading...</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Gender</label>
+                                <p id="profile-gender">Loading...</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Contact Number</label>
+                                <p id="profile-contact">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-group">
+                        <h4>Academic Information</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>College</label>
+                                <p id="profile-college">Loading...</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Degree Program</label>
+                                <p id="profile-degree">Loading...</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Branch</label>
+                                <p id="profile-branch">Loading...</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Current Semester</label>
+                                <p id="profile-semester">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script type="module" src="js/student-dashboard.js"></script>
+</body>
+</html> 
