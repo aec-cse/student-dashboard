@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Dashboard</h2>
+        <a href="#" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="#" data-section="student-management"><i class="fas fa-users"></i> Student Management</a>
+        <a href="#" data-section="register-student"><i class="fas fa-user-plus"></i> Register Student</a>
+        <a href="#" data-section="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="main">
+        <div id="content-area">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Student Registration Form Template -->
+    <template id="register-student-template">
+        <div class="registration-container">
+            <iframe id="registration-frame" src="student-registration.html" frameborder="0"></iframe>
+        </div>
+    </template>
+
+    <script type="module" src="js/admin-dashboard.js"></script>
+</body>
+</html>
