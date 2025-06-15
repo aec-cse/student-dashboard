@@ -14,16 +14,21 @@ service cloud.firestore {
     
     function isStudent() {
       return isAuthenticated() && 
-        exists(/databases/$(database)/documents/students/$(request.auth.uid));
+        exists(/databases/$(database)/documents/student-registrations/$(request.auth.uid));
     }
     
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
-    function isValidStudentData() {
-      let requiredFields = ['name', 'email', 'studentId', 'department', 'semester'];
-      return request.resource.data.keys().hasAll(requiredFields);
+    function isValidStudentRegistration() {
+      let requiredFields = [
+        'fullName', 'email', 'contact', 'internshipId', 
+        'photographURL', 'signatureURL', 'status', 
+        'applicationDate', 'userId'
+      ];
+      return request.resource.data.keys().hasAll(requiredFields) &&
+             request.resource.data.status in ['pending', 'approved', 'rejected'];
     }
     
     function isValidAdminData() {
@@ -39,27 +44,47 @@ service cloud.firestore {
 
     function isValidGradeData() {
       let requiredFields = ['studentId', 'courseId', 'midterm', 'final', 'assignment', 'total', 'letterGrade'];
-      return request.resource.data.keys().hasAll(requiredFields);
+      return request.resource.data.keys().hasAll(requiredFields) &&
+             request.resource.data.total >= 0 &&
+             request.resource.data.total <= 100;
     }
 
     function isValidAttendanceData() {
       let requiredFields = ['studentId', 'courseId', 'date', 'status'];
       return request.resource.data.keys().hasAll(requiredFields) &&
-             request.resource.data.status in ['present', 'absent', 'late'];
+             request.resource.data.status in ['present', 'absent', 'late'] &&
+             request.resource.data.date is timestamp;
     }
 
     function isValidNotificationData() {
-      let requiredFields = ['studentId', 'title', 'message', 'type', 'timestamp'];
+      let requiredFields = ['title', 'message', 'type', 'timestamp', 'recipients'];
       return request.resource.data.keys().hasAll(requiredFields) &&
-             request.resource.data.type in ['info', 'warning', 'important'];
+             request.resource.data.type in ['info', 'warning', 'important'] &&
+             request.resource.data.timestamp is timestamp &&
+             request.resource.data.recipients is list;
     }
     
-    // Rules for students collection
-    match /students/{studentId} {
-      allow read: if isAuthenticated() && (isAdmin() || isOwner(studentId));
-      allow create: if isAdmin();
-      allow update: if isAdmin() || (isOwner(studentId) && isValidStudentData());
+    // Rules for student-registrations collection
+    match /student-registrations/{registrationId} {
+      allow read: if isAuthenticated() && (isAdmin() || isOwner(resource.data.userId));
+      allow create: if isAuthenticated() && (
+        isAdmin() || 
+        (request.resource.data.userId == request.auth.uid && isValidStudentRegistration())
+      );
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (isOwner(resource.data.userId) && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+      );
       allow delete: if isAdmin();
+    }
+
+    // Rules for admins collection
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidAdminData();
+      allow update: if isAdmin() && adminId == request.auth.uid && isValidAdminData();
+      allow delete: if false; // Prevent admin deletion
     }
 
     // Rules for courses collection
@@ -96,19 +121,19 @@ service cloud.firestore {
     // Rules for notifications collection
     match /notifications/{notificationId} {
       allow read: if isAuthenticated() && 
-        (isAdmin() || resource.data.studentId == request.auth.uid);
+        (isAdmin() || request.auth.uid in resource.data.recipients);
       allow create: if isAdmin() && isValidNotificationData();
       allow update: if isAdmin() && isValidNotificationData();
       allow delete: if isAdmin() || 
-        (isOwner(resource.data.studentId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']));
+        (request.auth.uid in resource.data.recipients && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']));
     }
-    
-    // Rules for admins collection
-    match /admins/{adminId} {
+
+    // Rules for enquiries collection
+    match /enquiries/{enquiryId} {
       allow read: if isAdmin();
-      allow create: if isAdmin() && isValidAdminData();
-      allow update: if isAdmin() && adminId == request.auth.uid && isValidAdminData();
-      allow delete: if false;
+      allow create: if true; // Allow public to create enquiries
+      allow update, delete: if isAdmin();
     }
     
     // Default deny

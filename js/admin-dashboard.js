@@ -1,29 +1,49 @@
-import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
-import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
   authDomain: "admin-af1fc.firebaseapp.com",
   projectId: "admin-af1fc",
-  storageBucket: "admin-af1fc.firebasestorage.app",
+  storageBucket: "admin-af1fc.appspot.com",
   messagingSenderId: "1042593739824",
   appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+let app;
+let db;
+let auth;
 
-// Create a separate auth instance for student operations
-const studentAuth = getAuth();
-if (studentAuth.app.name !== '[DEFAULT]') {
-    deleteApp(studentAuth.app);
+// Initialize Firebase
+function initializeFirebase() {
+    try {
+        // Check if Firebase is already initialized
+        if (getApps().length > 0) {
+            console.log('Using existing Firebase instance');
+            app = getApp();
+            db = getFirestore(app);
+            auth = getAuth(app);
+            return;
+        }
+
+        // Initialize new instance
+        console.log('Initializing new Firebase instance');
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        console.log('Firebase initialized successfully');
+    } catch (error) {
+        console.error('Error initializing Firebase:', error);
+        utils.showMessage('Failed to initialize application. Please refresh the page.', 'error');
+        throw error;
+    }
 }
-const studentApp = initializeApp(firebaseConfig, 'student-auth');
-const studentAuthInstance = getAuth(studentApp);
+
+// Initialize Firebase immediately
+initializeFirebase();
 
 // Add utils object
 const utils = {
@@ -36,12 +56,17 @@ const utils = {
         `;
 
         const contentArea = document.getElementById('content-area');
-        contentArea.insertBefore(messageDiv, contentArea.firstChild);
-
-        setTimeout(() => messageDiv.remove(), 5000);
+        if (contentArea) {
+            contentArea.insertBefore(messageDiv, contentArea.firstChild);
+            setTimeout(() => messageDiv.remove(), 5000);
+        } else {
+            console.error('Content area not found for message display');
+        }
     },
     generateApplicationId() {
-        // Implementation of generateApplicationId method
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 1000);
+        return `APP${timestamp}${random}`;
     }
 };
 
@@ -608,10 +633,35 @@ async function loadContent(section, studentId = null) {
           content = template.content.cloneNode(true);
           const iframe = content.querySelector('#registration-frame');
           if (iframe) {
+            // Set up message listener for iframe communication
+            const messageHandler = async (event) => {
+              // Only handle messages from our iframe
+              if (event.source === iframe.contentWindow) {
+                if (event.data && event.data.type === 'registration-complete') {
+                  // Remove the message listener to prevent duplicates
+                  window.removeEventListener('message', messageHandler);
+                  // Refresh the student list after successful registration
+                  await loadContent('student-management');
+                }
+              }
+            };
+            window.addEventListener('message', messageHandler);
+
             iframe.onload = () => {
+              // Send auth state and Firebase config to iframe
               const authState = {
                 type: 'auth-state',
-                user: auth.currentUser
+                user: auth.currentUser ? {
+                  uid: auth.currentUser.uid,
+                  email: auth.currentUser.email,
+                  emailVerified: auth.currentUser.emailVerified,
+                  isAnonymous: auth.currentUser.isAnonymous,
+                  metadata: {
+                    creationTime: auth.currentUser.metadata.creationTime,
+                    lastSignInTime: auth.currentUser.metadata.lastSignInTime
+                  }
+                } : null,
+                firebaseConfig: firebaseConfig // Share the Firebase config
               };
               iframe.contentWindow.postMessage(authState, '*');
             };
@@ -807,9 +857,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Cleanup function to unsubscribe from auth state changes when the page is unloaded
+  // Cleanup on page unload
   window.addEventListener('unload', () => {
-    console.log('Unsubscribing from auth state changes...');
     unsubscribe();
   });
 });
