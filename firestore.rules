@@ -54,6 +54,11 @@ service cloud.firestore {
              request.resource.data.type in ['info', 'warning', 'important'];
     }
 
+    // Allow write access to test collection for connection testing
+    match /test/{document=**} {
+      allow read, write: if true;
+    }
+
     // Rules for students collection
     match /students/{studentId} {
       allow read: if isAuthenticated() && (isAdmin() || isOwner(studentId));
@@ -117,6 +122,13 @@ service cloud.firestore {
       allow create: if true;  // Allow new registrations
       allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    // Rules for enquiries collection (contact form submissions)
+    match /enquiries/{enquiryId} {
+      allow create: if true;  // Allow anyone to create enquiries
+      allow read: if isAdmin();  // Only admins can read enquiries
+      allow update, delete: if isAdmin();  // Only admins can update/delete enquiries
     }
   }
 } 

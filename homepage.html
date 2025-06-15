@@ -1680,46 +1680,187 @@
   </a>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD3yUUmQ7ZWZF1ODnmTd3sWlv1qjSq00zE",
     authDomain: "admin-af1fc.firebaseapp.com",
     projectId: "admin-af1fc",
-    storageBucket: "admin-af1fc.firebasestorage.app",
+    storageBucket: "admin-af1fc.appspot.com",
     messagingSenderId: "1042593739824",
     appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  // Initialize Firebase
+  let app;
+  let db;
+  
+  async function initializeFirebase() {
+    try {
+      // Check if Firebase is already initialized
+      if (!app) {
+        app = initializeApp(firebaseConfig);
+        console.log("Firebase app initialized");
+      }
+      
+      if (!db) {
+        db = getFirestore(app);
+        console.log("Firestore initialized");
+        
+        // Enable offline persistence
+        try {
+          await enableIndexedDbPersistence(db);
+          console.log("Offline persistence enabled");
+        } catch (error) {
+          if (error.code === 'failed-precondition') {
+            console.warn("Multiple tabs open, persistence can only be enabled in one tab at a time.");
+          } else if (error.code === 'unimplemented') {
+            console.warn("The current browser doesn't support persistence.");
+          }
+        }
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Firebase initialization error:", {
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      return false;
+    }
+  }
+
+  // Test Firestore connection
+  async function testFirestoreConnection() {
+    try {
+      if (!db) {
+        const initialized = await initializeFirebase();
+        if (!initialized) {
+          throw new Error("Firebase initialization failed");
+        }
+      }
+
+      console.log("Testing Firestore connection...");
+      const testCollection = collection(db, "test");
+      const testDoc = await addDoc(testCollection, { 
+        test: true,
+        timestamp: serverTimestamp()
+      });
+      console.log("Firestore connection test successful, document ID:", testDoc.id);
+      
+      // Clean up test document
+      // Note: You'll need to add deleteDoc to imports if you want to clean up
+      return true;
+    } catch (error) {
+      console.error("Firestore connection test failed:", {
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      return false;
+    }
+  }
+
+  // Initialize Firebase when the page loads
+  window.addEventListener('load', async () => {
+    const initialized = await initializeFirebase();
+    if (!initialized) {
+      alert("Failed to initialize the application. Please refresh the page and try again.");
+    }
+  });
 
   document.getElementById("contactForm").addEventListener("submit", async function (e) {
     e.preventDefault();
-
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const message = document.getElementById("message").value.trim();
-
-    if (!name || !email || !phone || !message) {
-      alert("Please fill out all fields.");
-      return;
-    }
-
+    
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+    
     try {
-      await addDoc(collection(db,"enquiry"), {
+      // Ensure Firebase is initialized
+      const initialized = await initializeFirebase();
+      if (!initialized) {
+        throw new Error("Failed to initialize the application. Please refresh the page and try again.");
+      }
+
+      // Test Firestore connection
+      const isConnected = await testFirestoreConnection();
+      if (!isConnected) {
+        throw new Error("Unable to connect to the database. Please check your internet connection and try again.");
+      }
+
+      // Disable submit button and show loading state
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      console.log("Form data:", { name, email, phone, message }); // Log form data
+
+      // Validate inputs
+      if (!name || !email || !phone || !message) {
+        throw new Error("Please fill out all fields.");
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new Error("Please enter a valid email address.");
+      }
+
+      // Validate phone number (Indian format)
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        throw new Error("Please enter a valid 10-digit Indian phone number.");
+      }
+
+      console.log("Attempting to add document to Firestore..."); // Log before Firestore operation
+
+      // Add document to Firestore
+      const docRef = await addDoc(collection(db, "enquiries"), {
         name,
         email,
         phone,
         message,
-        timestamp: new Date().toISOString()
+        timestamp: serverTimestamp(),
+        status: "new"
       });
-      alert("Message sent successfully!");
+
+      console.log("Message sent successfully with ID:", docRef.id);
+      
+      // Show success message
+      alert("Thank you for your message! We will get back to you soon.");
       document.getElementById("contactForm").reset();
+
     } catch (error) {
-      console.error("Error adding document: ", error);
-      alert("Failed to send message. Please try again.");
+      console.error("Form submission error details:", {
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      
+      // Show specific error message to user
+      if (error.code === 'permission-denied') {
+        alert("Unable to send message. Please try again later or contact us directly via email.");
+      } else if (error.code === 'network') {
+        alert("Network error. Please check your internet connection and try again.");
+      } else if (error.code === 'unavailable') {
+        alert("Service temporarily unavailable. Please try again in a few minutes.");
+      } else if (error.code === 'failed-precondition') {
+        alert("Unable to process your request. Please try again later.");
+      } else {
+        alert(error.message || "Failed to send message. Please try again.");
+      }
+    } finally {
+      // Re-enable submit button and restore original text
+      submitButton.disabled = false;
+      submitButton.innerHTML = originalButtonText;
     }
   });
 </script>
