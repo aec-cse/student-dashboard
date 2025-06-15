@@ -63,7 +63,7 @@ service cloud.firestore {
     match /students/{studentId} {
       allow read: if isAuthenticated() && (isAdmin() || isOwner(studentId));
       allow create: if isAdmin();
-      allow update: if isAdmin() || (isOwner(studentId) && isValidStudentData());
+      allow update: if isAdmin() || (isOwner(studentId));
       allow delete: if isAdmin();
     }
 
@@ -111,15 +111,16 @@ service cloud.firestore {
     // Rules for admins collection
     match /admins/{adminId} {
       allow read: if isAdmin();
-      allow create: if isAdmin() && isValidAdminData();
-      allow update: if isAdmin() && adminId == request.auth.uid && isValidAdminData();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && adminId == request.auth.uid;
       allow delete: if false;  // Prevent admin deletion for security
     }
 
-    // Rules for student-registrations collection (pending registrations)
+    // Rules for student-registrations collection
     match /student-registrations/{registrationId} {
-      allow read: if isAdmin();
-      allow create: if true;  // Allow new registrations
+      // Allow public read/write access for registrations
+      allow read: if true;
+      allow create: if true;
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }

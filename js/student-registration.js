@@ -4,7 +4,7 @@
 
 // Add your Firebase imports here, for example:
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 // ... (add any other Firebase imports you need)
 
 // Add your registration logic here, using direct Firebase calls.
@@ -20,8 +20,18 @@ const firebaseConfig = {
     appId: "1:1042593739824:web:a3c401e02fb3578fc769f5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Initialize Firebase
+let app;
+let db;
+
+try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.error('Error initializing Firebase:', error);
+    alert('Error initializing the application. Please try again later.');
+}
 
 const form = document.getElementById('studentForm');
 const loadingOverlay = document.getElementById('loadingOverlay');
@@ -84,13 +94,41 @@ function getCheckedDocuments() {
     return Array.from(document.querySelectorAll('input[name="documents"]:checked')).map(cb => cb.value);
 }
 
+// Helper: generate internship ID
+async function generateInternshipId() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.toLocaleString('default', { month: 'short' }).toUpperCase();
+    
+    // Get the count of students registered this month
+    const studentCollection = collection(db, "student-registrations");
+    const q = query(
+        studentCollection,
+        where("submittedAt", ">=", new Date(now.getFullYear(), now.getMonth(), 1)),
+        where("submittedAt", "<", new Date(now.getFullYear(), now.getMonth() + 1, 1))
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const count = querySnapshot.size + 1;
+    
+    // Format the count with leading zeros
+    const paddedCount = count.toString().padStart(3, '0');
+    
+    return `ATIT-${year}-${month}-${paddedCount}`;
+}
+
 // Form submit handler
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     loadingOverlay.style.display = 'flex';
+    
     try {
+        // Generate internship ID
+        const internshipId = await generateInternshipId();
+        
         // Collect form data
-        const data = {
+        const formData = {
+            internshipId,
             fullName: form.fullName.value.trim(),
             dob: form.dob.value,
             gender: form.gender.value,
@@ -126,26 +164,71 @@ form.addEventListener('submit', async (e) => {
         // Upload files to Cloudinary
         const photographFile = form.photograph.files[0];
         const signatureFile = form.signature.files[0];
-        if (!photographFile || !signatureFile) throw new Error('Photograph and signature are required.');
-        data.photograph = await uploadToCloudinary(photographFile);
-        data.signature = await uploadToCloudinary(signatureFile);
+        
+        if (!photographFile || !signatureFile) {
+            throw new Error('Photograph and signature are required.');
+        }
+
+        try {
+            formData.photograph = await uploadToCloudinary(photographFile);
+            formData.signature = await uploadToCloudinary(signatureFile);
+        } catch (uploadError) {
+            console.error('Error uploading files:', uploadError);
+            throw new Error('Failed to upload files. Please try again.');
+        }
 
         // Save to Firestore
-        await addDoc(collection(db, 'student-registrations'), data);
+        try {
+            console.log('Attempting to save registration to Firestore...');
+            const studentRegistrationsRef = collection(db, 'student-registrations');
+            const docRef = await addDoc(studentRegistrationsRef, formData);
+            console.log('Registration saved successfully with ID:', docRef.id);
 
-        loadingOverlay.style.display = 'none';
-        alert('Registration submitted successfully!');
-        form.reset();
-        document.getElementById('photographPreview').innerHTML = '';
-        document.getElementById('signaturePreview').innerHTML = '';
-        backlogCountGroup.style.display = 'none';
-        experienceDetails.style.display = 'none';
-        // Optionally, notify parent window (for admin dashboard modal)
-        if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'registration-complete' }, '*');
+            // Show success message
+            loadingOverlay.style.display = 'none';
+            alert(`Registration submitted successfully! Your Internship ID is: ${internshipId}`);
+            
+            // Reset form
+            form.reset();
+            document.getElementById('photographPreview').innerHTML = '';
+            document.getElementById('signaturePreview').innerHTML = '';
+            document.getElementById('backlogCountGroup').style.display = 'none';
+            document.getElementById('experienceDetails').style.display = 'none';
+
+            // Notify parent window if in iframe
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'registration-complete' }, '*');
+            }
+        } catch (firestoreError) {
+            console.error('Firestore error:', {
+                code: firestoreError.code,
+                message: firestoreError.message,
+                stack: firestoreError.stack
+            });
+            
+            let errorMessage = 'Failed to save registration. ';
+            switch (firestoreError.code) {
+                case 'permission-denied':
+                    errorMessage += 'Permission denied. Please contact support.';
+                    break;
+                case 'unavailable':
+                    errorMessage += 'Service unavailable. Please check your internet connection.';
+                    break;
+                case 'invalid-argument':
+                    errorMessage += 'Invalid data provided. Please check your form entries.';
+                    break;
+                default:
+                    errorMessage += firestoreError.message || 'An unknown error occurred.';
+            }
+            throw new Error(errorMessage);
         }
     } catch (error) {
+        console.error('Registration error:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
         loadingOverlay.style.display = 'none';
-        alert('Error submitting registration: ' + (error.message || error));
+        alert('Error submitting registration: ' + (error.message || 'An unknown error occurred. Please try again.'));
     }
 });

@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
 // Firebase configuration
@@ -360,66 +360,161 @@ async function renderDashboard() {
 }
 
 // Function to render the student list
-function renderStudentList(students) {
+async function renderStudentList(students) {
+    const studentListContainer = document.createElement('div');
+    studentListContainer.className = 'student-list';
+
   if (!students || students.length === 0) {
-    return `
+        studentListContainer.innerHTML = `
       <div class="no-students">
-        <h2>No Students Found</h2>
-        <p>There are no registered students in the system.</p>
+                <p>No students found</p>
       </div>
     `;
-  }
+        return studentListContainer;
+    }
 
-  const studentCards = students.map(student => `
-    <div class="student-card" data-id="${student.id}">
-      <div class="student-info">
+    const studentCards = students.map(student => {
+        const photoUrl = student.photoURL || student.photograph;
+        const avatarUrl = student.avatarURL || photoUrl;
+        const status = student.status || 'pending';
+        const submissionDate = student.submittedAt ? 
+            new Date(student.submittedAt.toDate()).toLocaleDateString() : 
+            'Not available';
+
+        return `
+            <div class="student-card" data-student-id="${student.id}">
+                <div class="student-photo-container">
+                    ${photoUrl ? 
+                        `<img src="${photoUrl}" alt="${student.fullName}" onerror="this.parentElement.innerHTML = '<div class=\'student-photo-placeholder\'><i class=\'fas fa-user\'></i></div>'">` :
+                        `<div class="student-photo-placeholder"><i class="fas fa-user"></i></div>`
+                    }
+                </div>
+                <div class="student-content">
         <div class="student-header">
-          <h3>${student.internshipId || 'ID not provided'}</h3>
-          <span class="status-badge ${student.status || 'pending'}">${student.status || 'Pending'}</span>
+                        <div class="student-avatar">
+                            ${avatarUrl ? 
+                                `<img src="${avatarUrl}" alt="${student.fullName}" onerror="this.parentElement.innerHTML = '<div class=\'student-avatar-placeholder\'><i class=\'fas fa-user\'></i></div>'">` :
+                                `<div class="student-avatar-placeholder"><i class="fas fa-user"></i></div>`
+                            }
         </div>
-        <p><strong>Name:</strong> ${student.fullName || 'N/A'}</p>
-        <p><strong>Email:</strong> ${student.email || 'N/A'}</p>
-        <p><strong>College:</strong> ${student.college || 'N/A'}</p>
-        <p><strong>Branch:</strong> ${student.branch || 'N/A'}</p>
-        <p><strong>Semester:</strong> ${student.semester || 'N/A'}</p>
-        <p><strong>Submitted:</strong> ${new Date(student.submittedAt).toLocaleDateString()}</p>
+                        <div class="student-header-info">
+                            <h3>
+                                ${student.fullName}
+                                ${student.status === 'approved' ? '<span class="verified-badge"><i class="fas fa-check-circle"></i></span>' : ''}
+                            </h3>
+                            <p class="status-badge ${status}">
+                                ${status.charAt(0).toUpperCase() + status.slice(1)}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="student-info">
+                        <div class="student-info-item">
+                            <strong>ID</strong>
+                            <p>${student.internshipId || 'N/A'}</p>
+                        </div>
+                        <div class="student-info-item">
+                            <strong>Email</strong>
+                            <p>${student.email || 'N/A'}</p>
+                        </div>
+                        <div class="student-info-item">
+                            <strong>College</strong>
+                            <p>${student.college || 'N/A'}</p>
+                        </div>
+                        <div class="student-info-item">
+                            <strong>Branch</strong>
+                            <p>${student.branch || 'N/A'}</p>
+                        </div>
+                        <div class="student-info-item">
+                            <strong>Submitted</strong>
+                            <p>${submissionDate}</p>
+                        </div>
       </div>
       <div class="student-actions">
-        <button class="view-details-btn">
+                        <button class="view-details-btn" data-student-id="${student.id}">
+                            <i class="fas fa-eye"></i>
           View Details
-          <i class="fas fa-arrow-right"></i>
         </button>
-        <button class="delete-student-btn" data-id="${student.id}">
+                        <button class="delete-student-btn" data-student-id="${student.id}">
           <i class="fas fa-trash"></i>
           Delete
         </button>
       </div>
     </div>
-  `).join('');
-
-  return `
-    <div class="student-list">
-      ${studentCards}
     </div>
   `;
+    }).join('');
+
+    studentListContainer.innerHTML = studentCards;
+
+    // Add event listeners after rendering
+    studentListContainer.querySelectorAll('.view-details-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const studentId = e.currentTarget.getAttribute('data-student-id');
+            viewStudentDetails(studentId);
+        });
+    });
+
+    studentListContainer.querySelectorAll('.delete-student-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const studentId = e.currentTarget.getAttribute('data-student-id');
+            deleteStudent(studentId);
+        });
+    });
+
+    return studentListContainer;
 }
 
-// Function to update student status
-async function updateStudentStatus(studentId, newStatus) {
-  try {
-    console.log(`Updating status for student ${studentId} to ${newStatus}`);
-    const studentRef = doc(db, "student-registrations", studentId);
+// Make functions globally available
+window.updateStudentStatus = async function(studentId, newStatus) {
+    try {
+        const studentRef = doc(db, 'student-registrations', studentId);
     await updateDoc(studentRef, {
       status: newStatus,
-      statusUpdatedAt: new Date().toISOString()
-    });
-    console.log('Status updated successfully');
-    return true;
+            updatedAt: serverTimestamp()
+        });
+
+        // Show success message
+        alert(`Student status updated to ${newStatus}`);
+        
+        // Close the modal
+        const modal = document.querySelector('.student-details-modal');
+        if (modal) {
+            modal.remove();
+        }
+
+        // Refresh the student list
+        await loadContent('student-management');
   } catch (error) {
     console.error('Error updating student status:', error);
-    throw error;
-  }
-}
+        alert('Failed to update student status. Please try again.');
+    }
+};
+
+window.deleteStudent = async function(studentId) {
+    if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const studentRef = doc(db, 'student-registrations', studentId);
+        await deleteDoc(studentRef);
+
+        // Show success message
+        alert('Student deleted successfully');
+        
+        // Close the modal
+        const modal = document.querySelector('.student-details-modal');
+        if (modal) {
+            modal.remove();
+        }
+
+        // Refresh the student list
+        await loadContent('student-management');
+    } catch (error) {
+        console.error('Error deleting student:', error);
+        alert('Failed to delete student. Please try again.');
+    }
+};
 
 // Helper function to format array or string data
 function formatListData(data) {
@@ -719,9 +814,13 @@ function attachStudentCardHandlers() {
     if (viewDetailsBtn) {
       viewDetailsBtn.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent card click
-        const studentId = card.getAttribute('data-id');
+                const studentId = card.getAttribute('data-student-id');
         console.log("View details button clicked:", studentId);
-        loadContent('student-detail', studentId);
+                if (studentId) {
+                    viewStudentDetails(studentId);
+                } else {
+                    console.error('No student ID found for this card');
+                }
       });
     }
 
@@ -731,9 +830,12 @@ function attachStudentCardHandlers() {
       deleteStudentBtn.addEventListener('click', async (e) => {
         e.stopPropagation(); // Prevent card click
         e.preventDefault(); // Prevent form submission
-        const studentId = card.getAttribute('data-id');
-        console.log("Delete button clicked for student:", studentId);
+                const studentId = card.getAttribute('data-student-id');
+                if (studentId) {
         await deleteStudent(studentId);
+                } else {
+                    console.error('No student ID found for this card');
+                }
       });
     }
 
@@ -743,9 +845,12 @@ function attachStudentCardHandlers() {
       if (e.target.closest('.view-details-btn') || e.target.closest('.delete-student-btn')) {
         return;
       }
-      const studentId = card.getAttribute('data-id');
-      console.log("Student card clicked:", studentId);
-      loadContent('student-detail', studentId);
+            const studentId = card.getAttribute('data-student-id');
+            if (studentId) {
+                viewStudentDetails(studentId);
+            } else {
+                console.error('No student ID found for this card');
+            }
     });
   });
 }
@@ -874,164 +979,212 @@ async function handleLogout() {
   }
 } 
 
-// Function to delete a student
-async function deleteStudent(studentId) {
+// Function to view student details
+async function viewStudentDetails(studentId) {
+    if (!studentId) {
+        console.error('No student ID provided for detail view');
+        return;
+    }
+
     try {
-        // Get student document to find auth UID
         const studentDoc = await getDoc(doc(db, 'student-registrations', studentId));
+        
         if (!studentDoc.exists()) {
-            throw new Error('Student not found');
-        }
-
-        const studentData = studentDoc.data();
-        const userId = studentData.userId;
-        const email = studentData.email;
-
-        // Confirm deletion
-        if (!confirm(`Are you sure you want to delete student ${studentData.fullName} (${studentData.internshipId})? This action cannot be undone.`)) {
+            console.error('Student not found');
             return;
         }
 
-        console.log('Starting student deletion process...');
+        const student = studentDoc.data();
 
-        // Delete from Firestore first
-        console.log('Deleting student data from Firestore...');
-        await deleteDoc(doc(db, 'student-registrations', studentId));
-        console.log('Student data deleted from Firestore');
+        // Helper function to format array or string data
+        const formatData = (data) => {
+            if (!data) return 'Not provided';
+            if (Array.isArray(data)) return data.join(', ');
+            if (typeof data === 'string') return data;
+            return 'Not provided';
+        };
 
-        // Delete auth account if it exists
-        if (userId) {
-    try {
-                console.log('Attempting to delete auth account...');
-                // Note: We can't directly delete another user's account
-                // Instead, we'll just remove their auth data from our records
-                // The actual auth account will be cleaned up by Firebase's security rules
-                console.log('Auth account marked for deletion');
-            } catch (authError) {
-                console.warn('Could not delete auth account:', authError);
-                // Continue with the process even if auth deletion fails
+        const modal = document.createElement('div');
+        modal.className = 'student-details-modal';
+        
+        modal.innerHTML = `
+            <div class="student-details-content">
+                <div class="student-details-header">
+                    <div class="student-profile">
+                        <div class="student-photo">
+                            ${student.photograph ? 
+                                `<img src="${student.photograph}" alt="${student.fullName}" onerror="this.parentElement.innerHTML='<div class=\'photo-placeholder\'><i class=\'fas fa-user\'></i></div>'">` :
+                                `<div class="photo-placeholder"><i class="fas fa-user"></i></div>`
+                            }
+                        </div>
+                        <div class="student-info">
+                            <h2>${student.fullName}</h2>
+                            <p class="student-id">${student.internshipId || 'No ID'}</p>
+                        </div>
+                    </div>
+                    <button class="close-modal-btn" onclick="this.closest('.student-details-modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="student-details-body">
+                    <div class="details-section">
+                        <h3><i class="fas fa-user"></i> Personal Information</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong>Full Name</strong>
+                                <p>${student.fullName}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Date of Birth</strong>
+                                <p>${student.dob || 'Not provided'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Gender</strong>
+                                <p>${student.gender || 'Not provided'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-envelope"></i> Contact Information</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong>Email</strong>
+                                <p>${student.email}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Phone</strong>
+                                <p>${student.contact || 'Not provided'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Address</strong>
+                                <p>${student.address || 'Not provided'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong>College</strong>
+                                <p>${student.college}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Branch</strong>
+                                <p>${student.branch}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>CGPA</strong>
+                                <p>${student.gpa || 'Not provided'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-code"></i> Technical Skills</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong>Programming Languages</strong>
+                                <p>${formatData(student.programmingLanguages)}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Tools & Software</strong>
+                                <p>${formatData(student.toolsSoftware)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-briefcase"></i> Internship Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong>Preferred Start Date</strong>
+                                <p>${student.startDate || 'Not provided'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Duration</strong>
+                                <p>${student.duration || 'Not provided'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Area of Interest</strong>
+                                <p>${student.areaOfInterest || 'Not provided'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-file-alt"></i> Documents</h3>
+                        <div class="details-grid">
+                            ${student.photograph ? `
+                                <a href="${student.photograph}" class="document-link" target="_blank">
+                                    <i class="fas fa-id-card"></i> Photograph
+                                </a>
+                            ` : ''}
+                            ${student.signature ? `
+                                <a href="${student.signature}" class="document-link" target="_blank">
+                                    <i class="fas fa-signature"></i> Signature
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong>Registration Date</strong>
+                                <p>${student.submittedAt ? new Date(student.submittedAt.toDate()).toLocaleDateString() : 'Not available'}</p>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Status</strong>
+                                <p>${student.status || 'Pending'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="student-details-footer">
+                    <div class="status-buttons">
+                        ${student.status !== 'pending' ? `
+                            <button class="pending-btn" onclick="updateStudentStatus('${studentId}', 'pending')">
+                                <i class="fas fa-clock"></i> Set Pending
+                            </button>
+                        ` : ''}
+                        ${student.status !== 'approved' ? `
+                            <button class="approve-btn" onclick="updateStudentStatus('${studentId}', 'approved')">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        ` : ''}
+                        ${student.status !== 'rejected' ? `
+                            <button class="reject-btn" onclick="updateStudentStatus('${studentId}', 'rejected')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        ` : ''}
+                    </div>
+                    <button class="delete-btn" onclick="deleteStudent('${studentId}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
             }
-        }
+        });
 
-        // Show success message
-        utils.showMessage(`Student ${studentData.fullName} (${studentData.internshipId}) has been deleted successfully.`, 'success');
-
-        // Refresh the student list
-        await renderStudentManagement();
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+            }
+        });
 
     } catch (error) {
-        console.error('Error deleting student:', error);
-        let errorMessage = 'Failed to delete student. ';
-        
-        if (error.code === 'permission-denied') {
-            errorMessage += 'You do not have permission to delete students.';
-        } else if (error.message.includes('not found')) {
-            errorMessage += 'Student not found.';
-        } else {
-            errorMessage += error.message || 'Please try again.';
+        console.error('Error viewing student details:', error);
     }
-
-        utils.showMessage(errorMessage, 'error');
-    }
-}
-
-// Remove all registration related functions
-function initializeDashboard() {
-    // Initialize Firebase if not already initialized
-    if (!app) {
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            console.log('Firebase initialized successfully');
-        } catch (error) {
-            console.error('Error initializing Firebase:', error);
-            return;
-            }
-    }
-
-    // Check authentication state
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            console.log('User is signed in:', user.email);
-            // Load dashboard content
-            await loadContent('dashboard');
-            } else {
-            console.log('No user is signed in');
-            window.location.href = 'admin-login.html';
-            }
-        });
-
-    // Initialize sidebar navigation
-    initializeSidebar();
-}
-
-// Update sidebar initialization to remove registration link
-function initializeSidebar() {
-    const sidebarLinks = document.querySelectorAll('.sidebar a');
-    sidebarLinks.forEach(link => {
-        link.addEventListener('click', async (e) => {
-        e.preventDefault();
-            const section = e.target.closest('a').dataset.section;
-            if (section === 'logout') {
-                await handleLogout();
-            } else {
-                await loadContent(section);
-            }
-        });
-    });
-}
-
-// Add CSS for file previews
-const style = document.createElement('style');
-style.textContent = `
-    .file-preview {
-        margin-top: 10px;
-        padding: 10px;
-        border: 1px solid #e1e8ed;
-        border-radius: 8px;
-        min-height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .file-preview img {
-        max-width: 200px;
-        max-height: 200px;
-        object-fit: contain;
-    }
-
-    input[type="file"] {
-        padding: 10px;
-        border: 2px solid #e1e8ed;
-        border-radius: 8px;
-        width: 100%;
-        background: #fff;
-    }
-
-    input[type="file"]:focus {
-        border-color: #4CAF50;
-        outline: none;
-    }
-`;
-document.head.appendChild(style); 
-
-// Add message listener for iframe communication
-window.addEventListener('message', async (event) => {
-  // Verify the origin of the message
-  if (event.origin !== window.location.origin) return;
-
-  const { type, data } = event.data;
-
-  switch (type) {
-    case 'registration-success':
-      utils.showMessage('Student registered successfully!', 'success');
-      // Refresh dashboard to show new student
-      await loadContent('dashboard');
-      break;
-    case 'registration-error':
-      utils.showMessage(data.message || 'Error registering student', 'error');
-      break;
-  }
-}); 
+} 

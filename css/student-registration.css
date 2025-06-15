@@ -9,7 +9,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f8f9fa;
     min-height: 100vh;
     padding: 20px 0;
 }
@@ -18,13 +18,13 @@ body {
     max-width: 1000px;
     margin: 0 auto;
     background: white;
-    border-radius: 15px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
 
 header {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    background: #2c3e50;
     color: white;
     padding: 40px;
     text-align: center;
@@ -47,7 +47,7 @@ header p {
 
 .form-section {
     margin-bottom: 40px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid #eef2f7;
     padding-bottom: 30px;
 }
 
@@ -61,7 +61,7 @@ header p {
     font-size: 1.8rem;
     margin-bottom: 25px;
     padding-bottom: 10px;
-    border-bottom: 3px solid #4CAF50;
+    border-bottom: 3px solid #2c3e50;
     position: relative;
 }
 
@@ -72,7 +72,7 @@ header p {
     left: 0;
     width: 50px;
     height: 3px;
-    background: #45a049;
+    background: #3498db;
 }
 
 .form-grid {
@@ -113,19 +113,19 @@ header p {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
     transform: translateY(-1px);
 }
 
 .form-group input[type="file"] {
     padding: 10px;
     background: #f8f9fa;
-    border: 2px dashed #4CAF50;
+    border: 2px dashed #3498db;
 }
 
 .form-group input[type="file"]:hover {
-    background: #e8f5e8;
+    background: #e8f4fc;
 }
 
 .file-preview {
@@ -167,14 +167,14 @@ header p {
 }
 
 .checkbox-item:hover {
-    background: #e8f5e8;
-    border-color: #4CAF50;
+    background: #e8f4fc;
+    border-color: #3498db;
 }
 
 .checkbox-item input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    accent-color: #4CAF50;
+    accent-color: #3498db;
     cursor: pointer;
 }
 
@@ -193,8 +193,8 @@ header p {
 }
 
 .admin-section h2 {
-    color: #6c757d;
-    border-bottom-color: #6c757d;
+    color: #2c3e50;
+    border-bottom-color: #3498db;
 }
 
 .form-actions {
@@ -203,24 +203,24 @@ header p {
 }
 
 .submit-btn {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    background: #2c3e50;
     color: white;
     padding: 15px 40px;
     border: none;
-    border-radius: 50px;
+    border-radius: 8px;
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 .submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
+    background: #34495e;
 }
 
 .submit-btn:active {
@@ -246,7 +246,7 @@ header p {
     width: 50px;
     height: 50px;
     border: 5px solid rgba(255, 255, 255, 0.3);
-    border-top: 5px solid #4CAF50;
+    border-top: 5px solid #3498db;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 20px;
@@ -256,7 +256,6 @@ header p {
     0% {
         transform: rotate(0deg);
     }
-
     100% {
         transform: rotate(360deg);
     }

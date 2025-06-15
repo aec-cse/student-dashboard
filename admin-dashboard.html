@@ -35,6 +35,175 @@
         </div>
     </template>
 
+    <!-- Student Details Modal Template -->
+    <template id="student-details-template">
+        <div class="student-details-modal">
+            <div class="student-details-content">
+                <button class="close-details-btn" onclick="closeStudentDetails()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="student-details-header">
+                    <img src="" alt="Student Photo" class="student-photo" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2394a3b8\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'">
+                    <div class="student-details-info">
+                        <h2 class="student-name"></h2>
+                        <p class="student-id"></p>
+                        <div class="status-badge"></div>
+                    </div>
+                </div>
+                <div class="student-details-body">
+                    <div class="details-section">
+                        <h3><i class="fas fa-user"></i> Personal Information</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong><i class="fas fa-id-card"></i> Full Name</strong>
+                                <p class="full-name"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-calendar"></i> Date of Birth</strong>
+                                <p class="dob"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-venus-mars"></i> Gender</strong>
+                                <p class="gender"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-globe"></i> Nationality</strong>
+                                <p class="nationality"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-address-card"></i> Contact Information</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong><i class="fas fa-envelope"></i> Email</strong>
+                                <p class="email"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-phone"></i> Phone</strong>
+                                <p class="phone"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-map-marker-alt"></i> Address</strong>
+                                <p class="address"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong><i class="fas fa-book"></i> Course</strong>
+                                <p class="course"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-layer-group"></i> Year Level</strong>
+                                <p class="year-level"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-calendar-check"></i> Enrollment Date</strong>
+                                <p class="enrollment-date"></p>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-check-circle"></i> Status</strong>
+                                <p class="status"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <h3><i class="fas fa-file-alt"></i> Documents</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <strong><i class="fas fa-id-badge"></i> ID Card</strong>
+                                <a href="#" class="document-link">
+                                    <i class="fas fa-download"></i>
+                                    <span class="id-card">Download ID Card</span>
+                                </a>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-file-pdf"></i> Transcript</strong>
+                                <a href="#" class="document-link">
+                                    <i class="fas fa-download"></i>
+                                    <span class="transcript">Download Transcript</span>
+                                </a>
+                            </div>
+                            <div class="detail-item">
+                                <strong><i class="fas fa-folder"></i> Other Documents</strong>
+                                <a href="#" class="document-link">
+                                    <i class="fas fa-download"></i>
+                                    <span class="other-docs">View All Documents</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Student Card Template -->
+    <template id="student-card-template">
+        <div class="student-card">
+            <div class="student-photo-container">
+                <img src="" alt="Student Photo" class="student-photo">
+                <div class="student-photo-placeholder" style="display: none;">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            <div class="student-content">
+                <div class="student-header">
+                    <div class="student-avatar">
+                        <img src="" alt="Student Avatar" class="student-avatar-img">
+                        <div class="student-avatar-placeholder" style="display: none;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="student-header-info">
+                        <h3>
+                            <span class="student-name"></span>
+                            <i class="fas fa-check-circle verified-badge" style="display: none; color: #3498db;"></i>
+                        </h3>
+                        <p class="student-id"></p>
+                    </div>
+                </div>
+                <div class="status-badge">
+                    <span class="status-text"></span>
+                </div>
+                <div class="student-info">
+                    <div class="student-info-item">
+                        <strong>Email</strong>
+                        <p class="student-email"></p>
+                    </div>
+                    <div class="student-info-item">
+                        <strong>Phone</strong>
+                        <p class="student-phone"></p>
+                    </div>
+                    <div class="student-info-item">
+                        <strong>Course</strong>
+                        <p class="student-course"></p>
+                    </div>
+                    <div class="student-info-item">
+                        <strong>Enrollment Date</strong>
+                        <p class="student-enrollment-date"></p>
+                    </div>
+                </div>
+                <div class="student-actions">
+                    <button class="view-details-btn">
+                        <i class="fas fa-eye"></i>
+                        View Details
+                    </button>
+                    <button class="delete-student-btn">
+                        <i class="fas fa-trash"></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <script>
         function closeRegistration() {
             const container = document.querySelector('.registration-container');
@@ -43,6 +212,13 @@
             }
             // Return to previous section
             loadContent('student-management');
+        }
+
+        function closeStudentDetails() {
+            const modal = document.querySelector('.student-details-modal');
+            if (modal) {
+                modal.remove();
+            }
         }
 
         // Close registration form when clicking outside
@@ -57,51 +233,119 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeRegistration();
+                closeStudentDetails();
             }
         });
     </script>
 
     <style>
+        .registration-container {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 62, 80, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 40px;
+            width: calc(100% - 250px);
+            min-width: 320px;
+            backdrop-filter: blur(4px);
+        }
+
         .registration-wrapper {
             position: relative;
             width: 100%;
             height: 100%;
             max-width: 1200px;
             margin: auto;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        #registration-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
         }
 
         .close-registration-btn {
             position: absolute;
-            top: -40px;
-            right: 0;
-            background: white;
+            top: 15px;
+            right: 15px;
+            background: #2c3e50;
             border: none;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             z-index: 1001;
             transition: all 0.2s ease;
+            color: white;
         }
 
         .close-registration-btn:hover {
-            background: #f8f9fa;
+            background: #34495e;
             transform: scale(1.1);
         }
 
         .close-registration-btn i {
-            color: #666;
             font-size: 16px;
         }
 
+        @media (max-width: 1024px) {
+            .registration-container {
+                left: 200px;
+                width: calc(100% - 200px);
+                padding: 20px;
+            }
+        }
+
         @media (max-width: 768px) {
+            .registration-container {
+                left: 0;
+                width: 100%;
+                padding: 10px;
+            }
+
+            .registration-wrapper {
+                border-radius: 8px;
+            }
+
             .close-registration-btn {
-                top: -35px;
+                top: 10px;
                 right: 10px;
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .registration-container {
+                padding: 5px;
+            }
+
+            .registration-wrapper {
+                border-radius: 6px;
+            }
+
+            .close-registration-btn {
+                top: 8px;
+                right: 8px;
+                width: 30px;
+                height: 30px;
             }
         }
     </style>
