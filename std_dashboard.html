@@ -9,303 +9,163 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   
   <style>
-    
-    /* Reset and Global Styles */
     * {
-    margin: 0; 
-    padding: 0; 
-    box-sizing: 
-    border-box; 
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
     
-    body { 
-    display: flex; 
-    font-family: 'Poppins', sans-serif; 
-    height: 100vh; 
-    overflow: hidden; 
-    background-color: #f8f9fa; 
-    color: #2c3e50; 
+    body {
+      display: flex;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      background-color: #f8f9fa;
+      color: #2c3e50;
     }
     
-    /* Sidebar Styles */
-    .sidebar { 
-    width: 250px; 
-    background-color: #34495e; 
-    color: #ecf0f1; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    padding: 20px 0; 
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1); 
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: #2c3e50;
+      color: white;
+      padding: 2rem 0;
+      position: fixed;
+      height: 100vh;
+      z-index: 1000;
     }
     
-    .sidebar h2 { 
-    margin-bottom: 20px; 
-    font-size: 1.5rem; 
-    font-weight: 600; }
-    
-    .sidebar a { 
-    text-decoration: none; 
-    color: #ecf0f1; 
-    width: 90%; 
-    padding: 10px 15px; 
-    text-align: left; 
-    margin-bottom: 10px; 
-    border-radius: 5px; 
-    transition: all 0.3s ease-in-out; 
-    display: flex; 
-    align-items: center; 
-    }
-
-    .sidebar a:hover, .sidebar a.active { 
-    background-color: #1abc9c; 
-    }
-
-    .sidebar a i { 
-    margin-right: 10px;
-    }
-
-    /* Main Content Styles */
-    .main { 
-    flex: 1; 
-    background-color: #f8f9fa; 
-    padding: 20px; 
-    overflow-y: auto; 
-    }
-
-    #content-area h1 {
-    font-size: 2.2rem; 
-    font-weight: 600; 
-    margin-bottom: 20px; 
-    }
-
-    #content-area p { 
-    font-size: 1rem; 
-    color: #7f8c8d; 
-    margin-bottom: 20px; 
-    }
-
-    /* Card Styles */
-    .card-container { 
-    display: flex; 
-    gap: 20px; 
-    justify-content: space-between; 
-    flex-wrap: wrap; 
-    }
-
-    .card { 
-    flex: 1; 
-    max-width: 200px; 
-    background-color: #ecf0f1; 
-    border: 1px solid #ddd; 
-    border-radius: 10px; 
-    padding: 20px; 
-    text-align: center; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-    }
-
-    .card h3 { 
-    font-size: 1.2rem; 
-    margin-bottom: 10px; 
-    }
-
-    .card p { 
-    font-size: 0.9rem; 
-    color: #7f8c8d; 
-    }
-
-    /* Table Styling */
-    table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 10px; 
-    }
-
-    table, th, td { 
-    border: 1px solid #ddd; 
-    }
-
-    th, td { 
-    padding: 10px; 
-    text-align: left; 
-    }
-
-    th { 
-    background-color: #34495e; 
-    color: white; 
-    }
-
-    td { 
-    background-color: #ecf0f1; 
-    }
-
-    /* Form Styling */
-    form { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 15px; 
-    max-width: 400px; 
-    }
-
-    form input, form button, form select { 
-    padding: 10px; 
-    border: 1px solid #ddd; 
-    border-radius: 5px; 
-    font-size: 1rem; 
-    }
-
-    form button { 
-    background-color: #1abc9c; 
-    color: white; 
-    border: none; 
-    cursor: pointer; 
-    transition: background-color 0.3s ease; 
-    }
-
-    form button:hover { 
-    background-color: #16a085; 
-    }
-
-    /* Logout Modal */
-    .logout-warning { 
-    display: none; 
-    position: fixed; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
-    background: white; 
-    padding: 20px; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
-    border-radius: 8px; 
-    text-align: center; 
-    }
-
-    .logout-warning button { 
-    margin: 10px; 
-    padding: 10px 15px; 
-    border: none; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    font-size: 1rem; 
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.5rem;
+      font-weight: 600;
     }
     
-    .logout-warning .confirm { 
-    background: #e74c3c; 
-    color: white; 
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0 1rem;
+    }
+    
+    .sidebar a {
+      text-decoration: none;
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s ease;
     }
 
-    .logout-warning .cancel { 
-    background: #2ecc71; 
-    color: white; 
+    .sidebar a:hover, .sidebar a.active {
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    /* Additional styles for dynamic content */
-    .profile-card {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
+    .sidebar a i {
+      width: 20px;
     }
 
-    .profile-details {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-top: 15px;
+    /* Main Content */
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 2rem;
+      background-color: #f8f9fa;
     }
 
-    .courses-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
+    .content-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .course-card {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
 
-    .course-progress {
-        margin-top: 15px;
-        background: #f0f0f0;
-        border-radius: 5px;
-        overflow: hidden;
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    .progress-bar {
-        height: 10px;
-        background: #1abc9c;
-        transition: width 0.3s ease;
+    .stat-card h3 {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
     }
 
-    .attendance-table, .grades-table {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        overflow-x: auto;
+    .stat-card .value {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #2c3e50;
     }
 
-    .notifications-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+    /* Content Sections */
+    .section {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    .notification-item {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        border-left: 4px solid #1abc9c;
+    .section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
     }
 
-    .notification-item.important {
-        border-left-color: #e74c3c;
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
     }
 
-    .notification-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
     }
 
-    .notification-title {
-        font-weight: 600;
+    th {
+      font-weight: 500;
+      color: #7f8c8d;
     }
 
-    .notification-date {
-        color: #7f8c8d;
-        font-size: 0.9rem;
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
-    .no-notifications {
-        text-align: center;
-        color: #7f8c8d;
-        padding: 20px;
-    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
 
-    .loading {
-        text-align: center;
-        padding: 20px;
-        color: #7f8c8d;
-    }
-
-    .error-message {
-        background: #e74c3c;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin: 10px 0;
+      .sidebar h2, .sidebar a span {
         display: none;
-    }
+      }
 
+      .main {
+        margin-left: 70px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -314,77 +174,90 @@
     <h2>Student Portal</h2>
     <nav>
       <a href="#" data-section="profile" class="active">
-        <i class="fas fa-user"></i> Profile
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
       </a>
       <a href="#" data-section="courses">
-        <i class="fas fa-book"></i> Courses
+        <i class="fas fa-book"></i>
+        <span>Courses</span>
       </a>
       <a href="#" data-section="attendance">
-        <i class="fas fa-calendar-check"></i> Attendance
+        <i class="fas fa-calendar-check"></i>
+        <span>Attendance</span>
       </a>
       <a href="#" data-section="grades">
-        <i class="fas fa-graduation-cap"></i> Grades
+        <i class="fas fa-graduation-cap"></i>
+        <span>Grades</span>
       </a>
       <a href="#" data-section="notifications">
-        <i class="fas fa-bell"></i> Notifications
+        <i class="fas fa-bell"></i>
+        <span>Notifications</span>
       </a>
       <a href="#" id="logout-btn">
-        <i class="fas fa-sign-out-alt"></i> Logout
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
       </a>
     </nav>
   </div>
 
   <!-- Main Content -->
   <div class="main">
-    <div id="content-area">
+    <div class="content-wrapper">
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Enrolled Courses</h3>
+          <div class="value" id="enrolled-courses-count">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Average Grade</h3>
+          <div class="value" id="average-grade">0%</div>
+        </div>
+        <div class="stat-card">
+          <h3>Attendance Rate</h3>
+          <div class="value" id="attendance-rate">0%</div>
+        </div>
+        <div class="stat-card">
+          <h3>Notifications</h3>
+          <div class="value" id="notifications-count">0</div>
+        </div>
+      </div>
+
       <!-- Profile Section -->
-      <div id="profile-section" class="dashboard-section">
-        <h1>Student Profile</h1>
+      <div id="profile-section" class="section">
+        <h2>Student Profile</h2>
         <div class="loading">Loading profile...</div>
         <div class="error-message"></div>
-        <!-- Profile content will be dynamically loaded here -->
       </div>
 
       <!-- Courses Section -->
-      <div id="courses-section" class="dashboard-section" style="display: none;">
-        <h1>My Courses</h1>
+      <div id="courses-section" class="section" style="display: none;">
+        <h2>My Courses</h2>
         <div class="loading">Loading courses...</div>
         <div class="error-message"></div>
-        <!-- Courses content will be dynamically loaded here -->
       </div>
 
       <!-- Attendance Section -->
-      <div id="attendance-section" class="dashboard-section" style="display: none;">
-        <h1>Attendance Record</h1>
+      <div id="attendance-section" class="section" style="display: none;">
+        <h2>Attendance Record</h2>
         <div class="loading">Loading attendance records...</div>
         <div class="error-message"></div>
-        <!-- Attendance content will be dynamically loaded here -->
       </div>
 
       <!-- Grades Section -->
-      <div id="grades-section" class="dashboard-section" style="display: none;">
-        <h1>Academic Performance</h1>
+      <div id="grades-section" class="section" style="display: none;">
+        <h2>Academic Performance</h2>
         <div class="loading">Loading grades...</div>
         <div class="error-message"></div>
-        <!-- Grades content will be dynamically loaded here -->
       </div>
 
       <!-- Notifications Section -->
-      <div id="notifications-section" class="dashboard-section" style="display: none;">
-        <h1>Notifications</h1>
+      <div id="notifications-section" class="section" style="display: none;">
+        <h2>Notifications</h2>
         <div class="loading">Loading notifications...</div>
         <div class="error-message"></div>
-        <!-- Notifications content will be dynamically loaded here -->
       </div>
     </div>
-  </div>
-
-  <!-- Logout Warning Modal -->
-  <div class="logout-warning">
-    <h3>Confirm Logout</h3>
-    <p>Are you sure you want to logout?</p>
-    <button class="confirm">Yes, Logout</button>
-    <button class="cancel">Cancel</button>
   </div>
 
   <!-- Firebase SDK -->

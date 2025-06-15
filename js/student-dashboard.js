@@ -1,7 +1,7 @@
-// Firebase imports
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -19,22 +19,54 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // DOM Elements
-const contentArea = document.getElementById('content-area');
-const welcomeMessage = document.getElementById('welcome-message');
 const studentName = document.getElementById('student-name');
 const studentId = document.getElementById('student-id');
+const enrolledCoursesCount = document.getElementById('enrolled-courses-count');
+const averageGrade = document.getElementById('average-grade');
+const attendanceRate = document.getElementById('attendance-rate');
+const notificationCount = document.getElementById('notification-count');
+const logoutBtn = document.getElementById('logout-btn');
 
-// Utility Functions
-function showMessage(message, type = 'error') {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
-    messageDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        ${message}
-    `;
-    contentArea.insertBefore(messageDiv, contentArea.firstChild);
-    setTimeout(() => messageDiv.remove(), 5000);
+// Modal Elements
+const logoutModal = document.getElementById('logout-modal');
+const closeModalBtn = document.querySelector('.close-modal');
+const cancelLogoutBtn = document.getElementById('cancel-logout');
+const confirmLogoutBtn = document.getElementById('confirm-logout');
+
+// Modal Functions
+function showModal() {
+    logoutModal.classList.add('show');
 }
+
+function hideModal() {
+    logoutModal.classList.remove('show');
+}
+
+// Event Listeners for Modal
+logoutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    showModal();
+});
+
+closeModalBtn.addEventListener('click', hideModal);
+cancelLogoutBtn.addEventListener('click', hideModal);
+
+// Close modal when clicking outside
+logoutModal.addEventListener('click', (e) => {
+    if (e.target === logoutModal) {
+        hideModal();
+    }
+});
+
+// Handle logout confirmation
+confirmLogoutBtn.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        window.location.href = 'student-login.html';
+    } catch (error) {
+        console.error('Error signing out:', error);
+    }
+});
 
 // Load student data
 async function loadStudentData(userId) {
@@ -47,12 +79,6 @@ async function loadStudentData(userId) {
             if (data.status !== 'approved') {
                 throw new Error(`Your registration is ${data.status}. Please wait for admin approval.`);
             }
-            // If student is approved, check students collection
-            const studentDoc = await getDoc(doc(db, 'students', userId));
-            if (studentDoc.exists()) {
-                return studentDoc.data();
-            }
-            // If not in students collection, return registration data
             return data;
         }
 
@@ -77,22 +103,10 @@ async function loadCourses(studentId) {
             where('studentId', '==', studentId)
         );
         const enrollmentsSnapshot = await getDocs(enrollmentsQuery);
-        const enrollments = enrollmentsSnapshot.docs.map(doc => doc.data());
-
-        const courses = [];
-        for (const enrollment of enrollments) {
-            const courseDoc = await getDoc(doc(db, 'courses', enrollment.courseId));
-            if (courseDoc.exists()) {
-                courses.push({
-                    id: courseDoc.id,
-                    ...courseDoc.data()
-                });
-            }
-        }
-        return courses;
+        return enrollmentsSnapshot.docs.length;
     } catch (error) {
         console.error('Error loading courses:', error);
-        throw error;
+        return 0;
     }
 }
 
@@ -104,13 +118,13 @@ async function loadGrades(studentId) {
             where('studentId', '==', studentId)
         );
         const gradesSnapshot = await getDocs(gradesQuery);
-        return gradesSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        const grades = gradesSnapshot.docs.map(doc => doc.data().total);
+        
+        if (grades.length === 0) return 0;
+        return (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1);
     } catch (error) {
         console.error('Error loading grades:', error);
-        throw error;
+        return 0;
     }
 }
 
@@ -122,13 +136,14 @@ async function loadAttendance(studentId) {
             where('studentId', '==', studentId)
         );
         const attendanceSnapshot = await getDocs(attendanceQuery);
-        return attendanceSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        const attendance = attendanceSnapshot.docs.map(doc => doc.data());
+        
+        if (attendance.length === 0) return 0;
+        const presentDays = attendance.filter(record => record.status === 'present').length;
+        return ((presentDays / attendance.length) * 100).toFixed(1);
     } catch (error) {
         console.error('Error loading attendance:', error);
-        throw error;
+        return 0;
     }
 }
 
@@ -140,323 +155,61 @@ async function loadNotifications(studentId) {
             where('studentId', '==', studentId)
         );
         const notificationsSnapshot = await getDocs(notificationsQuery);
-        return notificationsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        return notificationsSnapshot.docs.length;
     } catch (error) {
         console.error('Error loading notifications:', error);
-        throw error;
+        return 0;
     }
 }
 
-// Load content based on section
-async function loadContent(section, studentData) {
+// Update dashboard data
+async function updateDashboard(studentData) {
     try {
-        const template = document.getElementById(`${section}-template`);
-        if (!template) {
-            throw new Error('Template not found');
-        }
+        // Update student info
+        studentName.textContent = studentData.fullName || 'Student';
+        studentId.textContent = `ID: ${studentData.internshipId || 'N/A'}`;
 
-        contentArea.innerHTML = '';
-        const content = template.content.cloneNode(true);
-        contentArea.appendChild(content);
-
-        switch (section) {
-            case 'overview':
-                await loadOverviewContent(studentData);
-                break;
-            case 'courses':
-                await loadCoursesContent(studentData);
-                break;
-            case 'grades':
-                await loadGradesContent(studentData);
-                break;
-            case 'attendance':
-                await loadAttendanceContent(studentData);
-                break;
-            case 'profile':
-                await loadProfileContent(studentData);
-                break;
-        }
-    } catch (error) {
-        console.error(`Error loading ${section} content:`, error);
-        showMessage(`Error loading ${section}. Please try again.`);
-    }
-}
-
-// Load overview content
-async function loadOverviewContent(studentData) {
-    try {
+        // Load and update stats
         const courses = await loadCourses(studentData.userId);
         const grades = await loadGrades(studentData.userId);
         const attendance = await loadAttendance(studentData.userId);
         const notifications = await loadNotifications(studentData.userId);
 
-        // Update stats
-        document.getElementById('enrolled-courses-count').textContent = courses.length;
-        
-        // Calculate average grade
-        if (grades.length > 0) {
-            const average = grades.reduce((sum, grade) => sum + grade.total, 0) / grades.length;
-            document.getElementById('average-grade').textContent = average.toFixed(2);
-        }
-
-        // Calculate attendance rate
-        if (attendance.length > 0) {
-            const presentDays = attendance.filter(record => record.status === 'present').length;
-            const attendanceRate = (presentDays / attendance.length) * 100;
-            document.getElementById('attendance-rate').textContent = `${attendanceRate.toFixed(1)}%`;
-        }
-
-        // Update notification count
-        document.getElementById('notification-count').textContent = notifications.length;
-
-        // Load recent activity
-        const activityList = document.getElementById('activity-list');
-        activityList.innerHTML = '';
-
-        // Combine and sort activities
-        const activities = [
-            ...grades.map(grade => ({
-                type: 'grade',
-                date: grade.updatedAt,
-                message: `Grade updated for ${grade.courseName}: ${grade.total}`
-            })),
-            ...attendance.map(record => ({
-                type: 'attendance',
-                date: record.date,
-                message: `Attendance marked: ${record.status} for ${record.courseName}`
-            })),
-            ...notifications.map(notification => ({
-                type: 'notification',
-                date: notification.createdAt,
-                message: notification.message
-            }))
-        ].sort((a, b) => new Date(b.date) - new Date(a.date))
-         .slice(0, 5);
-
-        activities.forEach(activity => {
-            const activityItem = document.createElement('div');
-            activityItem.className = 'activity-item';
-            activityItem.innerHTML = `
-                <i class="fas fa-${activity.type === 'grade' ? 'chart-bar' : 
-                                  activity.type === 'attendance' ? 'calendar-check' : 
-                                  'bell'}"></i>
-                <div class="activity-content">
-                    <p>${activity.message}</p>
-                    <small>${new Date(activity.date).toLocaleDateString()}</small>
-                </div>
-            `;
-            activityList.appendChild(activityItem);
-        });
+        enrolledCoursesCount.textContent = courses;
+        averageGrade.textContent = grades;
+        attendanceRate.textContent = `${attendance}%`;
+        notificationCount.textContent = notifications;
     } catch (error) {
-        console.error('Error loading overview content:', error);
-        showMessage('Error loading overview data. Please try again.');
+        console.error('Error updating dashboard:', error);
+        // Don't redirect on dashboard update errors
     }
 }
 
-// Load courses content
-async function loadCoursesContent(studentData) {
+// Check authentication state
+let isInitializing = true;
+
+onAuthStateChanged(auth, async (user) => {
+    if (isInitializing) {
+        isInitializing = false;
+    }
+
+    if (!user) {
+        window.location.href = 'student-login.html';
+        return;
+    }
+
     try {
-        const courses = await loadCourses(studentData.userId);
-        const coursesList = document.getElementById('courses-list');
-        coursesList.innerHTML = '';
-
-        courses.forEach(course => {
-            const courseCard = document.createElement('div');
-            courseCard.className = 'course-card';
-            courseCard.innerHTML = `
-                <h3>${course.courseName}</h3>
-                <p class="course-code">${course.courseCode}</p>
-                <div class="course-details">
-                    <p><i class="fas fa-user"></i> ${course.instructor}</p>
-                    <p><i class="fas fa-clock"></i> ${course.schedule}</p>
-                    <p><i class="fas fa-graduation-cap"></i> ${course.credits} Credits</p>
-                </div>
-                <p class="course-description">${course.description}</p>
-            `;
-            coursesList.appendChild(courseCard);
-        });
-    } catch (error) {
-        console.error('Error loading courses content:', error);
-        showMessage('Error loading courses. Please try again.');
-    }
-}
-
-// Load grades content
-async function loadGradesContent(studentData) {
-    try {
-        const grades = await loadGrades(studentData.userId);
-        const gradesTableBody = document.getElementById('grades-table-body');
-        gradesTableBody.innerHTML = '';
-
-        grades.forEach(grade => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${grade.courseName}</td>
-                <td>${grade.midterm || 'N/A'}</td>
-                <td>${grade.final || 'N/A'}</td>
-                <td>${grade.assignment || 'N/A'}</td>
-                <td>${grade.total || 'N/A'}</td>
-                <td class="${grade.letterGrade ? 'text-' + getGradeClass(grade.letterGrade) : ''}">
-                    ${grade.letterGrade || 'N/A'}
-                </td>
-            `;
-            gradesTableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Error loading grades content:', error);
-        showMessage('Error loading grades. Please try again.');
-    }
-}
-
-// Load attendance content
-async function loadAttendanceContent(studentData) {
-    try {
-        const attendance = await loadAttendance(studentData.userId);
-        
-        // Calculate attendance statistics
-        const totalDays = attendance.length;
-        const presentDays = attendance.filter(record => record.status === 'present').length;
-        const absentDays = attendance.filter(record => record.status === 'absent').length;
-        const attendanceRate = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
-
-        // Update summary cards
-        document.getElementById('overall-attendance').textContent = `${attendanceRate.toFixed(1)}%`;
-        document.getElementById('present-days').textContent = presentDays;
-        document.getElementById('absent-days').textContent = absentDays;
-
-        // Update attendance table
-        const attendanceTableBody = document.getElementById('attendance-table-body');
-        attendanceTableBody.innerHTML = '';
-
-        attendance.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(record => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${new Date(record.date).toLocaleDateString()}</td>
-                <td>${record.courseName}</td>
-                <td class="text-${getStatusClass(record.status)}">${record.status}</td>
-                <td>${record.remarks || '-'}</td>
-            `;
-            attendanceTableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Error loading attendance content:', error);
-        showMessage('Error loading attendance data. Please try again.');
-    }
-}
-
-// Load profile content
-async function loadProfileContent(studentData) {
-    try {
-        // Update profile header
-        document.getElementById('profile-name').textContent = studentData.fullName;
-        document.getElementById('profile-id').textContent = `Student ID: ${studentData.internshipId}`;
-        document.getElementById('profile-email').textContent = `Email: ${studentData.email}`;
-
-        // Update profile image if available
-        if (studentData.photographURL) {
-            document.getElementById('student-photo').src = studentData.photographURL;
+        const studentData = await loadStudentData(user.uid);
+        if (!studentData) {
+            throw new Error('Student data not found');
         }
-
-        // Update personal information
-        document.getElementById('profile-full-name').textContent = studentData.fullName;
-        document.getElementById('profile-dob').textContent = new Date(studentData.dob).toLocaleDateString();
-        document.getElementById('profile-gender').textContent = studentData.gender;
-        document.getElementById('profile-contact').textContent = studentData.contactNumber;
-
-        // Update academic information
-        document.getElementById('profile-college').textContent = studentData.college;
-        document.getElementById('profile-degree').textContent = studentData.degreeProgram;
-        document.getElementById('profile-branch').textContent = studentData.branch;
-        document.getElementById('profile-semester').textContent = studentData.semester;
+        await updateDashboard(studentData);
     } catch (error) {
-        console.error('Error loading profile content:', error);
-        showMessage('Error loading profile data. Please try again.');
-    }
-}
-
-// Helper functions
-function getGradeClass(grade) {
-    if (grade >= 'A') return 'success';
-    if (grade >= 'B') return 'info';
-    if (grade >= 'C') return 'warning';
-    return 'danger';
-}
-
-function getStatusClass(status) {
-    switch (status.toLowerCase()) {
-        case 'present': return 'success';
-        case 'late': return 'warning';
-        case 'absent': return 'danger';
-        default: return 'info';
-    }
-}
-
-// Initialize dashboard
-document.addEventListener('DOMContentLoaded', async () => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            console.log('No authenticated user, redirecting to login...');
-            window.location.href = 'student-login.html';
-            return;
-        }
-
-        try {
-            // Load student data
-            const studentData = await loadStudentData(user.uid);
-            
-            if (!studentData) {
-                console.error('Student data not found');
-                showMessage('Error: Student data not found. Please contact support.', 'error');
-                await signOut(auth);
-                window.location.href = 'student-login.html';
-                return;
-            }
-
-            // Update header
-            welcomeMessage.textContent = `Welcome, ${studentData.fullName}`;
-            studentName.textContent = studentData.fullName;
-            studentId.textContent = `ID: ${studentData.internshipId}`;
-
-            // Load initial content (overview)
-            await loadContent('overview', studentData);
-
-            // Set up navigation handlers
-            document.querySelectorAll('.sidebar-nav a').forEach(link => {
-                link.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    const section = e.target.closest('a').getAttribute('data-section');
-                    
-                    if (section === 'logout') {
-                        try {
-                            await signOut(auth);
-                            window.location.href = 'student-login.html';
-                        } catch (error) {
-                            console.error('Error signing out:', error);
-                            showMessage('Error signing out. Please try again.');
-                        }
-                        return;
-                    }
-
-                    // Update active state
-                    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-                    e.target.closest('a').classList.add('active');
-
-                    // Load content
-                    await loadContent(section, studentData);
-                });
-            });
-
-        } catch (error) {
-            console.error('Error initializing dashboard:', error);
-            showMessage(error.message || 'Error loading dashboard. Please try again.');
+        console.error('Error initializing dashboard:', error);
+        // Only redirect if it's not the initial load
+        if (!isInitializing) {
             await signOut(auth);
             window.location.href = 'student-login.html';
         }
-    });
-
-    // Cleanup
-    return () => unsubscribe();
+    }
 }); 

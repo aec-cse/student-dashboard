@@ -691,110 +691,158 @@ async function renderStudentManagement() {
   return html;
 }
 
-// Function to load content with status update handling
+// DOM Elements
+const logoutBtn = document.getElementById('logout-btn');
+const logoutModal = document.getElementById('logout-modal');
+const closeModalBtn = document.querySelector('.close-modal');
+const cancelLogoutBtn = document.getElementById('cancel-logout');
+const confirmLogoutBtn = document.getElementById('confirm-logout');
+
+// Modal Functions
+function showModal() {
+    logoutModal.classList.add('show');
+}
+
+function hideModal() {
+    logoutModal.classList.remove('show');
+}
+
+// Event Listeners for Modal
+logoutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showModal();
+});
+
+closeModalBtn.addEventListener('click', hideModal);
+cancelLogoutBtn.addEventListener('click', hideModal);
+
+// Close modal when clicking outside
+logoutModal.addEventListener('click', (e) => {
+    if (e.target === logoutModal) {
+        hideModal();
+    }
+});
+
+// Handle logout confirmation
+confirmLogoutBtn.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        window.location.href = 'admin-login.html';
+    } catch (error) {
+        console.error('Error signing out:', error);
+        utils.showMessage('Error signing out. Please try again.', 'error');
+    }
+});
+
+// Update the loadContent function to handle logout section
 async function loadContent(section, studentId = null) {
-  const contentArea = document.getElementById('content-area');
-  const mainContent = document.querySelector('.main');
-  if (!contentArea) return;
+    const contentArea = document.getElementById('content-area');
+    
+    if (section === 'logout') {
+        e.preventDefault();
+        showModal();
+        return;
+    }
+    
+    const mainContent = document.querySelector('.main');
+    if (!contentArea) return;
 
-  try {
-    // Update main content section attribute
-    mainContent.setAttribute('data-section', section);
+    try {
+        // Update main content section attribute
+        mainContent.setAttribute('data-section', section);
 
-    let content = '';
-    switch (section) {
-      case 'dashboard':
-        content = await renderDashboard();
-        break;
-      case 'student-management':
-        content = await renderStudentManagement();
-        break;
-      case 'student-detail':
-        if (!studentId) {
-          console.error('No student ID provided for detail view');
-          return;
-        }
-        const student = await getStudentById(studentId);
-        if (student) {
-          content = renderStudentDetail(student);
-        } else {
-          utils.showMessage('Student not found', 'error');
-          return;
-        }
-        break;
-      case 'register-student':
-        const template = document.getElementById('register-student-template');
-        if (template) {
-          content = template.content.cloneNode(true);
-          const iframe = content.querySelector('#registration-frame');
-          if (iframe) {
-            // Set up message listener for iframe communication
-            const messageHandler = async (event) => {
-              // Only handle messages from our iframe
-              if (event.source === iframe.contentWindow) {
-                if (event.data && event.data.type === 'registration-complete') {
-                  // Remove the message listener to prevent duplicates
-                  window.removeEventListener('message', messageHandler);
-                  // Refresh the student list after successful registration
-                  await loadContent('student-management');
+        let content = '';
+        switch (section) {
+            case 'dashboard':
+                content = await renderDashboard();
+                break;
+            case 'student-management':
+                content = await renderStudentManagement();
+                break;
+            case 'student-detail':
+                if (!studentId) {
+                    console.error('No student ID provided for detail view');
+                    return;
                 }
-              }
-            };
-            window.addEventListener('message', messageHandler);
+                const student = await getStudentById(studentId);
+                if (student) {
+                    content = renderStudentDetail(student);
+                } else {
+                    utils.showMessage('Student not found', 'error');
+                    return;
+                }
+                break;
+            case 'register-student':
+                const template = document.getElementById('register-student-template');
+                if (template) {
+                    content = template.content.cloneNode(true);
+                    const iframe = content.querySelector('#registration-frame');
+                    if (iframe) {
+                        // Set up message listener for iframe communication
+                        const messageHandler = async (event) => {
+                            // Only handle messages from our iframe
+                            if (event.source === iframe.contentWindow) {
+                                if (event.data && event.data.type === 'registration-complete') {
+                                    // Remove the message listener to prevent duplicates
+                                    window.removeEventListener('message', messageHandler);
+                                    // Refresh the student list after successful registration
+                                    await loadContent('student-management');
+                                }
+                            }
+                        };
+                        window.addEventListener('message', messageHandler);
 
-            iframe.onload = () => {
-              // Send auth state and Firebase config to iframe
-              const authState = {
-                type: 'auth-state',
-                user: auth.currentUser ? {
-                  uid: auth.currentUser.uid,
-                  email: auth.currentUser.email,
-                  emailVerified: auth.currentUser.emailVerified,
-                  isAnonymous: auth.currentUser.isAnonymous,
-                  metadata: {
-                    creationTime: auth.currentUser.metadata.creationTime,
-                    lastSignInTime: auth.currentUser.metadata.lastSignInTime
-                  }
-                } : null,
-                firebaseConfig: firebaseConfig // Share the Firebase config
-              };
-              iframe.contentWindow.postMessage(authState, '*');
-            };
-          }
+                        iframe.onload = () => {
+                            // Send auth state and Firebase config to iframe
+                            const authState = {
+                                type: 'auth-state',
+                                user: auth.currentUser ? {
+                                    uid: auth.currentUser.uid,
+                                    email: auth.currentUser.email,
+                                    emailVerified: auth.currentUser.emailVerified,
+                                    isAnonymous: auth.currentUser.isAnonymous,
+                                    metadata: {
+                                        creationTime: auth.currentUser.metadata.creationTime,
+                                        lastSignInTime: auth.currentUser.metadata.lastSignInTime
+                                    }
+                                } : null,
+                                firebaseConfig: firebaseConfig // Share the Firebase config
+                            };
+                            iframe.contentWindow.postMessage(authState, '*');
+                        };
+                    }
+                }
+                break;
+            default:
+                console.log('Unknown section:', section);
+                return;
         }
-        break;
-      case 'logout':
-        await handleLogout();
-        return;
-      default:
-        console.log('Unknown section:', section);
-        return;
+
+        // Update the content area with the rendered content
+        if (typeof content === 'string') {
+            contentArea.innerHTML = content;
+        } else {
+            contentArea.innerHTML = '';
+            contentArea.appendChild(content);
+        }
+
+        // Attach handlers based on the section
+        if (section === 'student-management') {
+            attachStudentCardHandlers();
+        } else if (section === 'student-detail') {
+            attachStudentDetailHandlers();
+        }
+
+        // Update active state in sidebar
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.classList.toggle('active', link.getAttribute('data-section') === section);
+        });
+
+    } catch (error) {
+        console.error('Error loading content:', error);
+        utils.showMessage('Error loading content. Please try again.', 'error');
     }
-
-    // Update the content area with the rendered content
-    if (typeof content === 'string') {
-      contentArea.innerHTML = content;
-    } else {
-      contentArea.innerHTML = '';
-      contentArea.appendChild(content);
-    }
-
-    // Attach handlers based on the section
-    if (section === 'student-management') {
-      attachStudentCardHandlers();
-    } else if (section === 'student-detail') {
-      attachStudentDetailHandlers();
-    }
-
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar a').forEach(link => {
-      link.classList.toggle('active', link.getAttribute('data-section') === section);
-    });
-
-  } catch (error) {
-    console.error('Error loading content:', error);
-    utils.showMessage('Error loading content. Please try again.', 'error');
-  }
 }
 
 // Function to attach click handlers to student cards
@@ -967,31 +1015,6 @@ document.addEventListener('DOMContentLoaded', () => {
     unsubscribe();
   });
 });
-
-// Function to handle logout
-async function handleLogout() {
-  try {
-    // Show confirmation dialog
-    const confirmed = await new Promise((resolve) => {
-      const result = confirm('Are you sure you want to logout?');
-      resolve(result);
-    });
-
-    if (!confirmed) {
-      return; // User cancelled logout
-    }
-
-    // Sign out from Firebase
-    await signOut(auth);
-    console.log('User signed out successfully');
-    
-    // Redirect to login page
-    window.location.href = 'admin-login.html';
-  } catch (error) {
-    console.error('Error signing out:', error);
-    utils.showMessage('Error signing out. Please try again.', 'error');
-  }
-}
 
 // Function to view student details
 async function viewStudentDetails(studentId) {
