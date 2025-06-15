@@ -174,4 +174,6 @@ async function initializeDatabase() {
 }
 
 // Run initialization
-initializeDatabase(); 
+// initializeDatabase();
+
+export { initializeDatabase }; 
