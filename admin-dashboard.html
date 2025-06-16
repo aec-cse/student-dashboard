@@ -15,6 +15,7 @@
         <a href="#" data-section="student-management"><i class="fas fa-users"></i> Student Management</a>
         <a href="#" data-section="register-student"><i class="fas fa-user-plus"></i> Register Student</a>
         <a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a>
+        <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
         <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
@@ -539,8 +540,14 @@
         .btn-danger:hover {
             background-color: #c0392b;
         }
+        
     </style>
-
+  <template id="user-enquiry-template">
+  <div class="dashboard-container">
+    <h1><i class="fas fa-envelope"></i> User Enquiries</h1>
+    <div id="enquiry-list" class="student-list"></div>
+  </div>
+</template>
     <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>
