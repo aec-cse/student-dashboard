@@ -827,6 +827,56 @@ async function handleStudentRegistration(event) {
     }
 }
 
+
+// Load and display user enquiries from Firestore
+async function loadUserEnquiries() {
+  const contentArea = document.getElementById('content-area');
+  contentArea.innerHTML = document.getElementById('user-enquiry-template').innerHTML;
+
+  const enquiryList = document.getElementById('enquiry-list');
+  enquiryList.innerHTML = '<p>Loading...</p>';
+
+  try {
+    const querySnapshot = await getDocs(collection(db, 'enquiries')); // updated collection name
+
+    if (querySnapshot.empty) {
+      enquiryList.innerHTML = '<p>No enquiries found.</p>';
+      return;
+    }
+
+    const cards = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      cards.push(`
+        <div class="student-card">
+          <div class="student-info">
+            <p><strong>Name:</strong> ${data.name || 'N/A'}</p>
+            <p><strong>Email:</strong> ${data.email || 'N/A'}</p>
+            <p><strong>Phone:</strong> ${data.phone || 'N/A'}</p>
+            <p><strong>Message:</strong> ${data.message || 'N/A'}</p>
+            <p><strong>Date:</strong> ${data.timestamp ? new Date(data.timestamp).toLocaleString() : 'N/A'}</p>
+          </div>
+        </div>
+      `);
+    });
+
+    enquiryList.innerHTML = cards.join('');
+  } catch (err) {
+    enquiryList.innerHTML = '<p>Error loading enquiries.</p>';
+    console.error(err);
+  }
+}
+
+// Attach click listener to sidebar link
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.sidebar a[data-section="user-enquiry"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadUserEnquiries();
+    });
+  });
+});
+
 // Update the loadContent function to handle logout section
 async function loadContent(section, studentId = null) {
     const contentArea = document.getElementById('content-area');
