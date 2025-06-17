@@ -48,6 +48,29 @@ const utils = {
     }
 };
 
+// Function to update student status
+async function updateStudentStatus(studentId, newStatus) {
+    try {
+        const studentRef = doc(db, "student-registrations", studentId);
+        await updateDoc(studentRef, {
+            status: newStatus,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Show success message
+        utils.showMessage(`Student status updated to ${newStatus}`, 'success');
+        
+        // Refresh the student list
+        await renderStudentManagement();
+    } catch (error) {
+        console.error("Error updating student status:", error);
+        utils.showMessage("Failed to update student status", 'error');
+    }
+}
+
+// Make updateStudentStatus available globally
+window.updateStudentStatus = updateStudentStatus;
+
 // Function to check admin status
 async function checkAdminStatus() {
   try {
