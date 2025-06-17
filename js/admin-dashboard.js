@@ -834,48 +834,303 @@ async function loadUserEnquiries() {
   contentArea.innerHTML = document.getElementById('user-enquiry-template').innerHTML;
 
   const enquiryList = document.getElementById('enquiry-list');
+  const enquiryToggle = document.getElementById('enquiry-toggle');
+  const searchInput = document.getElementById('enquiry-search');
+  const statusFilter = document.getElementById('status-filter');
+  const dateFilter = document.getElementById('date-filter');
+
   enquiryList.innerHTML = '<p>Loading...</p>';
 
   try {
-    const querySnapshot = await getDocs(collection(db, 'enquiries')); // updated collection name
+    const querySnapshot = await getDocs(collection(db, 'enquiries'));
+    const enquiries = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-    if (querySnapshot.empty) {
-      enquiryList.innerHTML = '<p>No enquiries found.</p>';
-      return;
-    }
+    // Update statistics
+    updateEnquiryStats(enquiries);
 
-    const cards = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      cards.push(`
-        <div class="student-card">
-          <div class="student-info">
-            <p><strong>Name:</strong> ${data.name || 'N/A'}</p>
-            <p><strong>Email:</strong> ${data.email || 'N/A'}</p>
-            <p><strong>Phone:</strong> ${data.phone || 'N/A'}</p>
-            <p><strong>Message:</strong> ${data.message || 'N/A'}</p>
-            <p><strong>Date:</strong> ${data.timestamp ? new Date(data.timestamp).toLocaleString() : 'N/A'}</p>
-          </div>
-        </div>
-      `);
+    // Add event listeners
+    enquiryToggle.addEventListener('change', () => {
+      renderEnquiries(enquiries, enquiryToggle.checked);
     });
 
-    enquiryList.innerHTML = cards.join('');
+    searchInput.addEventListener('input', () => {
+      renderEnquiries(enquiries, enquiryToggle.checked);
+    });
+
+    statusFilter.addEventListener('change', () => {
+      renderEnquiries(enquiries, enquiryToggle.checked);
+    });
+
+    dateFilter.addEventListener('change', () => {
+      renderEnquiries(enquiries, enquiryToggle.checked);
+    });
+
+    // Set up modal event listeners
+    setupEnquiryModal();
+
+    // Initial render
+    renderEnquiries(enquiries, false);
   } catch (err) {
     enquiryList.innerHTML = '<p>Error loading enquiries.</p>';
     console.error(err);
   }
 }
 
-// Attach click listener to sidebar link
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.sidebar a[data-section="user-enquiry"]').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      loadUserEnquiries();
-    });
+// Update enquiry statistics
+function updateEnquiryStats(enquiries) {
+  const stats = {
+    pending: 0,
+    resolved: 0,
+    total: enquiries.length
+  };
+
+  enquiries.forEach(enquiry => {
+    if (enquiry.status === 'resolved') {
+      stats.resolved++;
+    } else {
+      stats.pending++;
+    }
   });
-});
+
+  document.getElementById('pending-count').textContent = stats.pending;
+  document.getElementById('resolved-count').textContent = stats.resolved;
+  document.getElementById('total-count').textContent = stats.total;
+}
+
+// Render enquiries with filtering
+function renderEnquiries(enquiries, showAll) {
+  const enquiryList = document.getElementById('enquiry-list');
+  const searchTerm = document.getElementById('enquiry-search').value.toLowerCase();
+  const statusFilter = document.getElementById('status-filter').value;
+  const dateFilter = document.getElementById('date-filter').value;
+  const toggleText = document.querySelector('.toggle-text');
+
+  // Update toggle text with count
+  const recentEnquiries = enquiries.filter(enquiry => 
+    enquiry.timestamp && 
+    (new Date().getTime() - enquiry.timestamp.toDate().getTime()) <= 7 * 24 * 60 * 60 * 1000
+  );
+  toggleText.textContent = showAll ? `Show All (${enquiries.length})` : `Show Recent (${recentEnquiries.length})`;
+
+  const filteredEnquiries = enquiries.filter(enquiry => {
+    // Search filter
+    const matchesSearch = 
+      enquiry.name?.toLowerCase().includes(searchTerm) ||
+      enquiry.email?.toLowerCase().includes(searchTerm) ||
+      enquiry.message?.toLowerCase().includes(searchTerm);
+
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || enquiry.status === statusFilter;
+
+    // Date filter
+    let matchesDate = true;
+    if (dateFilter !== 'all' && enquiry.timestamp) {
+      const enquiryDate = enquiry.timestamp.toDate();
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+      switch (dateFilter) {
+        case 'today':
+          matchesDate = enquiryDate >= today;
+          break;
+        case 'week':
+          matchesDate = enquiryDate >= weekAgo;
+          break;
+        case 'month':
+          matchesDate = enquiryDate >= monthAgo;
+          break;
+      }
+    }
+
+    // Show all filter
+    const isRecent = showAll || (enquiry.timestamp && 
+      (new Date().getTime() - enquiry.timestamp.toDate().getTime()) <= 7 * 24 * 60 * 60 * 1000);
+
+    return matchesSearch && matchesStatus && matchesDate && isRecent;
+  });
+
+  if (filteredEnquiries.length === 0) {
+    enquiryList.innerHTML = '<div class="no-enquiries">No enquiries found</div>';
+    return;
+  }
+
+  // Add fade-out effect
+  enquiryList.style.opacity = '0';
+  setTimeout(() => {
+  enquiryList.innerHTML = filteredEnquiries.map(enquiry => `
+    <div class="enquiry-item" data-id="${enquiry.id}">
+      <div>${enquiry.name || 'N/A'}</div>
+      <div>${enquiry.email || 'N/A'}</div>
+      <div>${enquiry.subject || 'N/A'}</div>
+      <div>${enquiry.timestamp ? new Date(enquiry.timestamp.toDate()).toLocaleString() : 'N/A'}</div>
+      <div>
+        <span class="status-badge status-${enquiry.status || 'pending'}">
+          ${enquiry.status || 'Pending'}
+        </span>
+      </div>
+      <div class="action-buttons">
+        <button class="btn-icon btn-view" data-id="${enquiry.id}">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button class="btn-icon btn-delete" data-id="${enquiry.id}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+    // Add fade-in effect
+    enquiryList.style.opacity = '1';
+
+  // Attach event listeners to the newly created buttons
+  enquiryList.querySelectorAll('.btn-view').forEach(button => {
+    button.addEventListener('click', () => viewEnquiry(button.dataset.id));
+  });
+
+  enquiryList.querySelectorAll('.btn-delete').forEach(button => {
+    button.addEventListener('click', () => deleteEnquiry(button.dataset.id));
+  });
+  }, 150);
+}
+
+// Set up enquiry modal
+function setupEnquiryModal() {
+  const modal = document.getElementById('enquiry-modal');
+  const closeBtn = modal.querySelector('.close-modal');
+  const cancelBtn = modal.querySelector('#cancel-response');
+  const responseForm = document.getElementById('response-form');
+
+  // Add keyboard event listener for Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'block') {
+      hideEnquiryModal();
+    }
+  });
+
+  closeBtn.addEventListener('click', hideEnquiryModal);
+  cancelBtn.addEventListener('click', hideEnquiryModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      hideEnquiryModal();
+    }
+  });
+
+  responseForm.addEventListener('submit', handleEnquiryResponse);
+}
+
+// Show enquiry modal
+async function viewEnquiry(enquiryId) {
+  try {
+    const enquiryDoc = await getDoc(doc(db, 'enquiries', enquiryId));
+    if (!enquiryDoc.exists()) {
+      throw new Error('Enquiry not found');
+    }
+
+    const enquiry = enquiryDoc.data();
+    const modal = document.getElementById('enquiry-modal');
+
+    // Populate modal with enquiry details
+    document.getElementById('modal-name').textContent = enquiry.name || 'N/A';
+    document.getElementById('modal-email').textContent = enquiry.email || 'N/A';
+    document.getElementById('modal-message').textContent = enquiry.message || 'N/A';
+    document.getElementById('modal-date').textContent = enquiry.timestamp ? 
+      new Date(enquiry.timestamp.toDate()).toLocaleString() : 'N/A';
+    document.getElementById('modal-status').textContent = enquiry.status || 'Pending';
+    document.getElementById('response-status').value = enquiry.status || 'pending';
+    document.getElementById('response-message').value = '';
+
+    // Store enquiry ID in form
+    document.getElementById('response-form').dataset.enquiryId = enquiryId;
+
+    // Show modal with animation
+    modal.style.display = 'block';
+    modal.style.opacity = '0';
+    setTimeout(() => {
+      modal.style.opacity = '1';
+    }, 10);
+
+    // Focus on response input
+    document.getElementById('response-message').focus();
+  } catch (error) {
+    console.error('Error loading enquiry:', error);
+    utils.showMessage('Error loading enquiry details', 'error');
+  }
+}
+
+// Hide enquiry modal
+function hideEnquiryModal() {
+  const modal = document.getElementById('enquiry-modal');
+  
+  // Add fade-out animation
+  modal.style.opacity = '0';
+  setTimeout(() => {
+  modal.style.display = 'none';
+  document.getElementById('response-form').reset();
+  document.getElementById('response-form').dataset.enquiryId = '';
+  }, 200);
+}
+
+// Handle enquiry response
+async function handleEnquiryResponse(event) {
+  event.preventDefault();
+
+  try {
+    const form = event.target;
+    const enquiryId = form.dataset.enquiryId;
+    const status = document.getElementById('response-status').value;
+    const response = document.getElementById('response-message').value;
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    if (!enquiryId || !status || !response) {
+      throw new Error('Please fill in all fields');
+    }
+
+    // Disable submit button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    // Update enquiry in Firestore
+    await updateDoc(doc(db, 'enquiries', enquiryId), {
+      status,
+      response,
+      respondedAt: serverTimestamp(),
+      respondedBy: auth.currentUser.email
+    });
+
+    utils.showMessage('Response sent successfully', 'success');
+    hideEnquiryModal();
+    loadUserEnquiries(); // Refresh the list
+  } catch (error) {
+    console.error('Error sending response:', error);
+    utils.showMessage(error.message || 'Error sending response', 'error');
+    
+    // Reset submit button
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Response';
+  }
+}
+
+// Delete enquiry
+async function deleteEnquiry(enquiryId) {
+  try {
+    if (!confirm('Are you sure you want to delete this enquiry?')) {
+      return;
+    }
+
+    await deleteDoc(doc(db, 'enquiries', enquiryId));
+    utils.showMessage('Enquiry deleted successfully', 'success');
+    loadUserEnquiries(); // Refresh the list
+  } catch (error) {
+    console.error('Error deleting enquiry:', error);
+    utils.showMessage('Error deleting enquiry', 'error');
+  }
+}
 
 // Update the loadContent function to handle logout section
 async function loadContent(section, studentId = null) {
@@ -887,7 +1142,7 @@ async function loadContent(section, studentId = null) {
         const mainContent = document.querySelector('.main');
         mainContent.setAttribute('data-section', section);
 
-        let content = '';
+        let content;
         switch (section) {
             case 'dashboard':
                 content = await renderDashboard();
@@ -959,6 +1214,16 @@ async function loadContent(section, studentId = null) {
                         document.querySelector('.close-modal')?.addEventListener('click', hideNotificationModal);
                         document.getElementById('notification-form')?.addEventListener('submit', handleNotificationSubmit);
                         loadNotifications();
+                    }, 0);
+                }
+                break;
+            case 'user-enquiry':
+                const userEnquiryTemplate = document.getElementById('user-enquiry-template');
+                if (userEnquiryTemplate) {
+                    content = userEnquiryTemplate.content.cloneNode(true);
+                    // Set up event listeners after content is added to DOM
+                    setTimeout(() => {
+                        loadUserEnquiries();
                     }, 0);
                 }
                 break;
@@ -1399,122 +1664,81 @@ async function checkAdminAccess() {
     }
 }
 
-// Load notifications with search and filter functionality
+// Load notifications
 async function loadNotifications() {
     try {
         const notificationsList = document.getElementById('notifications-list');
-        const template = document.getElementById('notification-item-template');
-        const searchInput = document.getElementById('notification-search');
-        const priorityFilter = document.getElementById('priority-filter');
-
-        if (!notificationsList || !template) {
-            console.error('Required elements not found');
+    if (!notificationsList) {
+      console.log('Notifications list element not found');
             return;
         }
 
-        // Clear existing notifications
-        notificationsList.innerHTML = '';
-
-        // Get notifications from Firestore
-        const notificationsRef = collection(db, 'notifications');
-        const q = query(notificationsRef, orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            notificationsList.innerHTML = `
-                <div class="no-notifications">
-                    <i class="fas fa-bell-slash"></i>
-                    <p>No notifications found</p>
-                </div>
-            `;
-            return;
-        }
-
-        // Add search and filter event listeners
-        searchInput.addEventListener('input', filterNotifications);
-        priorityFilter.addEventListener('change', filterNotifications);
-
-        // Store notifications for filtering
-        window.notifications = querySnapshot.docs.map(doc => ({
+    const querySnapshot = await getDocs(collection(db, 'notifications'));
+    const notifications = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
 
-        // Initial render
-        renderNotifications(window.notifications);
-
+    renderNotifications(notifications);
     } catch (error) {
         console.error('Error loading notifications:', error);
         utils.showMessage('Error loading notifications', 'error');
     }
 }
 
-// Render notifications with search and filter
+// Render notifications
 function renderNotifications(notifications) {
     const notificationsList = document.getElementById('notifications-list');
-    const template = document.getElementById('notification-item-template');
-    const searchTerm = document.getElementById('notification-search').value.toLowerCase();
-    const priorityFilter = document.getElementById('priority-filter').value;
+  if (!notificationsList) {
+    console.log('Notifications list element not found');
+    return;
+  }
 
-    // Clear existing notifications
-    notificationsList.innerHTML = '';
-
-    // Filter notifications
-    const filteredNotifications = notifications.filter(notification => {
-        const matchesSearch = notification.title.toLowerCase().includes(searchTerm) ||
-                            notification.message.toLowerCase().includes(searchTerm);
-        const matchesPriority = priorityFilter === 'all' || notification.priority === priorityFilter;
-        return matchesSearch && matchesPriority;
-    });
-
-    if (filteredNotifications.length === 0) {
-        notificationsList.innerHTML = `
-            <div class="no-notifications">
-                <i class="fas fa-search"></i>
-                <p>No notifications match your search</p>
-            </div>
-        `;
+  if (notifications.length === 0) {
+    notificationsList.innerHTML = '<div class="no-notifications">No notifications found</div>';
         return;
     }
 
-    // Render filtered notifications
-    filteredNotifications.forEach(notification => {
-        const clone = template.content.cloneNode(true);
-        
-        // Set notification content
-        clone.querySelector('.notification-title').textContent = notification.title;
-        clone.querySelector('.notification-message').textContent = notification.message;
-        clone.querySelector('.notification-priority').textContent = notification.priority;
-        clone.querySelector('.notification-priority').classList.add(notification.priority);
-        clone.querySelector('.notification-date').textContent = formatDate(notification.createdAt);
-        clone.querySelector('.notification-author').textContent = `By ${notification.author || 'Admin'}`;
+  notificationsList.innerHTML = notifications
+    .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate())
+    .map(notification => `
+      <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
+        <div class="notification-content">
+          <div class="notification-header">
+            <h4>${notification.title || 'Notification'}</h4>
+            <span class="notification-date">${notification.timestamp.toDate().toLocaleString()}</span>
+          </div>
+          <p>${notification.message}</p>
+        </div>
+        <div class="notification-actions">
+          ${!notification.read ? `
+            <button class="btn-icon btn-mark-read" data-id="${notification.id}">
+              <i class="fas fa-check"></i>
+            </button>
+          ` : ''}
+          <button class="btn-icon btn-delete" data-id="${notification.id}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
 
         // Add event listeners
-        clone.querySelector('.edit-notification').addEventListener('click', () => editNotification(notification));
-        clone.querySelector('.delete-notification').addEventListener('click', () => deleteNotification(notification.id));
+  notificationsList.querySelectorAll('.btn-mark-read').forEach(button => {
+    button.addEventListener('click', () => markNotificationAsRead(button.dataset.id));
+  });
 
-        notificationsList.appendChild(clone);
+  notificationsList.querySelectorAll('.btn-delete').forEach(button => {
+    button.addEventListener('click', () => deleteNotification(button.dataset.id));
+  });
+
+  notificationsList.querySelectorAll('.notification-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (!e.target.closest('.notification-actions')) {
+        viewNotification(item.dataset.id);
+      }
     });
-}
-
-// Filter notifications based on search and priority
-function filterNotifications() {
-    if (window.notifications) {
-        renderNotifications(window.notifications);
-    }
-}
-
-// Format date for display
-function formatDate(timestamp) {
-    if (!timestamp) return '';
-    const date = timestamp.toDate();
-    return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }).format(date);
+  });
 }
 
 // Handle notification form submission
