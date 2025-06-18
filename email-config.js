@@ -6,7 +6,7 @@ const EMAIL_CONFIG = {
   emailjs: {
     serviceId: 'service_s0u3vte', // Your EmailJS Service ID
     templateId: 'template_tia1dnq', // Your EmailJS Template ID
-    userId: '_jIqsqGztLUev3BCA' // Your EmailJS Public Key
+    userId: 'feh6p7dxh9wpdNTFF' // Your EmailJS Public Key
   },
   
   // Alternative: SendGrid Configuration

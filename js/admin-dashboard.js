@@ -1162,23 +1162,44 @@ async function handleEnquiryResponse(event) {
 // Function to send email to user using EmailJS
 async function sendEmailToUser(emailData) {
   try {
+    console.log('🔍 Starting email send process...');
+    console.log('📧 Email data:', emailData);
+    
     // Check if EmailJS is available
     if (typeof emailjs === 'undefined') {
-      console.warn('EmailJS not loaded. Using fallback method.');
+      console.error('❌ EmailJS is not loaded! Check if the EmailJS script is included.');
+      console.warn('📝 Using fallback method instead.');
       await sendEmailFallback(emailData);
       return;
     }
 
+    console.log('✅ EmailJS is loaded successfully');
+
     // Check if configuration is available
     if (!window.EMAIL_CONFIG || !window.EMAIL_CONFIG.emailjs) {
-      console.warn('Email configuration not found. Please configure email-config.js');
+      console.error('❌ Email configuration not found! Check email-config.js');
+      console.warn('📝 Using fallback method instead.');
       await sendEmailFallback(emailData);
       return;
     }
 
     const config = window.EMAIL_CONFIG.emailjs;
+    console.log('⚙️ EmailJS Config:', config);
+    
+    // Validate configuration
+    if (!config.serviceId || !config.templateId || !config.userId) {
+      console.error('❌ Missing EmailJS configuration values!');
+      console.error('Service ID:', config.serviceId);
+      console.error('Template ID:', config.templateId);
+      console.error('User ID:', config.userId);
+      throw new Error('EmailJS configuration is incomplete');
+    }
+
     const templateParams = {
       to_email: emailData.to,
+      email: emailData.to,
+      user_email: emailData.to,
+      recipient_email: emailData.to,
       to_name: emailData.userName,
       subject: `Response to your enquiry: ${emailData.enquirySubject}`,
       message: emailData.response,
@@ -1186,6 +1207,8 @@ async function sendEmailToUser(emailData) {
       admin_email: emailData.adminEmail,
       enquiry_subject: emailData.enquirySubject
     };
+
+    console.log('📤 Sending email with params:', templateParams);
 
     // Send email using EmailJS
     const response = await emailjs.send(
@@ -1195,14 +1218,37 @@ async function sendEmailToUser(emailData) {
       config.userId
     );
 
-    console.log('Email sent successfully:', response);
+    console.log('✅ Email sent successfully:', response);
+    return response;
   } catch (error) {
-    console.error('Error sending email with EmailJS:', error);
+    console.error('❌ Error sending email with EmailJS:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    
+    // Log more details for 422 errors
+    if (error.status === 422) {
+      console.error('🔍 422 Error Details:');
+      console.error('This usually means template variables don\'t match');
+      console.error('Template ID:', config.templateId);
+      console.error('Service ID:', config.serviceId);
+      console.error('Parameters sent:', templateParams);
+      console.error('Make sure your EmailJS template uses these exact variable names:');
+      console.error('- {{to_name}}');
+      console.error('- {{message}}');
+      console.error('- {{status}}');
+      console.error('- {{subject}}');
+      console.error('- {{enquiry_subject}}');
+    }
+    
     // Try fallback method
     try {
+      console.log('🔄 Trying fallback email method...');
       await sendEmailFallback(emailData);
     } catch (fallbackError) {
-      console.error('Fallback email method also failed:', fallbackError);
+      console.error('❌ Fallback email method also failed:', fallbackError);
       throw new Error('Failed to send email to user');
     }
   }
@@ -1528,7 +1574,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       // Check admin status
       const isAdmin = await checkAdminAccess();
-      console.log('Admin status check result:', isAdmin);
+      console.log('Admin status:', isAdmin);
 
       if (!isAdmin) {
         console.error('User is not an admin, signing out and redirecting to login...');
