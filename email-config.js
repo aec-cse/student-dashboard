@@ -52,14 +52,3 @@ if (typeof module !== 'undefined' && module.exports) {
   window.EMAIL_TEMPLATES = EMAIL_TEMPLATES;
 }
 
-// ✅ EmailJS Configuration Complete!
-// Your credentials have been set up successfully.
-// You can now test the email functionality in your admin dashboard.
-
-// Instructions for setup:
-// 1. Go to https://www.emailjs.com/ and create an account
-// 2. Add an Email Service (Gmail, Outlook, etc.) and get the Service ID
-// 3. Create an Email Template and get the Template ID  
-// 4. Get your Public Key from Account settings
-// 5. Replace the placeholder values above with your real credentials
-// 6. Test the email functionality in your admin dashboard 
