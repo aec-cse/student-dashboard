@@ -7,6 +7,17 @@
     <link rel="stylesheet" href="css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="email-config.js"></script>
+    <script type="text/javascript">
+        (function() {
+            if (window.EMAIL_CONFIG && window.EMAIL_CONFIG.emailjs.userId) {
+                emailjs.init(window.EMAIL_CONFIG.emailjs.userId);
+            } else {
+                console.warn('EmailJS not configured. Please update email-config.js with your credentials.');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="sidebar">

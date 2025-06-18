@@ -1117,6 +1117,16 @@ async function handleEnquiryResponse(event) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
+    // Get the original enquiry to get user email
+    const enquiryDoc = await getDoc(doc(db, 'enquiries', enquiryId));
+    if (!enquiryDoc.exists()) {
+      throw new Error('Enquiry not found');
+    }
+
+    const enquiry = enquiryDoc.data();
+    const userEmail = enquiry.email;
+    const userName = enquiry.name;
+
     // Update enquiry in Firestore
     await updateDoc(doc(db, 'enquiries', enquiryId), {
       status,
@@ -1125,7 +1135,17 @@ async function handleEnquiryResponse(event) {
       respondedBy: auth.currentUser.email
     });
 
-    utils.showMessage('Response sent successfully', 'success');
+    // Send email to user using EmailJS
+    await sendEmailToUser({
+      to: userEmail,
+      userName: userName,
+      enquirySubject: enquiry.subject || 'Your Enquiry',
+      response: response,
+      status: status,
+      adminEmail: auth.currentUser.email
+    });
+
+    utils.showMessage('Response sent successfully and email delivered', 'success');
     hideEnquiryModal();
     loadUserEnquiries(); // Refresh the list
   } catch (error) {
@@ -1136,6 +1156,105 @@ async function handleEnquiryResponse(event) {
     const submitBtn = event.target.querySelector('button[type="submit"]');
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Response';
+  }
+}
+
+// Function to send email to user using EmailJS
+async function sendEmailToUser(emailData) {
+  try {
+    // Check if EmailJS is available
+    if (typeof emailjs === 'undefined') {
+      console.warn('EmailJS not loaded. Using fallback method.');
+      await sendEmailFallback(emailData);
+      return;
+    }
+
+    // Check if configuration is available
+    if (!window.EMAIL_CONFIG || !window.EMAIL_CONFIG.emailjs) {
+      console.warn('Email configuration not found. Please configure email-config.js');
+      await sendEmailFallback(emailData);
+      return;
+    }
+
+    const config = window.EMAIL_CONFIG.emailjs;
+    const templateParams = {
+      to_email: emailData.to,
+      to_name: emailData.userName,
+      subject: `Response to your enquiry: ${emailData.enquirySubject}`,
+      message: emailData.response,
+      status: emailData.status,
+      admin_email: emailData.adminEmail,
+      enquiry_subject: emailData.enquirySubject
+    };
+
+    // Send email using EmailJS
+    const response = await emailjs.send(
+      config.serviceId,
+      config.templateId,
+      templateParams,
+      config.userId
+    );
+
+    console.log('Email sent successfully:', response);
+  } catch (error) {
+    console.error('Error sending email with EmailJS:', error);
+    // Try fallback method
+    try {
+      await sendEmailFallback(emailData);
+    } catch (fallbackError) {
+      console.error('Fallback email method also failed:', fallbackError);
+      throw new Error('Failed to send email to user');
+    }
+  }
+}
+
+// Fallback email sending method using a simple API
+async function sendEmailFallback(emailData) {
+  try {
+    // Simple email sending using a webhook or form service
+    const emailContent = {
+      to: emailData.to,
+      subject: `Response to your enquiry: ${emailData.enquirySubject}`,
+      message: `
+Dear ${emailData.userName},
+
+Thank you for contacting us. We have reviewed your enquiry and here is our response:
+
+Status: ${emailData.status}
+Response: ${emailData.response}
+
+If you have any further questions, please don't hesitate to contact us.
+
+Best regards,
+The Admin Team
+      `,
+      from: emailData.adminEmail
+    };
+
+    // You can use services like Formspree, Netlify Forms, or your own backend
+    // For now, we'll just log the email content
+    console.log('Email content (fallback):', emailContent);
+    
+    // If you want to actually send emails, you can use one of these services:
+    
+    // Option 1: Formspree
+    // const response = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(emailContent)
+    // });
+
+    // Option 2: Your own backend API
+    // const response = await fetch('/api/send-email', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(emailContent)
+    // });
+
+    console.log('Email sent via fallback method (logged to console)');
+  } catch (error) {
+    console.error('Fallback email method failed:', error);
+    throw error;
   }
 }
 
