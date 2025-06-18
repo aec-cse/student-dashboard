@@ -20,6 +20,7 @@ const db = getFirestore(app);
 
 // DOM Elements
 const studentName = document.getElementById('student-name');
+
 const studentId = document.getElementById('student-id');
 const enrolledCoursesCount = document.getElementById('enrolled-courses-count');
 const averageGrade = document.getElementById('average-grade');
@@ -272,6 +273,7 @@ async function updateDashboard(studentData) {
     try {
         // Update student info
         studentName.textContent = studentData.fullName || 'Student';
+         document.getElementById('student_msg').innerText="Welcome "+studentData.fullName +"!";
         studentId.textContent = `ID: ${studentData.internshipId || 'N/A'}`;
 
         // Load and update stats
@@ -335,6 +337,7 @@ async function initDashboard() {
     try {
         await checkAuth();
         await loadNotifications();
+        
     } catch (error) {
         console.error('Error initializing dashboard:', error);
         utils.showMessage('Error loading dashboard', 'error');
