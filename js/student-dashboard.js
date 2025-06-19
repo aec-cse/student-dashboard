@@ -268,22 +268,90 @@ function formatDate(timestamp) {
     }).format(date);
 }
 
-// Update dashboard data
+// Sidebar navigation logic
+function showSection(section) {
+    document.querySelector('.main-content').style.display = section === 'dashboard';
+    document.getElementById('grades-section').style.display = section === 'grades' ? '' : 'none';
+    document.querySelectorAll('.nav-item').forEach(link => {
+        link.classList.toggle('active', link.getAttribute('data-section') === section);
+    });
+    if (section === 'grades') {
+        loadStudentGrades();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('[data-section="dashboard"]').addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection('dashboard');
+    });
+    document.getElementById('grades-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection('grades');
+    });
+});
+
+// Load and display all grades for the student
+async function loadStudentGrades() {
+    const user = auth.currentUser;
+    if (!user) return;
+    const gradesList = document.getElementById('grades-list');
+    gradesList.innerHTML = '<p>Loading grades...</p>';
+    try {
+        const gradesSnapshot = await getDocs(query(collection(db, 'grades'), where('studentId', '==', user.uid)));
+        if (gradesSnapshot.empty) {
+            gradesList.innerHTML = '<p>No grades found.</p>';
+            return;
+        }
+        // Fetch test info for each grade
+        const grades = [];
+        for (const docSnap of gradesSnapshot.docs) {
+            const gradeData = docSnap.data();
+            const testDoc = await getDoc(doc(db, 'tests', gradeData.testId));
+            grades.push({
+                testName: testDoc.exists() ? testDoc.data().name : 'Unknown',
+                testDate: testDoc.exists() ? testDoc.data().date : '',
+                maxMarks: testDoc.exists() ? testDoc.data().maxMarks : '',
+                grade: gradeData.grade
+            });
+        }
+        let html = '<table class="grades-table"><thead><tr><th>Test Name</th><th>Date</th><th>Max Marks</th><th>Your Grade</th></tr></thead><tbody>';
+        grades.forEach(g => {
+            html += `<tr><td>${g.testName}</td><td>${g.testDate}</td><td>${g.maxMarks}</td><td>${g.grade}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        gradesList.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading grades:', error);
+        gradesList.innerHTML = '<p>Error loading grades.</p>';
+    }
+}
+
+// Update dashboard data (average grade)
 async function updateDashboard(studentData) {
     try {
         // Update student info
         studentName.textContent = studentData.fullName || 'Student';
-         document.getElementById('student_msg').innerText="Welcome "+studentData.fullName +"!";
+        document.getElementById('student_msg').innerText = "Welcome " + studentData.fullName + "!";
         studentId.textContent = `ID: ${studentData.internshipId || 'N/A'}`;
 
         // Load and update stats
         const courses = await loadCourses(studentData.userId);
-        const grades = await loadGrades(studentData.userId);
+        const gradesSnapshot = await getDocs(query(collection(db, 'grades'), where('studentId', '==', studentData.userId)));
+        let avgGrade = 0;
+        let count = 0;
+        gradesSnapshot.forEach(doc => {
+            const g = doc.data().grade;
+            if (typeof g === 'number') {
+                avgGrade += g;
+                count++;
+            }
+        });
+        averageGrade.textContent = count > 0 ? (avgGrade / count).toFixed(1) : '0';
         const attendance = await loadAttendance(studentData.userId);
         const notifications = await loadNotifications();
 
         enrolledCoursesCount.textContent = courses;
-        averageGrade.textContent = grades;
         attendanceRate.textContent = `${attendance}%`;
         notificationCount.textContent = notifications;
     } catch (error) {

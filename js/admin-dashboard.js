@@ -482,6 +482,7 @@ async function deleteStudent(studentId) {
 
         // Delete student document
         await deleteDoc(doc(db, 'students', studentId));
+        await deleteDoc(doc(db, 'student-registrations', studentId));
 
         // Delete related documents
         const batch = writeBatch(db);
@@ -523,7 +524,7 @@ async function deleteStudent(studentId) {
         utils.showMessage('Student deleted successfully', 'success');
 
         // Reload the student list
-        await loadStudents();
+        await loadContent('student-management');
     } catch (error) {
         console.error('Error deleting student:', error);
         utils.showMessage(error.message || 'Error deleting student', 'error');
@@ -1415,6 +1416,16 @@ async function loadContent(section, studentId = null) {
                     }, 0);
                 }
                 break;
+            case 'grades':
+                const gradesTemplate = document.getElementById('grades-template');
+                if (gradesTemplate) {
+                    content = gradesTemplate.content.cloneNode(true);
+                    setTimeout(() => {
+                        document.getElementById('create-test-form')?.addEventListener('submit', handleCreateTest);
+                        loadTestsAndGrades();
+                    }, 0);
+                }
+                break;
             default:
                 console.log('Unknown section:', section);
                 return;
@@ -2063,4 +2074,131 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-}); 
+});
+
+// Grades management: handle test creation
+async function handleCreateTest(event) {
+    event.preventDefault();
+    const testName = document.getElementById('test-name').value.trim();
+    const testDate = document.getElementById('test-date').value;
+    const maxMarks = parseInt(document.getElementById('test-max-marks').value, 10);
+    if (!testName || !testDate || isNaN(maxMarks) || maxMarks < 1) {
+        utils.showMessage('Please fill all test fields correctly.', 'error');
+        return;
+    }
+    try {
+        await addDoc(collection(db, 'tests'), {
+            name: testName,
+            date: testDate,
+            maxMarks: maxMarks,
+            createdAt: serverTimestamp()
+        });
+        utils.showMessage('Test created successfully!', 'success');
+        document.getElementById('create-test-form').reset();
+        loadTestsAndGrades();
+    } catch (error) {
+        console.error('Error creating test:', error);
+        utils.showMessage('Failed to create test.', 'error');
+    }
+}
+
+// Grades management: load all tests and grades
+async function loadTestsAndGrades() {
+    const testsList = document.getElementById('tests-list');
+    if (!testsList) return;
+    testsList.innerHTML = '<p>Loading tests...</p>';
+    try {
+        const testsSnapshot = await getDocs(query(collection(db, 'tests'), orderBy('date', 'desc')));
+        if (testsSnapshot.empty) {
+            testsList.innerHTML = '<p>No tests found. Create a new test above.</p>';
+            return;
+        }
+        let html = '<table class="tests-table"><thead><tr><th>Test Name</th><th>Date</th><th>Max Marks</th><th>Actions</th></tr></thead><tbody>';
+        const testDocs = [];
+        testsSnapshot.forEach(doc => {
+            const test = doc.data();
+            testDocs.push({ id: doc.id, ...test });
+            html += `<tr><td>${test.name}</td><td>${test.date}</td><td>${test.maxMarks}</td><td><button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}'>Assign Grades</button></td></tr>`;
+        });
+        html += '</tbody></table>';
+        testsList.innerHTML = html;
+        // Add event listeners for 'Assign Grades' buttons
+        document.querySelectorAll('.assign-grades-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const testId = btn.getAttribute('data-test-id');
+                const testName = btn.getAttribute('data-test-name');
+                const maxMarks = btn.getAttribute('data-max-marks');
+                showAssignGradesModal(testId, testName, maxMarks);
+            });
+        });
+    } catch (error) {
+        console.error('Error loading tests:', error);
+        testsList.innerHTML = '<p>Error loading tests.</p>';
+    }
+}
+
+// Show the assign grades modal for a test
+async function showAssignGradesModal(testId, testName, maxMarks) {
+    // Remove any existing modal
+    document.getElementById('assign-grades-modal')?.remove();
+    // Clone and show the modal template
+    const template = document.getElementById('assign-grades-modal-template');
+    if (!template) return;
+    const modal = template.content.cloneNode(true);
+    document.body.appendChild(modal);
+    document.getElementById('modal-test-name').textContent = testName;
+    // Load all students
+    const students = await getAllStudents();
+    // Fetch existing grades for this test
+    const gradesSnapshot = await getDocs(query(collection(db, 'grades'), where('testId', '==', testId)));
+    const gradesMap = {};
+    gradesSnapshot.forEach(doc => {
+        const data = doc.data();
+        gradesMap[data.studentId] = { id: doc.id, ...data };
+    });
+    const gradesList = document.getElementById('grades-students-list');
+    if (gradesList) {
+        let html = '<table class="grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead><tbody>';
+        students.forEach(student => {
+            const gradeVal = gradesMap[student.id]?.grade ?? '';
+            html += `<tr><td>${student.fullName}</td><td>${student.email}</td><td><input type='number' class='grade-input' name='grade-${student.id}' data-student-id='${student.id}' min='0' max='${maxMarks}' placeholder='Grade' value='${gradeVal}' /></td></tr>`;
+        });
+        html += '</tbody></table>';
+        gradesList.innerHTML = html;
+    }
+    // Modal close/cancel handlers
+    document.getElementById('close-assign-grades-modal').onclick = closeAssignGradesModal;
+    document.getElementById('cancel-assign-grades').onclick = closeAssignGradesModal;
+    // Form submit handler
+    document.getElementById('assign-grades-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const inputs = document.querySelectorAll('.grade-input');
+        let updates = 0;
+        for (const input of inputs) {
+            const studentId = input.getAttribute('data-student-id');
+            const grade = input.value !== '' ? Number(input.value) : null;
+            if (grade === null || isNaN(grade)) continue;
+            // If grade exists, update; else, add new
+            if (gradesMap[studentId]) {
+                await updateDoc(doc(db, 'grades', gradesMap[studentId].id), {
+                    grade,
+                    updatedAt: serverTimestamp()
+                });
+            } else {
+                await addDoc(collection(db, 'grades'), {
+                    testId,
+                    studentId,
+                    grade,
+                    updatedAt: serverTimestamp()
+                });
+            }
+            updates++;
+        }
+        utils.showMessage(updates + ' grades saved!', 'success');
+        closeAssignGradesModal();
+    };
+}
+
+function closeAssignGradesModal() {
+    document.getElementById('assign-grades-modal')?.remove();
+} 

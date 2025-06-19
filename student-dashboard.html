@@ -19,6 +19,10 @@
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="#" class="nav-item" data-section="grades" id="grades-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Grades</span>
+                </a>
                 <a href="#" class="nav-item" id="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
@@ -97,6 +101,16 @@
                 <h2>Course Progress</h2>
                 <div class="progress-list" id="course-progress-list">
                     <!-- Course progress will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Grades Section -->
+            <div class="grades-section" id="grades-section" style="display:none;">
+                <div class="section-header">
+                    <h2>Your Grades</h2>
+                </div>
+                <div id="grades-list">
+                    <!-- Grades table will be rendered here -->
                 </div>
             </div>
         </main>

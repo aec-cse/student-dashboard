@@ -27,6 +27,7 @@
         <a href="#" data-section="register-student"><i class="fas fa-user-plus"></i> Register Student</a>
         <a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a>
         <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
+        <a href="#" data-section="grades"><i class="fas fa-clipboard-list"></i> Grades</a>
         <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
@@ -299,6 +300,50 @@
                 </div>
             </div>
         </div>
+    </template>
+
+    <!-- Grades Management Template -->
+    <template id="grades-template">
+        <div class="grades-container">
+            <div class="grades-header">
+                <h2>Manage Grades & Tests</h2>
+                <form id="create-test-form" class="create-test-form">
+                    <input type="text" id="test-name" placeholder="Test Name" required />
+                    <input type="date" id="test-date" required />
+                    <input type="number" id="test-max-marks" placeholder="Max Marks" min="1" required />
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Test</button>
+                </form>
+            </div>
+            <div class="tests-list-section">
+                <h3>All Tests</h3>
+                <div id="tests-list">
+                    <!-- Tests and grade assignment UI will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Assign Grades Modal Template -->
+    <template id="assign-grades-modal-template">
+      <div class="modal show" id="assign-grades-modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Assign Grades: <span id="modal-test-name"></span></h2>
+            <button class="close-modal" id="close-assign-grades-modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="assign-grades-form">
+              <div id="grades-students-list">
+                <!-- Student grade inputs will be rendered here -->
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save Grades</button>
+                <button type="button" class="btn btn-secondary" id="cancel-assign-grades">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </template>
 
     <script>

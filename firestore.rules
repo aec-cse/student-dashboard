@@ -61,9 +61,8 @@ service cloud.firestore {
 
     // Rules for students collection
     match /students/{studentId} {
-      allow read: if isAuthenticated();
+      allow read: if isAdmin() || (isStudent() && request.auth.uid == studentId);
       allow write: if isAdmin();
-      allow delete: if isAdmin();
     }
 
     // Rules for courses collection
@@ -81,9 +80,8 @@ service cloud.firestore {
 
     // Rules for grades collection
     match /grades/{gradeId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-      allow delete: if isAdmin();
+      allow read: if isAdmin() || (isStudent() && resource.data.studentId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
     }
 
     // Rules for attendance collection
@@ -101,8 +99,7 @@ service cloud.firestore {
     
     // Rules for admins collection
     match /admins/{adminId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     // Rules for student-registrations collection
@@ -117,6 +114,17 @@ service cloud.firestore {
       allow create: if true;  // Allow anyone to create enquiries
       allow read: if isAdmin();  // Only admins can read enquiries
       allow update, delete: if isAdmin();  // Only admins can update/delete enquiries
+    }
+
+    // Rules for tests collection
+    match /tests/{testId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Default: deny all
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 } 
