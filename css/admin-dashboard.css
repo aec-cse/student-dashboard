@@ -1683,18 +1683,24 @@ body {
 }
 
 .btn-icon {
-    padding: 6px;
-    border: none;
-    background: none;
-    color: #6c757d;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    padding: 0;
+    min-width: 0;
+    width: 36px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    border-radius: 8px;
 }
 
-.btn-icon:hover {
-    background: #f8f9fa;
-    color: #2c3e50;
+.btn-danger.btn-icon {
+    background: #ef4444;
+    color: #fff;
+}
+
+.btn-danger.btn-icon:hover {
+    background: #b91c1c;
 }
 
 .notification-content {
@@ -1930,4 +1936,108 @@ body {
         align-items: flex-start;
         gap: 0.5rem;
     }
+}
+
+/* --- Grades Table Section (Admin) --- */
+.grades-table-section {
+  padding: 1rem;
+}
+.grades-table-section .table-header {
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1fr;
+  border-radius: 16px 16px 0 0;
+}
+.grades-table-section .header-cell {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem;
+}
+.grades-table-section .table-body {
+  padding: 0.5rem 2rem 1.5rem 2rem;
+}
+.grades-table-section .table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1fr;
+  align-items: center;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+.grades-table-section .table-row:last-child {
+  border-bottom: none;
+}
+.grades-table-section .table-row:hover {
+  background: #f8fafc;
+}
+.grades-table-section .table-row > div:last-child {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.btn {
+  padding: 0.5em 1.2em;
+  min-height: 40px;
+  font-size: 0.95em;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  transition: background 0.2s;
+  box-sizing: border-box;
+}
+.btn-secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+.btn-secondary:hover {
+  background: #cbd5e1;
+}
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+  padding-left: 0em;
+  padding-right: 0em;
+}
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* --- Enhanced Inputs for Grades Section --- */
+.grades-header .create-test-form input[type="text"],
+.grades-header .create-test-form input[type="date"],
+.grades-header .create-test-form input[type="number"] {
+  padding: 0.85rem 1.2rem;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  font-size: 1rem;
+  background: #f8fafc;
+  color: #1e293b;
+  margin-right: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+.grades-header .create-test-form input[type="text"]:focus,
+.grades-header .create-test-form input[type="date"]:focus,
+.grades-header .create-test-form input[type="number"]:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+  background: #fff;
+}
+.grades-header .create-test-form input[type="number"]::-webkit-inner-spin-button,
+.grades-header .create-test-form input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.grades-header .create-test-form input[type="number"] {
+  -moz-appearance: textfield;
 }

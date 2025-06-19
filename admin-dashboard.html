@@ -304,23 +304,33 @@
 
     <!-- Grades Management Template -->
     <template id="grades-template">
-        <div class="grades-container">
-            <div class="grades-header">
-                <h2>Manage Grades & Tests</h2>
-                <form id="create-test-form" class="create-test-form">
-                    <input type="text" id="test-name" placeholder="Test Name" required />
-                    <input type="date" id="test-date" required />
-                    <input type="number" id="test-max-marks" placeholder="Max Marks" min="1" required />
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Test</button>
-                </form>
+      <div class="enquiry-dashboard grades-dashboard">
+        <div class="enquiry-header grades-header">
+          <div class="header-main">
+            <div class="title-section">
+              <i class="fas fa-clipboard-list"></i>
+              <h1>Grades & Tests</h1>
             </div>
-            <div class="tests-list-section">
-                <h3>All Tests</h3>
-                <div id="tests-list">
-                    <!-- Tests and grade assignment UI will be rendered here -->
-                </div>
-            </div>
+          </div>
+          <div class="controls-section">
+            <form id="create-test-form" class="create-test-form" style="display:flex;gap:1rem;align-items:center;">
+              <input type="text" id="test-name" placeholder="Test Name" required />
+              <input type="date" id="test-date" required />
+              <input type="number" id="test-max-marks" placeholder="Max Marks" min="1" required />
+              <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Test</button>
+            </form>
+          </div>
         </div>
+        <div class="enquiry-table grades-table-section">
+          <div class="table-header">
+            <div class="header-cell">Test Name</div>
+            <div class="header-cell">Date</div>
+            <div class="header-cell">Max Marks</div>
+            <div class="header-cell">Actions</div>
+          </div>
+          <div id="tests-list" class="table-body"></div>
+        </div>
+      </div>
     </template>
 
     <!-- Assign Grades Section (replaces modal) -->

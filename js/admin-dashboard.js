@@ -1899,13 +1899,17 @@ function renderNotifications(notifications) {
     }
 
   notificationsList.innerHTML = notifications
-    .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate())
+    .sort((a, b) => {
+      const aTime = a.timestamp && typeof a.timestamp.toDate === 'function' ? a.timestamp.toDate().getTime() : 0;
+      const bTime = b.timestamp && typeof b.timestamp.toDate === 'function' ? b.timestamp.toDate().getTime() : 0;
+      return bTime - aTime;
+    })
     .map(notification => `
       <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
         <div class="notification-content">
           <div class="notification-header">
             <h4>${notification.title || 'Notification'}</h4>
-            <span class="notification-date">${notification.timestamp.toDate().toLocaleString()}</span>
+            <span class="notification-date">${notification.timestamp && typeof notification.timestamp.toDate === 'function' ? notification.timestamp.toDate().toLocaleString() : 'N/A'}</span>
           </div>
           <p>${notification.message}</p>
         </div>
@@ -2115,12 +2119,20 @@ async function loadTestsAndGrades() {
             testsList.innerHTML = '<p>No tests found. Create a new test above.</p>';
             return;
         }
-        let html = '<table class="tests-table"><thead><tr><th>Test Name</th><th>Date</th><th>Max Marks</th><th>Actions</th></tr></thead><tbody>';
+        // Remove table headers, only render rows
+        let html = '';
         testsSnapshot.forEach(doc => {
             const test = doc.data();
-            html += `<tr><td>${test.name}</td><td>${test.date}</td><td>${test.maxMarks}</td><td><button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}' data-test-date='${test.date}'>Assign Grades</button></td></tr>`;
+            html += `<div class="table-row">
+                <div>${test.name}</div>
+                <div>${test.date}</div>
+                <div>${test.maxMarks}</div>
+                <div>
+                  <button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}' data-test-date='${test.date}'>Assign Grades</button>
+                  <button class='btn btn-danger btn-icon delete-test-btn' data-test-id='${doc.id}'><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
         });
-        html += '</tbody></table>';
         testsList.innerHTML = html;
         // Add event listeners for 'Assign Grades' buttons
         document.querySelectorAll('.assign-grades-btn').forEach(btn => {
@@ -2130,6 +2142,28 @@ async function loadTestsAndGrades() {
                 const maxMarks = btn.getAttribute('data-max-marks');
                 const testDate = btn.getAttribute('data-test-date');
                 showAssignGradesSection(testId, testName, maxMarks, testDate);
+            });
+        });
+        // Add event listeners for delete test buttons
+        document.querySelectorAll('.delete-test-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const testId = btn.getAttribute('data-test-id');
+                if (!confirm('Are you sure you want to delete this test? This will also delete all related grades.')) return;
+                try {
+                    // Delete all grades for this test
+                    const gradesQuery = query(collection(db, 'grades'), where('testId', '==', testId));
+                    const gradesSnapshot = await getDocs(gradesQuery);
+                    const batch = writeBatch(db);
+                    gradesSnapshot.forEach(doc => batch.delete(doc.ref));
+                    await batch.commit();
+                    // Delete the test itself
+                    await deleteDoc(doc(db, 'tests', testId));
+                    utils.showMessage('Test and related grades deleted.', 'success');
+                    loadTestsAndGrades();
+                } catch (error) {
+                    console.error('Error deleting test:', error);
+                    utils.showMessage('Failed to delete test.', 'error');
+                }
             });
         });
     } catch (error) {
