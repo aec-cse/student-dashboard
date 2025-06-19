@@ -2106,6 +2106,8 @@ async function handleCreateTest(event) {
 async function loadTestsAndGrades() {
     const testsList = document.getElementById('tests-list');
     if (!testsList) return;
+    testsList.style.display = '';
+    document.getElementById('assign-grades-section').style.display = 'none';
     testsList.innerHTML = '<p>Loading tests...</p>';
     try {
         const testsSnapshot = await getDocs(query(collection(db, 'tests'), orderBy('date', 'desc')));
@@ -2114,11 +2116,9 @@ async function loadTestsAndGrades() {
             return;
         }
         let html = '<table class="tests-table"><thead><tr><th>Test Name</th><th>Date</th><th>Max Marks</th><th>Actions</th></tr></thead><tbody>';
-        const testDocs = [];
         testsSnapshot.forEach(doc => {
             const test = doc.data();
-            testDocs.push({ id: doc.id, ...test });
-            html += `<tr><td>${test.name}</td><td>${test.date}</td><td>${test.maxMarks}</td><td><button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}'>Assign Grades</button></td></tr>`;
+            html += `<tr><td>${test.name}</td><td>${test.date}</td><td>${test.maxMarks}</td><td><button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}' data-test-date='${test.date}'>Assign Grades</button></td></tr>`;
         });
         html += '</tbody></table>';
         testsList.innerHTML = html;
@@ -2128,7 +2128,8 @@ async function loadTestsAndGrades() {
                 const testId = btn.getAttribute('data-test-id');
                 const testName = btn.getAttribute('data-test-name');
                 const maxMarks = btn.getAttribute('data-max-marks');
-                showAssignGradesModal(testId, testName, maxMarks);
+                const testDate = btn.getAttribute('data-test-date');
+                showAssignGradesSection(testId, testName, maxMarks, testDate);
             });
         });
     } catch (error) {
@@ -2137,16 +2138,15 @@ async function loadTestsAndGrades() {
     }
 }
 
-// Show the assign grades modal for a test
-async function showAssignGradesModal(testId, testName, maxMarks) {
-    // Remove any existing modal
-    document.getElementById('assign-grades-modal')?.remove();
-    // Clone and show the modal template
-    const template = document.getElementById('assign-grades-modal-template');
-    if (!template) return;
-    const modal = template.content.cloneNode(true);
-    document.body.appendChild(modal);
-    document.getElementById('modal-test-name').textContent = testName;
+// Refactor: Assign Grades Section (not modal)
+async function showAssignGradesSection(testId, testName, maxMarks, testDate) {
+    // Hide tests list, show assign grades section
+    document.getElementById('tests-list').style.display = 'none';
+    const section = document.getElementById('assign-grades-section');
+    section.style.display = '';
+    document.getElementById('assign-test-name').textContent = testName;
+    document.getElementById('assign-test-details').innerHTML = `<strong>Date:</strong> ${testDate} &nbsp; <strong>Max Marks:</strong> ${maxMarks}`;
+
     // Load all students
     const students = await getAllStudents();
     // Fetch existing grades for this test
@@ -2156,21 +2156,22 @@ async function showAssignGradesModal(testId, testName, maxMarks) {
         const data = doc.data();
         gradesMap[data.studentId] = { id: doc.id, ...data };
     });
-    const gradesList = document.getElementById('grades-students-list');
-    if (gradesList) {
-        let html = '<table class="grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead><tbody>';
-        students.forEach(student => {
-            const gradeVal = gradesMap[student.id]?.grade ?? '';
-            html += `<tr><td>${student.fullName}</td><td>${student.email}</td><td><input type='number' class='grade-input' name='grade-${student.id}' data-student-id='${student.id}' min='0' max='${maxMarks}' placeholder='Grade' value='${gradeVal}' /></td></tr>`;
-        });
-        html += '</tbody></table>';
-        gradesList.innerHTML = html;
-    }
-    // Modal close/cancel handlers
-    document.getElementById('close-assign-grades-modal').onclick = closeAssignGradesModal;
-    document.getElementById('cancel-assign-grades').onclick = closeAssignGradesModal;
+
+    // Render students table
+    renderGradesStudentsListSection(students, gradesMap, maxMarks);
+
+    // Search/filter logic
+    document.getElementById('student-search').oninput = function() {
+        const search = this.value.toLowerCase();
+        const filtered = students.filter(s =>
+            (s.fullName && s.fullName.toLowerCase().includes(search)) ||
+            (s.email && s.email.toLowerCase().includes(search))
+        );
+        renderGradesStudentsListSection(filtered, gradesMap, maxMarks);
+    };
+
     // Form submit handler
-    document.getElementById('assign-grades-form').onsubmit = async function(e) {
+    document.getElementById('assign-grades-form-section').onsubmit = async function(e) {
         e.preventDefault();
         const inputs = document.querySelectorAll('.grade-input');
         let updates = 0;
@@ -2178,7 +2179,6 @@ async function showAssignGradesModal(testId, testName, maxMarks) {
             const studentId = input.getAttribute('data-student-id');
             const grade = input.value !== '' ? Number(input.value) : null;
             if (grade === null || isNaN(grade)) continue;
-            // If grade exists, update; else, add new
             if (gradesMap[studentId]) {
                 await updateDoc(doc(db, 'grades', gradesMap[studentId].id), {
                     grade,
@@ -2195,10 +2195,102 @@ async function showAssignGradesModal(testId, testName, maxMarks) {
             updates++;
         }
         utils.showMessage(updates + ' grades saved!', 'success');
-        closeAssignGradesModal();
+        // Optionally, reload the list or stay on the page
+        showTestsListSection();
     };
+
+    // Back button
+    document.getElementById('back-to-tests').onclick = showTestsListSection;
 }
 
-function closeAssignGradesModal() {
-    document.getElementById('assign-grades-modal')?.remove();
-} 
+function renderGradesStudentsListSection(students, gradesMap, maxMarks) {
+    const gradesList = document.getElementById('grades-students-list-section');
+    // Calculate summary
+    const gradeVals = students.map(student => {
+        const grade = gradesMap[student.id]?.grade;
+        return typeof grade === 'number' ? grade : null;
+    }).filter(g => g !== null);
+    const avg = gradeVals.length ? (gradeVals.reduce((a, b) => a + b, 0) / gradeVals.length).toFixed(1) : '-';
+    const max = gradeVals.length ? Math.max(...gradeVals) : '-';
+    const min = gradeVals.length ? Math.min(...gradeVals) : '-';
+    // Render table
+    let html = '<table class="grades-table" id="admin-grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Grade</th><th>Export</th></tr></thead><tbody>';
+    students.forEach(student => {
+        const gradeVal = gradesMap[student.id]?.grade ?? '';
+        let badgeClass = 'grade-badge ';
+        let badge = '';
+        let missing = '';
+        if (gradeVal === '') {
+            missing = 'missing-grade';
+            badgeClass += 'low';
+            badge = '<span class="grade-badge low">-</span>';
+        } else if (typeof gradeVal === 'number' && maxMarks) {
+            const percent = (gradeVal / maxMarks) * 100;
+            if (percent >= 75) badgeClass += 'high';
+            else if (percent >= 50) badgeClass += 'medium';
+            else badgeClass += 'low';
+            badge = `<span class="${badgeClass}">${gradeVal}</span>`;
+        } else {
+            badgeClass += 'low';
+            badge = `<span class="${badgeClass}">${gradeVal}</span>`;
+        }
+        html += `<tr class="${missing}"><td>${student.fullName}</td><td>${student.email}</td><td>${badge}</td><td><button class='export-pdf-btn' data-student-id='${student.id}' data-student-name='${student.fullName}'>PDF</button></td></tr>`;
+    });
+    html += '</tbody>';
+    html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg}<br>Max: ${max}<br>Min: ${min}</td><td></td></tr></tfoot>`;
+    html += '</table>';
+    gradesList.innerHTML = html;
+    // Export as PDF logic for each student
+    document.querySelectorAll('.export-pdf-btn').forEach(btn => {
+        btn.onclick = async function() {
+            const studentId = btn.getAttribute('data-student-id');
+            const studentName = btn.getAttribute('data-student-name');
+            // Dynamically load jsPDF and html2canvas if not present
+            if (typeof window.jspdf === 'undefined') {
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+            }
+            if (typeof window.html2canvas === 'undefined') {
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+            }
+            // Create a mini table for this student
+            const row = btn.closest('tr');
+            const table = document.createElement('table');
+            table.className = 'grades-table';
+            table.innerHTML = `<thead><tr><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead><tbody>${row.innerHTML.replace(/<td><button.*?\/button><\/td>/, '')}</tbody>`;
+            const wrapper = document.createElement('div');
+            wrapper.appendChild(table);
+            document.body.appendChild(wrapper);
+            window.html2canvas(wrapper, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new window.jspdf.jsPDF();
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pageWidth - 20;
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.text(`Marksheet for ${studentName}`, 10, 10);
+                pdf.addImage(imgData, 'PNG', 10, 20, pdfWidth, pdfHeight);
+                pdf.save(`${studentName.replace(/\s+/g, '_')}_marksheet.pdf`);
+                document.body.removeChild(wrapper);
+            });
+        };
+    });
+}
+
+// Helper to load external scripts (if not already present)
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+function showTestsListSection() {
+    document.getElementById('assign-grades-section').style.display = 'none';
+    document.getElementById('tests-list').style.display = '';
+    loadTestsAndGrades();
+}
+
+// ... existing code ...

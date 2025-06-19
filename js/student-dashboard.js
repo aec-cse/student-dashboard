@@ -270,11 +270,27 @@ function formatDate(timestamp) {
 
 // Sidebar navigation logic
 function showSection(section) {
-    document.querySelector('.main-content').style.display = section === 'dashboard';
-    document.getElementById('grades-section').style.display = section === 'grades' ? '' : 'none';
+    // Toggle dashboard overview
+    const dashboardOverview = document.querySelector('.dashboard-overview');
+    if (dashboardOverview) dashboardOverview.style.display = section === 'dashboard' ? '' : 'none';
+
+    // Toggle notifications section
+    const notificationsSection = document.getElementById('notifications-section');
+    if (notificationsSection) notificationsSection.style.display = section === 'dashboard' ? '' : 'none';
+
+    // Toggle course progress section
+    const courseProgressSection = document.getElementById('course-progress-section');
+    if (courseProgressSection) courseProgressSection.style.display = section === 'dashboard' ? '' : 'none';
+
+    // Toggle grades section
+    const gradesSection = document.getElementById('grades-section');
+    if (gradesSection) gradesSection.style.display = section === 'grades' ? '' : 'none';
+
+    // Toggle nav active state
     document.querySelectorAll('.nav-item').forEach(link => {
         link.classList.toggle('active', link.getAttribute('data-section') === section);
     });
+
     if (section === 'grades') {
         loadStudentGrades();
     }
@@ -315,25 +331,86 @@ async function loadStudentGrades() {
                 grade: gradeData.grade
             });
         }
-        let html = '<table class="grades-table"><thead><tr><th>Test Name</th><th>Date</th><th>Max Marks</th><th>Your Grade</th></tr></thead><tbody>';
+        // Calculate summary
+        const gradeVals = grades.map(g => g.grade);
+        const avg = gradeVals.length ? (gradeVals.reduce((a, b) => a + b, 0) / gradeVals.length).toFixed(1) : '-';
+        const max = gradeVals.length ? Math.max(...gradeVals) : '-';
+        const min = gradeVals.length ? Math.min(...gradeVals) : '-';
+        // Render table
+        let html = '<table class="grades-table" id="grades-table"><thead><tr><th>Test Name</th><th>Date</th><th>Max Marks</th><th>Your Grade</th></tr></thead><tbody>';
         grades.forEach(g => {
-            html += `<tr><td>${g.testName}</td><td>${g.testDate}</td><td>${g.maxMarks}</td><td>${g.grade}</td></tr>`;
+            let badgeClass = 'grade-badge ';
+            if (g.maxMarks && typeof g.grade === 'number') {
+                const percent = (g.grade / g.maxMarks) * 100;
+                if (percent >= 75) badgeClass += 'high';
+                else if (percent >= 50) badgeClass += 'medium';
+                else badgeClass += 'low';
+            } else {
+                badgeClass += 'low';
+            }
+            html += `<tr><td>${g.testName}</td><td>${g.testDate}</td><td>${g.maxMarks}</td><td><span class="${badgeClass}">${g.grade}</span></td></tr>`;
         });
-        html += '</tbody></table>';
+        html += '</tbody>';
+        html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg}<br>Max: ${max}<br>Min: ${min}</td><td></td></tr></tfoot>`;
+        html += '</table>';
         gradesList.innerHTML = html;
+        // Export as PDF logic
+        const exportBtn = document.getElementById('export-pdf-btn');
+        if (exportBtn) {
+            exportBtn.onclick = async function() {
+                // Dynamically load jsPDF and html2canvas if not present
+                if (typeof window.jspdf === 'undefined') {
+                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+                }
+                if (typeof window.html2canvas === 'undefined') {
+                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+                }
+                const gradesTable = document.getElementById('grades-table');
+                if (!gradesTable) return;
+                // Clone the table for PDF (remove export button)
+                const clone = gradesTable.cloneNode(true);
+                const wrapper = document.createElement('div');
+                wrapper.appendChild(clone);
+                document.body.appendChild(wrapper);
+                window.html2canvas(wrapper, { scale: 2 }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new window.jspdf.jsPDF();
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const pdfWidth = pageWidth - 20;
+                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
+                    pdf.save('marksheet.pdf');
+                    document.body.removeChild(wrapper);
+                });
+            };
+        }
     } catch (error) {
         console.error('Error loading grades:', error);
         gradesList.innerHTML = '<p>Error loading grades.</p>';
     }
 }
 
+// Helper to load external scripts
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
 // Update dashboard data (average grade)
 async function updateDashboard(studentData) {
     try {
         // Update student info
-        studentName.textContent = studentData.fullName || 'Student';
-        document.getElementById('student_msg').innerText = "Welcome " + studentData.fullName + "!";
-        studentId.textContent = `ID: ${studentData.internshipId || 'N/A'}`;
+        if (studentName) studentName.textContent = studentData.fullName || 'Student';
+        const studentMsg = document.getElementById('student_msg');
+        if (studentMsg) studentMsg.innerText = "Welcome " + studentData.fullName + "!";
+        if (studentId) studentId.textContent = `ID: ${studentData.internshipId || 'N/A'}`;
 
         // Load and update stats
         const courses = await loadCourses(studentData.userId);
@@ -347,13 +424,13 @@ async function updateDashboard(studentData) {
                 count++;
             }
         });
-        averageGrade.textContent = count > 0 ? (avgGrade / count).toFixed(1) : '0';
+        if (averageGrade) averageGrade.textContent = count > 0 ? (avgGrade / count).toFixed(1) : '0';
         const attendance = await loadAttendance(studentData.userId);
         const notifications = await loadNotifications();
 
-        enrolledCoursesCount.textContent = courses;
-        attendanceRate.textContent = `${attendance}%`;
-        notificationCount.textContent = notifications;
+        if (enrolledCoursesCount) enrolledCoursesCount.textContent = courses;
+        if (attendanceRate) attendanceRate.textContent = `${attendance}%`;
+        if (notificationCount) notificationCount.textContent = notifications;
     } catch (error) {
         console.error('Error updating dashboard:', error);
         // Don't redirect on dashboard update errors
@@ -403,7 +480,6 @@ const utils = {
 // Initialize the dashboard
 async function initDashboard() {
     try {
-        await checkAuth();
         await loadNotifications();
         
     } catch (error) {

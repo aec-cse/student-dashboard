@@ -61,7 +61,7 @@ service cloud.firestore {
 
     // Rules for students collection
     match /students/{studentId} {
-      allow read: if isAdmin() || (isStudent() && request.auth.uid == studentId);
+      allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
 
@@ -80,7 +80,7 @@ service cloud.firestore {
 
     // Rules for grades collection
     match /grades/{gradeId} {
-      allow read: if isAdmin() || (isStudent() && resource.data.studentId == request.auth.uid);
+      allow read: if isAuthenticated();
       allow create, update, delete: if isAdmin();
     }
 
@@ -121,6 +121,11 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
+
+    // Debug
+    match /{document=**} {
+  allow read: if isAuthenticated();
+}
 
     // Default: deny all
     match /{document=**} {

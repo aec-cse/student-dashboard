@@ -323,28 +323,25 @@
         </div>
     </template>
 
-    <!-- Assign Grades Modal Template -->
-    <template id="assign-grades-modal-template">
-      <div class="modal show" id="assign-grades-modal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>Assign Grades: <span id="modal-test-name"></span></h2>
-            <button class="close-modal" id="close-assign-grades-modal">&times;</button>
-          </div>
-          <div class="modal-body">
-            <form id="assign-grades-form">
-              <div id="grades-students-list">
-                <!-- Student grade inputs will be rendered here -->
-              </div>
-              <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Save Grades</button>
-                <button type="button" class="btn btn-secondary" id="cancel-assign-grades">Cancel</button>
-              </div>
-            </form>
-          </div>
+    <!-- Assign Grades Section (replaces modal) -->
+    <div id="assign-grades-section" style="display:none;">
+        <div class="assign-grades-header">
+            <button class="btn btn-secondary" id="back-to-tests">&larr; Back to Tests</button>
+            <h2>Assign Grades: <span id="assign-test-name"></span></h2>
+            <div id="assign-test-details"></div>
         </div>
-      </div>
-    </template>
+        <div class="assign-grades-controls">
+            <input type="text" id="student-search" placeholder="Search students by name or email..." />
+        </div>
+        <form id="assign-grades-form-section">
+            <div id="grades-students-list-section">
+                <!-- Student grade inputs will be rendered here -->
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Grades</button>
+            </div>
+        </form>
+    </div>
 
     <script>
         function closeRegistration() {

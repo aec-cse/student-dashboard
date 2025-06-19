@@ -1840,3 +1840,94 @@ body {
         opacity: 1;
     }
 }
+
+/* Assign Grades Table Enhancements (Admin) */
+.assign-grades-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+.assign-grades-header h2 {
+    flex: 1;
+    margin: 0;
+}
+.assign-grades-controls {
+    margin-bottom: 1rem;
+}
+.assign-grades-controls input[type="text"] {
+    width: 100%;
+    max-width: 350px;
+    padding: 0.7em 1em;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 1em;
+}
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.grades-table th, .grades-table td {
+    padding: 1rem;
+    text-align: left;
+}
+.grades-table thead {
+    background: #f1f5f9;
+}
+.grades-table tbody tr:nth-child(even) {
+    background: #f6f8fa;
+}
+.grades-table tbody tr:nth-child(odd) {
+    background: #fff;
+}
+.grades-table tfoot {
+    background: #e0e7ef;
+    font-weight: bold;
+}
+.grade-badge {
+    display: inline-block;
+    padding: 0.4em 1em;
+    border-radius: 20px;
+    font-size: 1em;
+    font-weight: 600;
+    color: #fff;
+    min-width: 48px;
+    text-align: center;
+}
+.grade-badge.high { background: #22c55e; }
+.grade-badge.medium { background: #facc15; color: #7c5700; }
+.grade-badge.low { background: #ef4444; }
+.missing-grade {
+    background: #fff3cd !important;
+}
+.export-pdf-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5em 1.2em;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: 0.5em;
+}
+.export-pdf-btn:hover {
+    background: #1d4ed8;
+}
+@media (max-width: 900px) {
+    .grades-table th, .grades-table td {
+        padding: 0.5rem;
+        font-size: 0.95em;
+    }
+    .assign-grades-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
