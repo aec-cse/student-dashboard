@@ -41,7 +41,7 @@
             </div>
 
             <!-- Dashboard Overview -->
-            <div class="dashboard-overview">
+            <div class="dashboard-overview" id="dashboard-overview-section">
                 <div class="overview-card">
                     <i class="fas fa-book"></i>
                     <div class="overview-info">
@@ -72,6 +72,18 @@
                 </div>
             </div>
 
+            <!-- Attendance Trend Section (moved to its own section) -->
+            <div class="attendance-trend-section" id="attendance-section" style="display:none;">
+                <h2>Attendance Trend</h2>
+                <div style="display:flex;align-items:center;gap:2rem;">
+                    <div>
+                        <h3>Average Attendance</h3>
+                        <p id="attendance-average" style="font-size:2rem;font-weight:bold;">0%</p>
+                    </div>
+                    <canvas id="attendance-trend-chart" width="400" height="120"></canvas>
+                </div>
+            </div>
+
             <!-- Notifications Section -->
             <div class="notifications-section" id="notifications-section">
                 <div class="section-header">
@@ -93,14 +105,6 @@
                 </div>
                 <div class="notifications-list" id="notifications-list">
                     <!-- Notifications will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Course Progress -->
-            <div class="course-progress" id="course-progress-section">
-                <h2>Course Progress</h2>
-                <div class="progress-list" id="course-progress-list">
-                    <!-- Course progress will be loaded here -->
                 </div>
             </div>
 
@@ -153,6 +157,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="js/student-dashboard.js"></script>
 </body>
 </html> 

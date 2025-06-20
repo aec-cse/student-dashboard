@@ -2041,3 +2041,92 @@ body {
 .grades-header .create-test-form input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* --- Attendance Management Section --- */
+.attendance-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.attendance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.attendance-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+.attendance-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.attendance-controls input[type="date"] {
+  padding: 0.7em 1em;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  font-size: 1em;
+  background: #f8fafc;
+  color: #1e293b;
+}
+.attendance-list {
+  margin-top: 1.5rem;
+}
+.attendance-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f9fafb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.attendance-list th, .attendance-list td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+.attendance-list th {
+  background: #f1f5f9;
+  color: #1e293b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.attendance-list tr:last-child td {
+  border-bottom: none;
+}
+.attendance-list select.attendance-status {
+  padding: 0.5em 1em;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 1em;
+  background: #fff;
+  color: #1e293b;
+}
+.attendance-controls .btn {
+  min-width: 120px;
+}
+@media (max-width: 900px) {
+  .attendance-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .attendance-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .attendance-list th, .attendance-list td {
+    padding: 0.5rem;
+    font-size: 0.95em;
+  }
+}

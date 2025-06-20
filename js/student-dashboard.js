@@ -268,43 +268,72 @@ function formatDate(timestamp) {
     }).format(date);
 }
 
-// Sidebar navigation logic
+// Add navigation logic for attendance section
 function showSection(section) {
-    // Toggle dashboard overview
-    const dashboardOverview = document.querySelector('.dashboard-overview');
-    if (dashboardOverview) dashboardOverview.style.display = section === 'dashboard' ? '' : 'none';
-
-    // Toggle notifications section
-    const notificationsSection = document.getElementById('notifications-section');
-    if (notificationsSection) notificationsSection.style.display = section === 'dashboard' ? '' : 'none';
-
-    // Toggle course progress section
-    const courseProgressSection = document.getElementById('course-progress-section');
-    if (courseProgressSection) courseProgressSection.style.display = section === 'dashboard' ? '' : 'none';
-
-    // Toggle grades section
+    document.getElementById('dashboard-overview-section').style.display = section === 'dashboard' ? '' : 'none';
     const gradesSection = document.getElementById('grades-section');
     if (gradesSection) gradesSection.style.display = section === 'grades' ? '' : 'none';
-
-    // Toggle nav active state
-    document.querySelectorAll('.nav-item').forEach(link => {
+    // Show/hide welcome header
+    const studentMsg = document.getElementById('student_msg');
+    if (studentMsg) studentMsg.style.display = section === 'dashboard' ? '' : 'none';
+    // Show/hide notifications section
+    const notificationsSection = document.getElementById('notifications-section');
+    if (notificationsSection) notificationsSection.style.display = section === 'dashboard' ? '' : 'none';
+    // Set active class
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(link => {
         link.classList.toggle('active', link.getAttribute('data-section') === section);
     });
-
+    // Load grades if grades section
     if (section === 'grades') {
         loadStudentGrades();
     }
 }
 
+// Hook up sidebar links
+window.currentStudentId = null;
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelector('[data-section="dashboard"]').addEventListener('click', (e) => {
-        e.preventDefault();
+    document.querySelectorAll('.sidebar-nav .nav-item[data-section]').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            showSection(section);
+        });
+    });
+});
+
+// Check authentication state
+let isInitializing = true;
+
+onAuthStateChanged(auth, async (user) => {
+    if (isInitializing) {
+        isInitializing = false;
+    }
+
+    if (!user) {
+        window.location.href = 'student-login.html';
+        return;
+    }
+
+    try {
+        const studentData = await loadStudentData(user.uid);
+        if (!studentData) {
+            throw new Error('Student data not found');
+        }
+        await updateDashboard(studentData);
         showSection('dashboard');
-    });
-    document.getElementById('grades-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        showSection('grades');
-    });
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        // Only sign out for auth errors
+        const authErrorCodes = [
+            'permission-denied', 'unauthenticated', 'user-not-found', 'auth/user-not-found', 'auth/invalid-user-token', 'auth/user-token-expired'
+        ];
+        if (error && error.code && authErrorCodes.includes(error.code)) {
+            await signOut(auth);
+            window.location.href = 'student-login.html';
+        } else {
+            utils.showMessage('Error loading your dashboard. Please try again or contact support.', 'error');
+        }
+    }
 });
 
 // Load and display all grades for the student
@@ -351,7 +380,7 @@ async function loadStudentGrades() {
             html += `<tr><td>${g.testName}</td><td>${g.testDate}</td><td>${g.maxMarks}</td><td><span class="${badgeClass}">${g.grade}</span></td></tr>`;
         });
         html += '</tbody>';
-        html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg}<br>Max: ${max}<br>Min: ${min}</td><td></td></tr></tfoot>`;
+        html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg !== '-' ? avg + '%' : '-'}<br>Max: ${max}<br>Min: ${min}</td><td></td></tr></tfoot>`;
         html += '</table>';
         gradesList.innerHTML = html;
         // Export as PDF logic
@@ -424,7 +453,7 @@ async function updateDashboard(studentData) {
                 count++;
             }
         });
-        if (averageGrade) averageGrade.textContent = count > 0 ? (avgGrade / count).toFixed(1) : '0';
+        if (averageGrade) averageGrade.textContent = count > 0 ? ((avgGrade / count).toFixed(1) + '%') : '0%';
         const attendance = await loadAttendance(studentData.userId);
         const notifications = await loadNotifications();
 
@@ -436,35 +465,6 @@ async function updateDashboard(studentData) {
         // Don't redirect on dashboard update errors
     }
 }
-
-// Check authentication state
-let isInitializing = true;
-
-onAuthStateChanged(auth, async (user) => {
-    if (isInitializing) {
-        isInitializing = false;
-    }
-
-    if (!user) {
-        window.location.href = 'student-login.html';
-        return;
-    }
-
-    try {
-        const studentData = await loadStudentData(user.uid);
-        if (!studentData) {
-            throw new Error('Student data not found');
-        }
-        await updateDashboard(studentData);
-    } catch (error) {
-        console.error('Error initializing dashboard:', error);
-        // Only redirect if it's not the initial load
-        if (!isInitializing) {
-            await signOut(auth);
-            window.location.href = 'student-login.html';
-        }
-    }
-});
 
 // Utility functions
 const utils = {

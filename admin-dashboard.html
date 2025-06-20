@@ -28,6 +28,7 @@
         <a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a>
         <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
         <a href="#" data-section="grades"><i class="fas fa-clipboard-list"></i> Grades</a>
+        <a href="#" data-section="attendance"><i class="fas fa-calendar-check"></i> Attendance</a>
         <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
@@ -352,6 +353,25 @@
             </form>
         </div>
       </div>
+    </template>
+
+    <!-- Attendance Management Template -->
+    <template id="attendance-template">
+        <div class="attendance-container">
+            <div class="attendance-header">
+                <h2>Attendance Management</h2>
+                <div class="attendance-controls">
+                    <input type="date" id="attendance-date-picker" />
+                    <button class="btn btn-secondary" id="mark-all-present">Mark All Present</button>
+                    <button class="btn btn-secondary" id="mark-all-absent">Mark All Absent</button>
+                    <button class="btn btn-secondary" id="mark-all-late">Mark All Late</button>
+                    <button class="btn btn-primary" id="save-attendance">Save Attendance</button>
+                </div>
+            </div>
+            <div class="attendance-list" id="attendance-list">
+                <!-- Student attendance rows will be rendered here -->
+            </div>
+        </div>
     </template>
 
     <script>

@@ -1431,6 +1431,10 @@ async function loadContent(section, studentId = null) {
                     }, 0);
                 }
                 break;
+            case 'attendance':
+                await loadAttendanceSection();
+                content = null;
+                break;
             default:
                 console.log('Unknown section:', section);
                 return;
@@ -1439,7 +1443,7 @@ async function loadContent(section, studentId = null) {
         // Update the content area with the rendered content
         if (typeof content === 'string') {
             contentArea.innerHTML = content;
-        } else {
+        } else if (content instanceof Node) {
             contentArea.innerHTML = '';
             contentArea.appendChild(content);
         }
@@ -2197,8 +2201,8 @@ async function loadTestsAndGrades() {
                 <div>${test.name}</div>
                 <div>${test.date}</div>
                 <div>${test.maxMarks}</div>
-                <div>
-                  <button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}' data-test-date='${test.date}'>Assign Grades</button>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                  <button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}' data-test-date='${test.date}'>Assign Marks</button>
                   <button class='btn btn-danger btn-icon delete-test-btn' data-test-id='${doc.id}'><i class="fas fa-trash"></i></button>
                 </div>
             </div>`;
@@ -2267,8 +2271,9 @@ async function showAssignGradesSection(testId, testName, maxMarks, testDate) {
         <h2>Assign Grades: <span class="assign-test-name">${testName}</span></h2>
         <div class="assign-test-details"><strong>Date:</strong> ${testDate} &nbsp; <strong>Max Marks:</strong> ${maxMarks}</div>
     </div>`;
-    html += `<div class="assign-grades-controls">
+    html += `<div class="assign-grades-controls" style="display:flex;gap:1rem;align-items:center;">
         <input type="text" class="student-search" placeholder="Search students by name or email..." />
+        <button type="button" class="btn btn-primary export-all-grades-btn"><i class="fas fa-file-pdf"></i> Export All Grades as PDF</button>
     </div>`;
     html += `<form class="assign-grades-form-section">
         <div class="grades-students-list-section"></div>
@@ -2280,6 +2285,175 @@ async function showAssignGradesSection(testId, testName, maxMarks, testDate) {
 
     // Render students table
     renderGradesStudentsListSection(students, gradesMap, maxMarks);
+
+    // Export all grades as PDF logic
+    modalBody.querySelector('.export-all-grades-btn').onclick = async function() {
+        // Dynamically load jsPDF and html2canvas if not present
+        if (typeof window.jspdf === 'undefined') {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        }
+        if (typeof window.html2canvas === 'undefined') {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+        }
+        // Try to load jsPDF autotable plugin for better tables
+        let autoTableAvailable = false;
+        if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+            if (!window.jspdf.jsPDF.API.autoTable) {
+                try {
+                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+                } catch (e) {}
+            }
+            autoTableAvailable = !!window.jspdf.jsPDF.API.autoTable;
+        }
+        // Prepare data for the table
+        const tableHeaders = ['Student Name', 'Email', 'Marks'];
+        const tableRows = students.map(student => {
+            const marksVal = gradesMap[student.id]?.grade ?? '';
+            return [student.fullName, student.email, marksVal !== '' ? marksVal : '-'];
+        });
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        // Use jsPDF autoTable if available
+        if (autoTableAvailable) {
+            const pdf = new window.jspdf.jsPDF();
+            // Add background color
+            pdf.setFillColor(245, 248, 255); // light blueish
+            pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
+            // Add header bar
+            pdf.setFillColor(44, 62, 80); // dark blue
+            pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 32, 'F');
+            // Add logo and ATITS header
+            const logoImg = new Image();
+            logoImg.src = 'Logo.png';
+            logoImg.onload = function() {
+                pdf.addImage(logoImg, 'PNG', 14, 6, 20, 20);
+                pdf.setFontSize(22);
+                pdf.setTextColor(255);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('ATITS', 40, 20);
+                pdf.setFontSize(14);
+                pdf.setTextColor(44, 62, 80);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(`Marks Report`, 14, 44);
+                pdf.setFontSize(12);
+                pdf.text(`Test: ${testName}`, 14, 54);
+                pdf.text(`Date: ${testDate}`, 14, 62);
+                // Move Max Marks to the right
+                pdf.text(`Max Marks: ${maxMarks || '-'}`, pdf.internal.pageSize.getWidth() - 60, 62, { align: 'left' });
+                pdf.setFontSize(10);
+                // Add watermark
+                pdf.setTextColor(230, 236, 245);
+                pdf.setFontSize(60);
+                pdf.text('ATITS', pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() / 2, { align: 'center', angle: 30 });
+                pdf.setTextColor(44, 62, 80);
+                pdf.autoTable({
+                    head: [tableHeaders],
+                    body: tableRows,
+                    startY: 84,
+                    styles: { fontSize: 11, cellPadding: 3, halign: 'center', valign: 'middle', fillColor: [255,255,255] },
+                    headStyles: { fillColor: [44, 62, 80], textColor: 255, halign: 'center' },
+                    alternateRowStyles: { fillColor: [245, 245, 245] },
+                    margin: { left: 14, right: 14 },
+                    tableLineColor: [200, 200, 200],
+                    tableLineWidth: 0.2,
+                    didDrawPage: function (data) {
+                        // Footer bar
+                        pdf.setFillColor(44, 62, 80);
+                        pdf.rect(0, pdf.internal.pageSize.getHeight() - 18, pdf.internal.pageSize.getWidth(), 18, 'F');
+                        // Exported at (above footer)
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(44, 62, 80);
+                        pdf.text(`Exported: ${formattedDate}`, 14, pdf.internal.pageSize.getHeight() - 24);
+                        // Footer text
+                        pdf.setTextColor(255);
+                        pdf.text(`Admin: ${(auth.currentUser && auth.currentUser.email) || ''}`, 14, pdf.internal.pageSize.getHeight() - 6);
+                        const pageCount = pdf.internal.getNumberOfPages();
+                        pdf.text(`Page ${data.pageNumber} of ${pageCount}`, pdf.internal.pageSize.getWidth() - 40, pdf.internal.pageSize.getHeight() - 6);
+                    }
+                });
+                pdf.save(`${testName.replace(/\s+/g, '_')}_marks.pdf`);
+            };
+            // If logo fails to load, fallback to just header
+            logoImg.onerror = function() {
+                pdf.setFillColor(44, 62, 80);
+                pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 32, 'F');
+                pdf.setFontSize(22);
+                pdf.setTextColor(255);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('ATITS', 14, 20);
+                pdf.setFontSize(14);
+                pdf.setTextColor(44, 62, 80);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(`Marks Report`, 14, 44);
+                pdf.setFontSize(12);
+                pdf.text(`Test: ${testName}`, 14, 54);
+                pdf.text(`Date: ${testDate}`, 14, 62);
+                // Move Max Marks to the right
+                pdf.text(`Max Marks: ${maxMarks || '-'}`, pdf.internal.pageSize.getWidth() - 60, 62, { align: 'left' });
+                pdf.setFontSize(10);
+                pdf.text(`Exported: ${formattedDate}`, 14, 78);
+                // Add watermark
+                pdf.setTextColor(230, 236, 245);
+                pdf.setFontSize(60);
+                pdf.text('ATITS', pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() / 2, { align: 'center', angle: 30 });
+                pdf.setTextColor(44, 62, 80);
+                pdf.autoTable({
+                    head: [tableHeaders],
+                    body: tableRows,
+                    startY: 84,
+                    styles: { fontSize: 11, cellPadding: 3, halign: 'center', valign: 'middle', fillColor: [255,255,255] },
+                    headStyles: { fillColor: [44, 62, 80], textColor: 255, halign: 'center' },
+                    alternateRowStyles: { fillColor: [245, 245, 245] },
+                    margin: { left: 14, right: 14 },
+                    tableLineColor: [200, 200, 200],
+                    tableLineWidth: 0.2,
+                    didDrawPage: function (data) {
+                        // Footer bar
+                        pdf.setFillColor(44, 62, 80);
+                        pdf.rect(0, pdf.internal.pageSize.getHeight() - 18, pdf.internal.pageSize.getWidth(), 18, 'F');
+                        // Exported at (above footer)
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(44, 62, 80);
+                        pdf.text(`Exported: ${formattedDate}`, 14, pdf.internal.pageSize.getHeight() - 24);
+                        // Footer text
+                        pdf.setTextColor(255);
+                        pdf.text(`Admin: ${(auth.currentUser && auth.currentUser.email) || ''}`, 14, pdf.internal.pageSize.getHeight() - 6);
+                        const pageCount = pdf.internal.getNumberOfPages();
+                        pdf.text(`Page ${data.pageNumber} of ${pageCount}`, pdf.internal.pageSize.getWidth() - 40, pdf.internal.pageSize.getHeight() - 6);
+                    }
+                });
+                pdf.save(`${testName.replace(/\s+/g, '_')}_marks.pdf`);
+            };
+        } else {
+            // Fallback: styled html2canvas
+            const table = document.createElement('table');
+            table.className = 'grades-table';
+            table.style.borderCollapse = 'collapse';
+            table.style.width = '100%';
+            table.innerHTML = `<thead><tr><th style='background:#2c3e50;color:#fff;padding:8px;border:1px solid #ccc;text-align:center;'>Student Name</th><th style='background:#2c3e50;color:#fff;padding:8px;border:1px solid #ccc;text-align:center;'>Email</th><th style='background:#2c3e50;color:#fff;padding:8px;border:1px solid #ccc;text-align:center;'>Marks</th></tr></thead><tbody>` +
+                students.map((student, i) => {
+                    const marksVal = gradesMap[student.id]?.grade ?? '';
+                    const bg = i % 2 === 0 ? '#f5f5f5' : '#fff';
+                    return `<tr style='background:${bg};'><td style='padding:8px;border:1px solid #ccc;text-align:center;'>${student.fullName}</td><td style='padding:8px;border:1px solid #ccc;text-align:center;'>${student.email}</td><td style='padding:8px;border:1px solid #ccc;text-align:center;'>${marksVal !== '' ? marksVal : '-'}</td></tr>`;
+                }).join('') + '</tbody>';
+            const wrapper = document.createElement('div');
+            wrapper.style.padding = '20px';
+            wrapper.innerHTML = `<div style='display:flex;align-items:center;margin-bottom:8px;'><img src='Logo.png' style='height:40px;margin-right:12px;'><span style='font-size:2rem;font-weight:bold;'>ATITS</span></div><h2 style='margin-bottom:0;'>Marks Report</h2><div style='margin-bottom:8px;'>Test: <b>${testName}</b></div><div style='margin-bottom:8px;'>Date: <b>${testDate}</b></div><div style='margin-bottom:8px;'>Max Marks: <b>${maxMarks || '-'}</b></div><div style='margin-bottom:8px;'>Exported: ${formattedDate}</div>`;
+            wrapper.appendChild(table);
+            document.body.appendChild(wrapper);
+            window.html2canvas(wrapper, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new window.jspdf.jsPDF();
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pageWidth - 20;
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
+                pdf.save(`${testName.replace(/\s+/g, '_')}_marks.pdf`);
+                document.body.removeChild(wrapper);
+            });
+        }
+    };
 
     // Search/filter logic
     modalBody.querySelector('.student-search').oninput = function() {
@@ -2363,78 +2537,16 @@ function renderGradesStudentsListSection(students, gradesMap, maxMarks) {
     const max = gradeVals.length ? Math.max(...gradeVals) : '-';
     const min = gradeVals.length ? Math.min(...gradeVals) : '-';
     // Render table
-    let html = '<table class="grades-table" id="admin-grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Grade</th><th>Export</th></tr></thead><tbody>';
+    let html = '<table class="grades-table" id="admin-grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Marks</th></tr></thead><tbody>';
     students.forEach(student => {
-        const gradeVal = gradesMap[student.id]?.grade ?? '';
-        let badgeClass = 'grade-badge ';
-        let badge = '';
-        let missing = '';
-        if (gradeVal === '') {
-            missing = 'missing-grade';
-            badgeClass += 'low';
-            badge = '<span class="grade-badge low">-</span>';
-        } else if (typeof gradeVal === 'number' && maxMarks) {
-            const percent = (gradeVal / maxMarks) * 100;
-            if (percent >= 75) badgeClass += 'high';
-            else if (percent >= 50) badgeClass += 'medium';
-            else badgeClass += 'low';
-            badge = `<span class="${badgeClass}">${gradeVal}</span>`;
-        } else {
-            badgeClass += 'low';
-            badge = `<span class="${badgeClass}">${gradeVal}</span>`;
-        }
-        // Render input for grade
-        html += `<tr class="${missing}"><td>${student.fullName}</td><td>${student.email}</td><td><input type="number" class="grade-input" data-student-id="${student.id}" min="0" max="${maxMarks}" value="${gradeVal !== '' ? gradeVal : ''}" style="width:80px;"> ${badge}</td><td><button class='export-pdf-btn' data-student-id='${student.id}' data-student-name='${student.fullName}'>PDF</button></td></tr>`;
+        const marksVal = gradesMap[student.id]?.grade ?? '';
+        // Render input for marks, no badge
+        html += `<tr><td>${student.fullName}</td><td>${student.email}</td><td><input type="number" class="grade-input" data-student-id="${student.id}" min="0" max="${maxMarks}" value="${marksVal !== '' ? marksVal : ''}" style="width:80px;"></td></tr>`;
     });
     html += '</tbody>';
-    html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg}<br>Max: ${max}<br>Min: ${min}</td><td></td></tr></tfoot>`;
+    html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg}<br>Max: ${max}<br>Min: ${min}</td></tr></tfoot>`;
     html += '</table>';
     gradesList.innerHTML = html;
-    // Export as PDF logic for each student
-    document.querySelectorAll('.export-pdf-btn').forEach(btn => {
-        btn.onclick = async function() {
-            const studentId = btn.getAttribute('data-student-id');
-            const studentName = btn.getAttribute('data-student-name');
-            // Dynamically load jsPDF and html2canvas if not present
-            if (typeof window.jspdf === 'undefined') {
-                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-            }
-            if (typeof window.html2canvas === 'undefined') {
-                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-            }
-            // Create a mini table for this student
-            const row = btn.closest('tr');
-            const table = document.createElement('table');
-            table.className = 'grades-table';
-            // Clone the row and replace the input with the badge for export
-            const clonedRow = row.cloneNode(true);
-            const gradeCell = clonedRow.querySelector('td:nth-child(3)');
-            if (gradeCell) {
-                // Remove the input and keep only the badge
-                const badge = gradeCell.querySelector('.grade-badge');
-                gradeCell.innerHTML = badge ? badge.outerHTML : gradeCell.textContent;
-            }
-            // Remove the export button cell
-            const exportCell = clonedRow.querySelector('td:last-child');
-            if (exportCell) exportCell.remove();
-            table.innerHTML = `<thead><tr><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead><tbody>${clonedRow.innerHTML}</tbody>`;
-            const wrapper = document.createElement('div');
-            wrapper.appendChild(table);
-            document.body.appendChild(wrapper);
-            window.html2canvas(wrapper, { scale: 2 }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new window.jspdf.jsPDF();
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const imgProps = pdf.getImageProperties(imgData);
-                const pdfWidth = pageWidth - 20;
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                pdf.text(`Marksheet for ${studentName}`, 10, 10);
-                pdf.addImage(imgData, 'PNG', 10, 20, pdfWidth, pdfHeight);
-                pdf.save(`${studentName.replace(/\s+/g, '_')}_marksheet.pdf`);
-                document.body.removeChild(wrapper);
-            });
-        };
-    });
 }
 
 // Helper to load external scripts (if not already present)
@@ -2455,3 +2567,141 @@ function showTestsListSection() {
 }
 
 // ... existing code ...
+
+// Add after loadContent function or similar navigation logic
+async function loadAttendanceSection() {
+    const contentArea = document.getElementById('content-area');
+    const template = document.getElementById('attendance-template');
+    contentArea.innerHTML = template.innerHTML;
+    const dateInput = document.getElementById('attendance-date-picker');
+    const attendanceList = document.getElementById('attendance-list');
+    const markAllPresentBtn = document.getElementById('mark-all-present');
+    const markAllAbsentBtn = document.getElementById('mark-all-absent');
+    const markAllLateBtn = document.getElementById('mark-all-late');
+    const saveAttendanceBtn = document.getElementById('save-attendance');
+
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+
+    let students = await getAllStudents();
+    let attendanceMap = {};
+
+    async function loadAttendanceForDate(date) {
+        attendanceMap = {};
+        const attendanceSnapshot = await getDocs(query(collection(db, 'attendance'), where('date', '==', date)));
+        attendanceSnapshot.forEach(doc => {
+            const data = doc.data();
+            attendanceMap[data.studentId] = data.status;
+        });
+    }
+
+    function renderAttendanceList() {
+        let html = `<table class="grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Status</th></tr></thead><tbody>`;
+        students.forEach(student => {
+            const status = attendanceMap[student.id] || 'absent';
+            html += `<tr><td>${student.fullName}</td><td>${student.email}</td><td>
+                <select class="attendance-status" data-student-id="${student.id}">
+                    <option value="present" ${status === 'present' ? 'selected' : ''}>Present</option>
+                    <option value="absent" ${status === 'absent' ? 'selected' : ''}>Absent</option>
+                    <option value="late" ${status === 'late' ? 'selected' : ''}>Late</option>
+                </select>
+            </td></tr>`;
+        });
+        html += '</tbody></table>';
+        attendanceList.innerHTML = html;
+    }
+
+    async function refresh() {
+        await loadAttendanceForDate(dateInput.value);
+        renderAttendanceList();
+    }
+
+    dateInput.onchange = refresh;
+    await refresh();
+
+    markAllPresentBtn.onclick = () => {
+        students.forEach(s => attendanceMap[s.id] = 'present');
+        renderAttendanceList();
+    };
+    markAllAbsentBtn.onclick = () => {
+        students.forEach(s => attendanceMap[s.id] = 'absent');
+        renderAttendanceList();
+    };
+    markAllLateBtn.onclick = () => {
+        students.forEach(s => attendanceMap[s.id] = 'late');
+        renderAttendanceList();
+    };
+
+    attendanceList.addEventListener('change', (e) => {
+        if (e.target.classList.contains('attendance-status')) {
+            const studentId = e.target.getAttribute('data-student-id');
+            attendanceMap[studentId] = e.target.value;
+        }
+    });
+
+    saveAttendanceBtn.onclick = async () => {
+        const date = dateInput.value;
+        for (const student of students) {
+            const status = attendanceMap[student.id] || 'absent';
+            // Find if record exists for this student/date
+            const q = query(collection(db, 'attendance'), where('studentId', '==', student.id), where('date', '==', date));
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) {
+                // Update existing
+                await updateDoc(snapshot.docs[0].ref, { status });
+            } else {
+                // Add new
+                await addDoc(collection(db, 'attendance'), {
+                    studentId: student.id,
+                    date,
+                    status
+                });
+            }
+        }
+        utils.showMessage('Attendance saved!', 'success');
+        await refresh();
+    };
+}
+
+// Add navigation for attendance section
+const attendanceSidebarLink = document.querySelector('[data-section="attendance"]');
+if (attendanceSidebarLink) {
+    attendanceSidebarLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadAttendanceSection();
+    });
+}
+// ... existing code ...
+
+// In renderStudentDetail or similar function, after rendering student info, add attendance summary
+async function renderStudentAttendanceSummary(studentId) {
+    const attendanceSnapshot = await getDocs(query(collection(db, 'attendance'), where('studentId', '==', studentId)));
+    const records = attendanceSnapshot.docs.map(doc => doc.data());
+    const total = records.length;
+    const present = records.filter(r => r.status === 'present').length;
+    const absent = records.filter(r => r.status === 'absent').length;
+    const late = records.filter(r => r.status === 'late').length;
+    const percent = total ? ((present / total) * 100).toFixed(1) : '0.0';
+    const html = `<div class="attendance-summary-block" style="margin:1.5rem 0 0 0;padding:1.2rem 1.5rem;background:#f8fafc;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);max-width:400px;">
+        <h3 style="margin:0 0 0.7rem 0;font-size:1.1rem;color:#2563eb;">Attendance Summary</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;">
+            <div><b>Total Days:</b> ${total}</div>
+            <div><b>Present:</b> ${present}</div>
+            <div><b>Absent:</b> ${absent}</div>
+            <div><b>Late:</b> ${late}</div>
+            <div><b>Attendance %:</b> ${percent}%</div>
+        </div>
+    </div>`;
+    const modal = document.querySelector('.student-details-modal .student-details-body');
+    if (modal) {
+        // Insert after personal info or at end
+        modal.insertAdjacentHTML('beforeend', html);
+    }
+}
+// Call this in renderStudentDetail after rendering student info
+const origRenderStudentDetail = renderStudentDetail;
+renderStudentDetail = async function(student) {
+    await origRenderStudentDetail(student);
+    await renderStudentAttendanceSummary(student.id);
+};
