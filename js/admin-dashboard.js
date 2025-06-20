@@ -106,11 +106,8 @@ async function getAllStudents(searchId = '') {
     const studentCollection = collection(db, "student-registrations");
     console.log("Collection reference created:", studentCollection);
 
-    // Add a query to order by submittedAt in descending order (newest first)
-    const q = query(studentCollection, orderBy("submittedAt", "desc"));
-    console.log("Query created:", q);
-
-    const querySnapshot = await getDocs(q);
+    // Instead, fetch all students regardless of submittedAt
+    const querySnapshot = await getDocs(studentCollection);
     console.log("Query snapshot received:", querySnapshot);
     console.log("Number of documents:", querySnapshot.size);
 
@@ -122,6 +119,13 @@ async function getAllStudents(searchId = '') {
     const students = [];
     querySnapshot.forEach((doc) => {
       const studentData = doc.data();
+      // Fallback for fullName
+      let fullName = studentData.fullName;
+      if (!fullName) {
+        if (studentData.firstName || studentData.lastName) {
+          fullName = `${studentData.firstName || ''} ${studentData.lastName || ''}`.trim();
+        }
+      }
       // If searchId is provided, filter by internshipId
       if (!searchId ||
         (studentData.internshipId &&
@@ -129,7 +133,7 @@ async function getAllStudents(searchId = '') {
         console.log("Processing student document:", {
           id: doc.id,
           internshipId: studentData.internshipId,
-          fullName: studentData.fullName,
+          fullName: fullName,
           email: studentData.email,
           submittedAt: studentData.submittedAt
         });
@@ -137,6 +141,7 @@ async function getAllStudents(searchId = '') {
         students.push({ 
           id: doc.id,  // This is the userId
           ...studentData,
+          fullName: fullName,
           // Ensure these fields exist for display
           status: studentData.status || 'pending',
           submittedAt: studentData.submittedAt || studentData.registeredAt || new Date().toISOString()
@@ -1623,7 +1628,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Cleanup on page unload
-  window.addEventListener('unload', () => {
+  window.addEventListener('pagehide', () => {
     unsubscribe();
   });
 });
@@ -2032,6 +2037,18 @@ async function deleteNotification(notificationId) {
     }
 }
 
+// Mark notification as read
+async function markNotificationAsRead(notificationId) {
+    try {
+        const notificationRef = doc(db, 'notifications', notificationId);
+        await updateDoc(notificationRef, { read: true });
+        loadNotifications();
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        utils.showMessage(error.message || 'Error marking notification as read', 'error');
+    }
+}
+
 // Show notification modal
 function showNotificationModal() {
     const modal = document.getElementById('notification-modal');
@@ -2172,14 +2189,13 @@ async function loadTestsAndGrades() {
     }
 }
 
-// Refactor: Assign Grades Section (not modal)
+// Replace showAssignGradesSection to open modal and render inside it
 async function showAssignGradesSection(testId, testName, maxMarks, testDate) {
-    // Hide tests list, show assign grades section
-    document.getElementById('tests-list').style.display = 'none';
-    const section = document.getElementById('assign-grades-section');
-    section.style.display = '';
-    document.getElementById('assign-test-name').textContent = testName;
-    document.getElementById('assign-test-details').innerHTML = `<strong>Date:</strong> ${testDate} &nbsp; <strong>Max Marks:</strong> ${maxMarks}`;
+    // Show the modal
+    const modal = document.getElementById('assign-grades-modal');
+    const modalBody = document.getElementById('assign-grades-modal-body');
+    modal.style.display = 'block';
+    modal.style.opacity = '1';
 
     // Load all students
     const students = await getAllStudents();
@@ -2191,11 +2207,29 @@ async function showAssignGradesSection(testId, testName, maxMarks, testDate) {
         gradesMap[data.studentId] = { id: doc.id, ...data };
     });
 
+    // Render the assign grades UI as HTML (use class instead of id for injected fields)
+    let html = '';
+    html += `<div class="assign-grades-header">
+        <button class="btn btn-secondary back-to-tests-modal">&larr; Back to Tests</button>
+        <h2>Assign Grades: <span class="assign-test-name">${testName}</span></h2>
+        <div class="assign-test-details"><strong>Date:</strong> ${testDate} &nbsp; <strong>Max Marks:</strong> ${maxMarks}</div>
+    </div>`;
+    html += `<div class="assign-grades-controls">
+        <input type="text" class="student-search" placeholder="Search students by name or email..." />
+    </div>`;
+    html += `<form class="assign-grades-form-section">
+        <div class="grades-students-list-section"></div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Grades</button>
+        </div>
+    </form>`;
+    modalBody.innerHTML = html;
+
     // Render students table
     renderGradesStudentsListSection(students, gradesMap, maxMarks);
 
     // Search/filter logic
-    document.getElementById('student-search').oninput = function() {
+    modalBody.querySelector('.student-search').oninput = function() {
         const search = this.value.toLowerCase();
         const filtered = students.filter(s =>
             (s.fullName && s.fullName.toLowerCase().includes(search)) ||
@@ -2205,9 +2239,9 @@ async function showAssignGradesSection(testId, testName, maxMarks, testDate) {
     };
 
     // Form submit handler
-    document.getElementById('assign-grades-form-section').onsubmit = async function(e) {
+    modalBody.querySelector('.assign-grades-form-section').onsubmit = async function(e) {
         e.preventDefault();
-        const inputs = document.querySelectorAll('.grade-input');
+        const inputs = modalBody.querySelectorAll('.grade-input');
         let updates = 0;
         for (const input of inputs) {
             const studentId = input.getAttribute('data-student-id');
@@ -2230,15 +2264,43 @@ async function showAssignGradesSection(testId, testName, maxMarks, testDate) {
         }
         utils.showMessage(updates + ' grades saved!', 'success');
         // Optionally, reload the list or stay on the page
-        showTestsListSection();
+        closeAssignGradesModal();
+        loadTestsAndGrades();
     };
 
     // Back button
-    document.getElementById('back-to-tests').onclick = showTestsListSection;
+    modalBody.querySelector('.back-to-tests-modal').onclick = closeAssignGradesModal;
+
+    // Close modal on X button
+    document.getElementById('close-assign-grades-modal').onclick = closeAssignGradesModal;
+
+    // Close modal on outside click
+    modal.onclick = function(e) {
+        if (e.target === modal) closeAssignGradesModal();
+    };
+    // Close modal on Escape key
+    document.addEventListener('keydown', escModalHandler);
+
+    function escModalHandler(e) {
+        if (e.key === 'Escape') {
+            closeAssignGradesModal();
+            document.removeEventListener('keydown', escModalHandler);
+        }
+    }
+}
+
+function closeAssignGradesModal() {
+    const modal = document.getElementById('assign-grades-modal');
+    modal.style.opacity = '0';
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.getElementById('assign-grades-modal-body').innerHTML = '';
+    }, 200);
 }
 
 function renderGradesStudentsListSection(students, gradesMap, maxMarks) {
-    const gradesList = document.getElementById('grades-students-list-section');
+    // Use class selector for the injected container
+    const gradesList = document.querySelector('.grades-students-list-section');
     // Calculate summary
     const gradeVals = students.map(student => {
         const grade = gradesMap[student.id]?.grade;
@@ -2268,7 +2330,8 @@ function renderGradesStudentsListSection(students, gradesMap, maxMarks) {
             badgeClass += 'low';
             badge = `<span class="${badgeClass}">${gradeVal}</span>`;
         }
-        html += `<tr class="${missing}"><td>${student.fullName}</td><td>${student.email}</td><td>${badge}</td><td><button class='export-pdf-btn' data-student-id='${student.id}' data-student-name='${student.fullName}'>PDF</button></td></tr>`;
+        // Render input for grade
+        html += `<tr class="${missing}"><td>${student.fullName}</td><td>${student.email}</td><td><input type="number" class="grade-input" data-student-id="${student.id}" min="0" max="${maxMarks}" value="${gradeVal !== '' ? gradeVal : ''}" style="width:80px;"> ${badge}</td><td><button class='export-pdf-btn' data-student-id='${student.id}' data-student-name='${student.fullName}'>PDF</button></td></tr>`;
     });
     html += '</tbody>';
     html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg}<br>Max: ${max}<br>Min: ${min}</td><td></td></tr></tfoot>`;
@@ -2290,7 +2353,18 @@ function renderGradesStudentsListSection(students, gradesMap, maxMarks) {
             const row = btn.closest('tr');
             const table = document.createElement('table');
             table.className = 'grades-table';
-            table.innerHTML = `<thead><tr><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead><tbody>${row.innerHTML.replace(/<td><button.*?\/button><\/td>/, '')}</tbody>`;
+            // Clone the row and replace the input with the badge for export
+            const clonedRow = row.cloneNode(true);
+            const gradeCell = clonedRow.querySelector('td:nth-child(3)');
+            if (gradeCell) {
+                // Remove the input and keep only the badge
+                const badge = gradeCell.querySelector('.grade-badge');
+                gradeCell.innerHTML = badge ? badge.outerHTML : gradeCell.textContent;
+            }
+            // Remove the export button cell
+            const exportCell = clonedRow.querySelector('td:last-child');
+            if (exportCell) exportCell.remove();
+            table.innerHTML = `<thead><tr><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead><tbody>${clonedRow.innerHTML}</tbody>`;
             const wrapper = document.createElement('div');
             wrapper.appendChild(table);
             document.body.appendChild(wrapper);
