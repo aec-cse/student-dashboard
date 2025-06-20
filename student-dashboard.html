@@ -23,6 +23,10 @@
                     <i class="fas fa-clipboard-list"></i>
                     <span>Grades</span>
                 </a>
+                <a href="#" class="nav-item" data-section="chat" id="chat-link">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
                 <a href="#" class="nav-item" id="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
@@ -154,6 +158,18 @@
                 <button id="cancel-logout" class="btn btn-secondary">Cancel</button>
                 <button id="confirm-logout" class="btn btn-danger">Logout</button>
             </div>
+        </div>
+    </div>
+
+    <div id="student-chat-panel" class="chat-panel" style="display:none;">
+        <div class="chat-header">
+            <span>Chat</span>
+            <button class="close-chat-btn" id="close-student-chat">&times;</button>
+        </div>
+        <div class="chat-messages" id="student-chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="student-chat-input" placeholder="Type a message..." autocomplete="off" />
+            <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 

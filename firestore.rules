@@ -122,10 +122,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Allow chat access if user is a participant
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null && request.auth.uid in resource.data.participants;
+      // Allow access to messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      }
+    }
+
     // Debug
     match /{document=**} {
-  allow read: if isAuthenticated();
-}
+      allow read: if isAuthenticated();
+    }
 
     // Default: deny all
     match /{document=**} {

@@ -29,6 +29,7 @@
         <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
         <a href="#" data-section="grades"><i class="fas fa-clipboard-list"></i> Grades</a>
         <a href="#" data-section="attendance"><i class="fas fa-calendar-check"></i> Attendance</a>
+        <a href="#" data-section="chat" id="chat-link"><i class="fas fa-comments"></i> Chat</a>
         <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
@@ -1743,6 +1744,23 @@ input:checked + .slider + .toggle-text {
         </div>
         <div class="modal-body" id="assign-grades-modal-body">
           <!-- Assign grades UI will be rendered here dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <div id="admin-chat-panel" class="chat-panel" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; max-width:none; border-radius:0; box-shadow:none; z-index:3000;">
+      <div class="chat-header" style="border-radius:0;">
+        <span>Chat</span>
+        <button class="close-chat-btn" id="close-admin-chat" style="float:right;">&times;</button>
+      </div>
+      <div class="chat-main-area">
+        <div class="chat-student-list" id="admin-chat-student-list"></div>
+        <div class="chat-conversation-area">
+          <div class="chat-messages" id="admin-chat-messages"></div>
+          <div class="chat-input-area">
+            <input type="text" id="admin-chat-input" placeholder="Type a message..." autocomplete="off" />
+            <button id="admin-chat-send"><i class="fas fa-paper-plane"></i></button>
+          </div>
         </div>
       </div>
     </div>

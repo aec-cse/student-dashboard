@@ -1,7 +1,7 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -489,4 +489,89 @@ async function initDashboard() {
 }
 
 // Start the dashboard when the page loads
-document.addEventListener('DOMContentLoaded', initDashboard); 
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+// --- Chat Functionality ---
+const chatLink = document.getElementById('chat-link');
+const chatPanel = document.getElementById('student-chat-panel');
+const closeChatBtn = document.getElementById('close-student-chat');
+const chatMessages = document.getElementById('student-chat-messages');
+const chatInput = document.getElementById('student-chat-input');
+const chatSendBtn = document.getElementById('student-chat-send');
+
+let adminId = null;
+let chatId = null;
+let unsubscribeChat = null;
+
+// Find the first admin (assume single admin)
+async function getAdminId() {
+  const db = getFirestore();
+  const adminsSnap = await getDocs(collection(db, 'admins'));
+  if (!adminsSnap.empty) {
+    return adminsSnap.docs[0].id;
+  }
+  return null;
+}
+
+// Open chat panel
+chatLink.addEventListener('click', async (e) => {
+  e.preventDefault();
+  chatPanel.style.display = 'flex';
+  if (!adminId) adminId = await getAdminId();
+  if (!adminId) {
+    chatMessages.innerHTML = '<p style="color:#ef4444">No admin available for chat.</p>';
+    return;
+  }
+  const user = auth.currentUser;
+  if (!user) return;
+  chatId = `${adminId}_${user.uid}`;
+  loadChatMessages();
+});
+
+// Close chat panel
+closeChatBtn.addEventListener('click', () => {
+  chatPanel.style.display = 'none';
+  if (unsubscribeChat) unsubscribeChat();
+});
+
+// Send message
+chatSendBtn.addEventListener('click', sendMessage);
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || !chatId) return;
+  const db = getFirestore();
+  const user = auth.currentUser;
+  await addDoc(collection(db, 'chats', chatId, 'messages'), {
+    senderId: user.uid,
+    senderRole: 'student',
+    text,
+    timestamp: serverTimestamp()
+  });
+  chatInput.value = '';
+}
+
+function loadChatMessages() {
+  const db = getFirestore();
+  const user = auth.currentUser;
+  chatMessages.innerHTML = '<p style="color:#888">Loading chat...</p>';
+  if (unsubscribeChat) unsubscribeChat();
+  unsubscribeChat = onSnapshot(
+    query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc')),
+    (snapshot) => {
+      chatMessages.innerHTML = '';
+      snapshot.forEach(doc => {
+        const msg = doc.data();
+        const isMe = msg.senderId === user.uid;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message' + (isMe ? ' student' : '');
+        msgDiv.textContent = msg.text;
+        chatMessages.appendChild(msgDiv);
+      });
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  );
+} 

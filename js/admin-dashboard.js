@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, deleteDoc, setDoc, addDoc, where, limit, serverTimestamp, writeBatch, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 import { getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 
 // Firebase configuration
@@ -1351,7 +1351,7 @@ async function loadContent(section, studentId = null) {
                 }
                 const student = await getStudentById(studentId);
                 if (student) {
-                    content = renderStudentDetail(student);
+                    content = await renderStudentDetail(student);
                 } else {
                     utils.showMessage('Student not found', 'error');
                     return;
@@ -2541,7 +2541,7 @@ function renderGradesStudentsListSection(students, gradesMap, maxMarks) {
     students.forEach(student => {
         const marksVal = gradesMap[student.id]?.grade ?? '';
         // Render input for marks, no badge
-        html += `<tr><td>${student.fullName}</td><td>${student.email}</td><td><input type="number" class="grade-input" data-student-id="${student.id}" min="0" max="${maxMarks}" value="${marksVal !== '' ? marksVal : ''}" style="width:80px;"></td></tr>`;
+        html += `<tr><td>${student.fullName}</td><td>${student.email}</td><td><input type="number" class="grade-input" data-student-id="${student.id}" min="0" max="${maxMarks}" value="${marksVal !== '' ? marksVal : ''}" style="width:80px;" name="grade-${student.id}"></td></tr>`;
     });
     html += '</tbody>';
     html += `<tfoot><tr><td colspan="2">Summary</td><td>Avg: ${avg}<br>Max: ${max}<br>Min: ${min}</td></tr></tfoot>`;
@@ -2577,7 +2577,6 @@ async function loadAttendanceSection() {
     const attendanceList = document.getElementById('attendance-list');
     const markAllPresentBtn = document.getElementById('mark-all-present');
     const markAllAbsentBtn = document.getElementById('mark-all-absent');
-    const markAllLateBtn = document.getElementById('mark-all-late');
     const saveAttendanceBtn = document.getElementById('save-attendance');
 
     // Set default date to today
@@ -2604,12 +2603,12 @@ async function loadAttendanceSection() {
                 <select class="attendance-status" data-student-id="${student.id}">
                     <option value="present" ${status === 'present' ? 'selected' : ''}>Present</option>
                     <option value="absent" ${status === 'absent' ? 'selected' : ''}>Absent</option>
-                    <option value="late" ${status === 'late' ? 'selected' : ''}>Late</option>
                 </select>
             </td></tr>`;
         });
         html += '</tbody></table>';
         attendanceList.innerHTML = html;
+        // No more View Records event handlers
     }
 
     async function refresh() {
@@ -2626,10 +2625,6 @@ async function loadAttendanceSection() {
     };
     markAllAbsentBtn.onclick = () => {
         students.forEach(s => attendanceMap[s.id] = 'absent');
-        renderAttendanceList();
-    };
-    markAllLateBtn.onclick = () => {
-        students.forEach(s => attendanceMap[s.id] = 'late');
         renderAttendanceList();
     };
 
@@ -2681,7 +2676,6 @@ async function renderStudentAttendanceSummary(studentId) {
     const total = records.length;
     const present = records.filter(r => r.status === 'present').length;
     const absent = records.filter(r => r.status === 'absent').length;
-    const late = records.filter(r => r.status === 'late').length;
     const percent = total ? ((present / total) * 100).toFixed(1) : '0.0';
     const html = `<div class="attendance-summary-block" style="margin:1.5rem 0 0 0;padding:1.2rem 1.5rem;background:#f8fafc;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);max-width:400px;">
         <h3 style="margin:0 0 0.7rem 0;font-size:1.1rem;color:#2563eb;">Attendance Summary</h3>
@@ -2689,8 +2683,8 @@ async function renderStudentAttendanceSummary(studentId) {
             <div><b>Total Days:</b> ${total}</div>
             <div><b>Present:</b> ${present}</div>
             <div><b>Absent:</b> ${absent}</div>
-            <div><b>Late:</b> ${late}</div>
             <div><b>Attendance %:</b> ${percent}%</div>
+            <div><b>Average Attendance:</b> ${percent}%</div>
         </div>
     </div>`;
     const modal = document.querySelector('.student-details-modal .student-details-body');
@@ -2704,4 +2698,237 @@ const origRenderStudentDetail = renderStudentDetail;
 renderStudentDetail = async function(student) {
     await origRenderStudentDetail(student);
     await renderStudentAttendanceSummary(student.id);
+    // (Button logic removed)
 };
+// Add modal for attendance records
+if (!document.getElementById('attendance-records-modal')) {
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'attendance-records-modal';
+    modalDiv.className = 'modal';
+    modalDiv.innerHTML = `
+      <div class="modal-content" style="max-width:600px;">
+        <div class="modal-header">
+          <h3 id="attendance-modal-title">Attendance Records</h3>
+          <button class="close-modal" id="close-attendance-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="attendance-modal-body">
+          <!-- Attendance table will be rendered here -->
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    document.getElementById('close-attendance-modal').onclick = () => {
+        modalDiv.classList.remove('show');
+        modalDiv.style.display = 'none';
+    };
+    modalDiv.onclick = (e) => { if (e.target === modalDiv) { modalDiv.classList.remove('show'); modalDiv.style.display = 'none'; } };
+}
+// Function to show attendance modal
+async function showStudentAttendanceModal(studentId, fullName) {
+    const modal = document.getElementById('attendance-records-modal');
+    const body = document.getElementById('attendance-modal-body');
+    const title = document.getElementById('attendance-modal-title');
+    title.textContent = `Attendance Records for ${fullName}`;
+    body.innerHTML = '<p>Loading attendance records...</p>';
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+    // Fetch attendance records
+    const attendanceSnapshot = await getDocs(query(collection(db, 'attendance'), where('studentId', '==', studentId)));
+    const records = attendanceSnapshot.docs.map(doc => doc.data());
+    // --- Summary Calculation ---
+    const total = records.length;
+    const present = records.filter(r => r.status === 'present').length;
+    const absent = records.filter(r => r.status === 'absent').length;
+    const percent = total ? ((present / total) * 100).toFixed(1) : '0.0';
+    let summaryHtml = `<div class="attendance-summary-block" style="margin:1.5rem 0 1.5rem 0;padding:1.2rem 1.5rem;background:#f8fafc;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);max-width:400px;">
+        <h3 style="margin:0 0 0.7rem 0;font-size:1.1rem;color:#2563eb;">Attendance Summary</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;">
+            <div><b>Total Days:</b> ${total}</div>
+            <div><b>Present:</b> ${present}</div>
+            <div><b>Absent:</b> ${absent}</div>
+            <div><b>Attendance %:</b> ${percent}%</div>
+            <div><b>Average Attendance:</b> ${percent}%</div>
+        </div>
+    </div>`;
+    if (records.length === 0) {
+        body.innerHTML = summaryHtml + '<p>No attendance records found.</p>';
+        return;
+    }
+    // Sort by date descending
+    records.sort((a, b) => new Date(b.date) - new Date(a.date));
+    let html = '<table class="grades-table"><thead><tr><th>Date</th><th>Status</th></tr></thead><tbody>';
+    records.forEach(r => {
+        let statusColor = r.status === 'present' ? '#22c55e' : r.status === 'absent' ? '#facc15' : '#ef4444';
+        html += `<tr><td>${r.date}</td><td><span style="padding:0.4em 1em;border-radius:20px;font-weight:600;background:${statusColor};color:#fff;">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span></td></tr>`;
+    });
+    html += '</tbody></table>';
+    body.innerHTML = summaryHtml + html;
+}
+
+// --- Attendance Records Modal Creation (only once) ---
+function ensureAttendanceRecordsModal() {
+    let modal = document.getElementById('attendance-records-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'attendance-records-modal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+              <h3 id="attendance-modal-title">Attendance Records</h3>
+              <button class="close-modal" id="close-attendance-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="attendance-modal-body">
+              <!-- Attendance table will be rendered here -->
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        // Close logic
+        document.getElementById('close-attendance-modal').onclick = () => {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        };
+        modal.onclick = (e) => { if (e.target === modal) { modal.classList.remove('show'); modal.style.display = 'none'; } };
+    }
+    return modal;
+}
+
+// --- Update Attendance Table Rendering ---
+// In loadAttendanceSection, update renderAttendanceList:
+// ... existing code ...
+function renderAttendanceList() {
+    let html = `<table class="grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Status</th></tr></thead><tbody>`;
+    students.forEach(student => {
+        const status = attendanceMap[student.id] || 'absent';
+        html += `<tr><td>${student.fullName}</td><td>${student.email}</td><td>
+            <select class="attendance-status" data-student-id="${student.id}">
+                <option value="present" ${status === 'present' ? 'selected' : ''}>Present</option>
+                <option value="absent" ${status === 'absent' ? 'selected' : ''}>Absent</option>
+            </select>
+        </td></tr>`;
+    });
+    html += '</tbody></table>';
+    attendanceList.innerHTML = html;
+    // No more View Records event handlers
+}
+// ... existing code ...
+
+// ... existing code ...
+// --- Admin Chat Functionality ---
+(function() {
+  const adminChatLink = document.getElementById('chat-link');
+  const adminChatPanel = document.getElementById('admin-chat-panel');
+  const closeAdminChatBtn = document.getElementById('close-admin-chat');
+  const adminChatStudentList = document.getElementById('admin-chat-student-list');
+  const adminChatMessages = document.getElementById('admin-chat-messages');
+  const adminChatInput = document.getElementById('admin-chat-input');
+  const adminChatSendBtn = document.getElementById('admin-chat-send');
+
+  let adminChatStudents = [];
+  let adminActiveStudentId = null;
+  let adminChatId = null;
+  let adminUnsubscribeChat = null;
+
+  if (adminChatLink && adminChatPanel) {
+    adminChatLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      adminChatPanel.style.display = 'flex';
+      await loadAdminChatStudentList();
+    });
+  }
+  if (closeAdminChatBtn) {
+    closeAdminChatBtn.addEventListener('click', () => {
+      adminChatPanel.style.display = 'none';
+      if (adminUnsubscribeChat) adminUnsubscribeChat();
+    });
+  }
+
+  async function loadAdminChatStudentList() {
+    adminChatStudentList.innerHTML = '<div style="padding:1em;color:#888;">Loading students...</div>';
+    adminChatStudents = await getAllStudents();
+    if (!adminChatStudents.length) {
+      adminChatStudentList.innerHTML = '<div style="padding:1em;color:#ef4444;">No students found.</div>';
+      return;
+    }
+    adminChatStudentList.innerHTML = '';
+    adminChatStudents.forEach(student => {
+      const item = document.createElement('button');
+      item.className = 'chat-student-item' + (student.id === adminActiveStudentId ? ' active' : '');
+      item.textContent = student.fullName || student.email || student.id;
+      item.onclick = () => selectAdminChatStudent(student.id);
+      adminChatStudentList.appendChild(item);
+    });
+    // Auto-select first student if none selected
+    if (!adminActiveStudentId && adminChatStudents.length) {
+      selectAdminChatStudent(adminChatStudents[0].id);
+    }
+  }
+
+  function selectAdminChatStudent(studentId) {
+    if (adminActiveStudentId === studentId) return;
+    adminActiveStudentId = studentId;
+    // Highlight active
+    adminChatStudentList.querySelectorAll('.chat-student-item').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent === getStudentNameById(studentId));
+    });
+    // Load chat
+    loadAdminChatMessages();
+  }
+  function getStudentNameById(id) {
+    const s = adminChatStudents.find(stu => stu.id === id);
+    return s ? (s.fullName || s.email || s.id) : id;
+  }
+
+  if (adminChatSendBtn) {
+    adminChatSendBtn.addEventListener('click', sendAdminChatMessage);
+  }
+  if (adminChatInput) {
+    adminChatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendAdminChatMessage();
+    });
+  }
+
+  function getAdminId() {
+    return auth.currentUser ? auth.currentUser.uid : null;
+  }
+
+  async function sendAdminChatMessage() {
+    const text = adminChatInput.value.trim();
+    if (!text || !adminActiveStudentId) return;
+    const db = getFirestore();
+    const adminId = getAdminId();
+    adminChatId = `${adminId}_${adminActiveStudentId}`;
+    await addDoc(collection(db, 'chats', adminChatId, 'messages'), {
+      senderId: adminId,
+      senderRole: 'admin',
+      text,
+      timestamp: serverTimestamp()
+    });
+    adminChatInput.value = '';
+  }
+
+  function loadAdminChatMessages() {
+    const db = getFirestore();
+    const adminId = getAdminId();
+    adminChatId = `${adminId}_${adminActiveStudentId}`;
+    adminChatMessages.innerHTML = '<p style="color:#888">Loading chat...</p>';
+    if (adminUnsubscribeChat) adminUnsubscribeChat();
+    adminUnsubscribeChat = onSnapshot(
+      query(collection(db, 'chats', adminChatId, 'messages'), orderBy('timestamp', 'asc')),
+      (snapshot) => {
+        adminChatMessages.innerHTML = '';
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const isMe = msg.senderId === adminId;
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'chat-message' + (isMe ? ' admin' : '');
+          msgDiv.textContent = msg.text;
+          adminChatMessages.appendChild(msgDiv);
+        });
+        adminChatMessages.scrollTop = adminChatMessages.scrollHeight;
+      }
+    );
+  }
+})();
+// ... existing code ...
