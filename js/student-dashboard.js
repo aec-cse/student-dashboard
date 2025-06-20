@@ -1,7 +1,7 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, serverTimestamp, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -242,7 +242,12 @@ function renderNotifications(notifications) {
         clone.querySelector('.notification-priority').textContent = notification.priority;
         clone.querySelector('.notification-priority').classList.add(notification.priority);
         clone.querySelector('.notification-date').textContent = formatDate(notification.createdAt);
-        clone.querySelector('.notification-author').textContent = `By ${notification.createdBy || 'Admin'}`;
+        // Show 'By Admin' if createdBy is missing or is 'anusayatradingsolutions@gmail.com'
+        let author = 'Admin';
+        if (notification.createdBy && notification.createdBy !== 'anusayatradingsolutions@gmail.com') {
+            author = notification.createdBy;
+        }
+        clone.querySelector('.notification-author').textContent = `By ${author}`;
 
         notificationsList.appendChild(clone);
     });
@@ -436,7 +441,6 @@ function loadScript(src) {
 async function updateDashboard(studentData) {
     try {
         // Update student info
-        if (studentName) studentName.textContent = studentData.fullName || 'Student';
         const studentMsg = document.getElementById('student_msg');
         if (studentMsg) studentMsg.innerText = "Welcome " + studentData.fullName + "!";
         if (studentId) studentId.textContent = `ID: ${studentData.internshipId || 'N/A'}`;
@@ -492,7 +496,7 @@ async function initDashboard() {
 document.addEventListener('DOMContentLoaded', initDashboard);
 
 // --- Chat Functionality ---
-const chatLink = document.getElementById('chat-link');
+const chatBubble = document.getElementById('floating-chat-bubble');
 const chatPanel = document.getElementById('student-chat-panel');
 const closeChatBtn = document.getElementById('close-student-chat');
 const chatMessages = document.getElementById('student-chat-messages');
@@ -514,7 +518,7 @@ async function getAdminId() {
 }
 
 // Open chat panel
-chatLink.addEventListener('click', async (e) => {
+chatBubble.addEventListener('click', async (e) => {
   e.preventDefault();
   chatPanel.style.display = 'flex';
   if (!adminId) adminId = await getAdminId();
@@ -540,11 +544,26 @@ chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
+async function ensureChatDocument(chatId, participants) {
+  const chatRef = doc(db, 'chats', chatId);
+  const chatSnap = await getDoc(chatRef);
+  if (!chatSnap.exists()) {
+    await setDoc(chatRef, { participants });
+  } else {
+    const data = chatSnap.data();
+    if (!data.participants || !participants.every(uid => data.participants.includes(uid))) {
+      await setDoc(chatRef, { participants: Array.from(new Set([...(data.participants || []), ...participants])) }, { merge: true });
+    }
+  }
+}
+
 async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text || !chatId) return;
   const db = getFirestore();
   const user = auth.currentUser;
+  // Ensure chat document exists with both admin and student as participants
+  await ensureChatDocument(chatId, [adminId, user.uid]);
   await addDoc(collection(db, 'chats', chatId, 'messages'), {
     senderId: user.uid,
     senderRole: 'student',

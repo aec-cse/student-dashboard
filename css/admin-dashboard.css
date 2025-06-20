@@ -2306,3 +2306,49 @@ body {
     min-height: 200px;
   }
 }
+
+/* Floating chat bubble styles */
+#floating-chat-bubble {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  border: none;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+#floating-chat-bubble:hover {
+  background: #1d4ed8;
+  transform: scale(1.08);
+}
+
+/* Ensure chat panel is above bubble */
+.chat-panel {
+  z-index: 2100 !important;
+}
+
+/* Ensure admin chat panel opens at bottom right like student dashboard */
+#admin-chat-panel.chat-panel {
+  position: fixed !important;
+  bottom: 32px !important;
+  right: 32px !important;
+  top: auto !important;
+  left: auto !important;
+  width: 370px !important;
+  max-width: 95vw !important;
+  height: 480px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18) !important;
+  background: #fff !important;
+  flex-direction: column !important;
+}

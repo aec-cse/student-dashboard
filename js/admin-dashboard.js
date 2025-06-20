@@ -2830,13 +2830,18 @@ function renderAttendanceList() {
   let adminChatId = null;
   let adminUnsubscribeChat = null;
 
-  if (adminChatLink && adminChatPanel) {
-    adminChatLink.addEventListener('click', async (e) => {
+  // Remove: const adminChatLink = document.getElementById('chat-link');
+  const chatBubble = document.getElementById('floating-chat-bubble');
+
+  // Replace adminChatLink event listener with chatBubble event listener
+  if (chatBubble && adminChatPanel) {
+    chatBubble.addEventListener('click', async (e) => {
       e.preventDefault();
       adminChatPanel.style.display = 'flex';
       await loadAdminChatStudentList();
     });
   }
+
   if (closeAdminChatBtn) {
     closeAdminChatBtn.addEventListener('click', () => {
       adminChatPanel.style.display = 'none';
@@ -2899,6 +2904,8 @@ function renderAttendanceList() {
     const db = getFirestore();
     const adminId = getAdminId();
     adminChatId = `${adminId}_${adminActiveStudentId}`;
+    // Ensure chat document exists with both admin and student as participants
+    await ensureChatDocument(adminChatId, [adminId, adminActiveStudentId]);
     await addDoc(collection(db, 'chats', adminChatId, 'messages'), {
       senderId: adminId,
       senderRole: 'admin',
@@ -2929,6 +2936,19 @@ function renderAttendanceList() {
         adminChatMessages.scrollTop = adminChatMessages.scrollHeight;
       }
     );
+  }
+
+  async function ensureChatDocument(chatId, participants) {
+    const chatRef = doc(db, 'chats', chatId);
+    const chatSnap = await getDoc(chatRef);
+    if (!chatSnap.exists()) {
+      await setDoc(chatRef, { participants });
+    } else {
+      const data = chatSnap.data();
+      if (!data.participants || !participants.every(uid => data.participants.includes(uid))) {
+        await setDoc(chatRef, { participants: Array.from(new Set([...(data.participants || []), ...participants])) }, { merge: true });
+      }
+    }
   }
 })();
 // ... existing code ...

@@ -23,10 +23,6 @@
                     <i class="fas fa-clipboard-list"></i>
                     <span>Grades</span>
                 </a>
-                <a href="#" class="nav-item" data-section="chat" id="chat-link">
-                    <i class="fas fa-comments"></i>
-                    <span>Chat</span>
-                </a>
                 <a href="#" class="nav-item" id="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
@@ -39,7 +35,6 @@
             <div class="content-header">
                 <h1 id="student_msg" style="text-align: center; width: 100%;"></h1>
                 <div class="user-info">
-                    <span id="student-name">Loading...</span>
                     <span id="student-id">ID: Loading...</span>
                 </div>
             </div>
@@ -172,6 +167,9 @@
             <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
+
+    <!-- Add floating chat bubble -->
+    <button id="floating-chat-bubble" style="position:fixed;bottom:32px;right:32px;width:60px;height:60px;border-radius:50%;background:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.18);border:none;z-index:2000;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;"><i class="fas fa-comments"></i></button>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="js/student-dashboard.js"></script>

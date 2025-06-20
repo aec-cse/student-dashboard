@@ -29,7 +29,6 @@
         <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
         <a href="#" data-section="grades"><i class="fas fa-clipboard-list"></i> Grades</a>
         <a href="#" data-section="attendance"><i class="fas fa-calendar-check"></i> Attendance</a>
-        <a href="#" data-section="chat" id="chat-link"><i class="fas fa-comments"></i> Chat</a>
         <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
@@ -1748,21 +1747,24 @@ input:checked + .slider + .toggle-text {
       </div>
     </div>
 
-    <div id="admin-chat-panel" class="chat-panel" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; max-width:none; border-radius:0; box-shadow:none; z-index:3000;">
-      <div class="chat-header" style="border-radius:0;">
+    <div id="admin-chat-panel" class="chat-panel" style="display:none; position:fixed; bottom:32px; right:32px; width:370px; max-width:95vw; height:480px; border-radius:18px; box-shadow:0 4px 24px rgba(0,0,0,0.18); z-index:3000; background:#fff; flex-direction:column;">
+      <div class="chat-header" style="border-radius:18px 18px 0 0;">
         <span>Chat</span>
         <button class="close-chat-btn" id="close-admin-chat" style="float:right;">&times;</button>
       </div>
-      <div class="chat-main-area">
-        <div class="chat-student-list" id="admin-chat-student-list"></div>
-        <div class="chat-conversation-area">
-          <div class="chat-messages" id="admin-chat-messages"></div>
-          <div class="chat-input-area">
-            <input type="text" id="admin-chat-input" placeholder="Type a message..." autocomplete="off" />
+      <div class="chat-main-area" style="display:flex;flex:1;min-height:0;">
+        <div class="chat-student-list" id="admin-chat-student-list" style="width:110px;overflow-y:auto;"></div>
+        <div class="chat-conversation-area" style="flex:1;display:flex;flex-direction:column;">
+          <div class="chat-messages" id="admin-chat-messages" style="flex:1;overflow-y:auto;"></div>
+          <div class="chat-input-area" style="display:flex;gap:0.5rem;padding:0.5rem 0.75rem;">
+            <input type="text" id="admin-chat-input" placeholder="Type a message..." autocomplete="off" style="flex:1;" />
             <button id="admin-chat-send"><i class="fas fa-paper-plane"></i></button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Add floating chat bubble -->
+    <button id="floating-chat-bubble" style="position:fixed;bottom:32px;right:32px;width:60px;height:60px;border-radius:50%;background:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.18);border:none;z-index:2000;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;"><i class="fas fa-comments"></i></button>
 </body>
 </html>
