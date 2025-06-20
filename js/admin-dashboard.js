@@ -1642,13 +1642,33 @@ async function viewStudentDetails(studentId) {
 
     try {
         const studentDoc = await getDoc(doc(db, 'student-registrations', studentId));
-        
         if (!studentDoc.exists()) {
             console.error('Student not found');
             return;
         }
-
         const student = studentDoc.data();
+
+        // Fetch all grades for the student
+        const gradesSnapshot = await getDocs(query(collection(db, 'grades'), where('studentId', '==', studentId)));
+        const grades = [];
+        for (const docSnap of gradesSnapshot.docs) {
+            const gradeData = docSnap.data();
+            // Fetch test info for each grade
+            let testName = 'Unknown', testDate = '';
+            if (gradeData.testId) {
+                const testDoc = await getDoc(doc(db, 'tests', gradeData.testId));
+                if (testDoc.exists()) {
+                    testName = testDoc.data().name || 'Unknown';
+                    testDate = testDoc.data().date || '';
+                }
+            }
+            grades.push({
+                testName,
+                testDate,
+                grade: gradeData.grade
+            });
+        }
+        grades.sort((a, b) => new Date(a.testDate) - new Date(b.testDate));
 
         // Helper function to format array or string data
         const formatData = (data) => {
@@ -1660,14 +1680,20 @@ async function viewStudentDetails(studentId) {
 
         const modal = document.createElement('div');
         modal.className = 'student-details-modal';
-        
+        // Add chart section if grades exist
+        const chartSection = grades.length ? `
+            <div class="details-section">
+                <h3><i class="fas fa-chart-line"></i> Progress Chart</h3>
+                <canvas id="student-progress-chart" height="120"></canvas>
+            </div>
+        ` : '';
         modal.innerHTML = `
             <div class="student-details-content">
                 <div class="student-details-header">
                     <div class="student-profile">
                         <div class="student-photo">
                             ${student.photograph ? 
-                                `<img src="${student.photograph}" alt="${student.fullName}" onerror="this.parentElement.innerHTML='<div class=\'photo-placeholder\'><i class=\'fas fa-user\'></i></div>'">` :
+                                `<img src="${student.photograph}" alt="${student.fullName}" onerror="this.parentElement.innerHTML='<div class='photo-placeholder'><i class='fas fa-user'></i></div>'">` :
                                 `<div class="photo-placeholder"><i class="fas fa-user"></i></div>`
                             }
                         </div>
@@ -1796,6 +1822,7 @@ async function viewStudentDetails(studentId) {
                             </div>
                         </div>
                     </div>
+                    ${chartSection}
                 </div>
                 <div class="student-details-footer">
                     <div class="status-buttons">
@@ -1838,6 +1865,32 @@ async function viewStudentDetails(studentId) {
             }
         });
 
+        // Render the chart if grades exist
+        if (grades.length) {
+            // Wait for DOM to update
+            setTimeout(() => {
+                const ctx = document.getElementById('student-progress-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: grades.map(g => g.testDate || g.testName),
+                        datasets: [{
+                            label: 'Grade',
+                            data: grades.map(g => g.grade),
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79,70,229,0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }, 0);
+        }
     } catch (error) {
         console.error('Error viewing student details:', error);
     }
