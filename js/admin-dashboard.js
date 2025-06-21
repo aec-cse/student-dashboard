@@ -717,44 +717,20 @@ async function renderStudentManagement() {
 // DOM Elements
 const logoutBtn = document.getElementById('logout-btn');
 const logoutModal = document.getElementById('logout-modal');
-const closeModalBtn = document.querySelector('.close-modal');
-const cancelLogoutBtn = document.getElementById('cancel-logout');
-const confirmLogoutBtn = document.getElementById('confirm-logout');
-
-// Modal Functions
-function showModal() {
-    logoutModal.classList.add('show');
-}
-
-function hideModal() {
-    logoutModal.classList.remove('show');
-}
 
 // Event Listeners for Modal
-logoutBtn.addEventListener('click', (e) => {
+logoutBtn.addEventListener('click', async (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    showModal();
-});
-
-closeModalBtn.addEventListener('click', hideModal);
-cancelLogoutBtn.addEventListener('click', hideModal);
-
-// Close modal when clicking outside
-logoutModal.addEventListener('click', (e) => {
-    if (e.target === logoutModal) {
-        hideModal();
-    }
+    await handleLogout();
 });
 
 // Handle logout confirmation
-confirmLogoutBtn.addEventListener('click', async () => {
+async function handleLogout() {
     if (isRegistrationInProgress) {
         utils.showMessage('Cannot logout during student registration. Please wait.', 'error');
         hideModal();
         return;
     }
-
     try {
         await signOut(auth);
         window.location.href = 'admin-login.html';
@@ -762,7 +738,7 @@ confirmLogoutBtn.addEventListener('click', async () => {
         console.error('Error signing out:', error);
         utils.showMessage('Error signing out. Please try again.', 'error');
     }
-});
+}
 
 // Function to handle student registration
 async function handleStudentRegistration(event) {
@@ -1567,8 +1543,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-
-  // Load the dashboard content by default
   loadContent('dashboard');
 });
 
