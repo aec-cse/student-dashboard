@@ -132,3 +132,110 @@
         font-size: 14px;
     }
 }
+
+/* Modern Login Themes with Glassmorphism */
+body.student-login-theme {
+    background: linear-gradient(135deg, #e0f7ec 0%, #a7f3d0 100%);
+}
+body.admin-login-theme {
+    background: linear-gradient(135deg, #ffe0e0 0%, #fecaca 100%);
+}
+
+.student-login-theme .login-container {
+    border-top: 6px solid #22c55e;
+    box-shadow: 0 8px 32px 0 rgba(34, 197, 94, 0.18);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 18px;
+    border: 1px solid rgba(34, 197, 94, 0.15);
+}
+.admin-login-theme .login-container {
+    border-top: 6px solid #ef4444;
+    box-shadow: 0 8px 32px 0 rgba(239, 68, 68, 0.18);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 18px;
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.student-login-theme .login-btn {
+    background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px 0 rgba(34, 197, 94, 0.10);
+}
+.student-login-theme .login-btn:hover {
+    background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+}
+
+.admin-login-theme .login-btn {
+    background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px 0 rgba(239, 68, 68, 0.10);
+}
+.admin-login-theme .login-btn:hover {
+    background: linear-gradient(90deg, #b91c1c 0%, #ef4444 100%);
+}
+
+.student-login-theme .forgot-password-btn,
+.student-login-theme .admin-link a {
+    color: #16a34a;
+}
+.admin-login-theme .forgot-password-btn,
+.admin-login-theme .back-link a {
+    color: #ef4444;
+}
+
+.login-header .login-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
+}
+
+.login-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+/* Compact Floating, Modern Login Elements */
+.floating-form {
+    padding: 20px 14px 16px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.floating-group {
+    margin-bottom: 14px;
+}
+.floating-input {
+    padding: 10px 10px;
+    border-radius: 6px;
+    font-size: 0.98rem;
+}
+.floating-btn {
+    margin-top: 6px;
+    padding: 10px 0;
+    font-size: 1rem;
+    border-radius: 6px;
+}
+.login-header .login-icon {
+    font-size: 2rem !important;
+    margin-bottom: 0.25rem !important;
+}
+.login-header h1 {
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+}
+.login-header p {
+    font-size: 0.95rem;
+}
