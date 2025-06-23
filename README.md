@@ -1,5 +1,16 @@
 # Student Dashboard - Educational Website Login System
 
+## GitHub Project Stats
+
+![GitHub Repo stars](https://img.shields.io/github/stars/aec-cse/student-dashboard?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/aec-cse/student-dashboard?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/aec-cse/student-dashboard?style=flat-square)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/aec-cse/student-dashboard?style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/aec-cse/student-dashboard?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/aec-cse/student-dashboard?style=flat-square)
+
+[![Contributors](https://contrib.rocks/image?repo=aec-cse/student-dashboard)](https://github.com/aec-cse/student-dashboard/graphs/contributors)
+
 **Project ID:** ATITS-INT-PROJ-001  
 **Assigned by:** Anusaya Trading and IT Solutions  
 **Deadline:** 5 June 2025
