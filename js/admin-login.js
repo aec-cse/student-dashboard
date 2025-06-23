@@ -1,6 +1,6 @@
 // Firebase imports
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
 // Firebase configuration
@@ -21,12 +21,25 @@ const db = getFirestore(app);
 // DOM Elements
 const loginForm = document.getElementById('loginForm');
 const errorMessage = document.getElementById('errorMessage');
+const forgotPasswordBtn = document.querySelector('.forgot-password-btn');
 
 // Show error message
 function showError(message) {
     console.error('Login error:', message);
     errorMessage.textContent = message;
     errorMessage.style.display = 'block';
+    errorMessage.style.color = '#dc3545';
+    errorMessage.style.backgroundColor = '#f8d7da';
+    errorMessage.style.border = '1px solid #f5c6cb';
+}
+
+// Show success message
+function showSuccess(message) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+    errorMessage.style.color = '#28a745';
+    errorMessage.style.backgroundColor = '#d4edda';
+    errorMessage.style.border = '1px solid #c3e6cb';
 }
 
 // Check if admin exists in Firestore
@@ -160,4 +173,44 @@ document.addEventListener('DOMContentLoaded', () => {
         // Unsubscribe after the initial check
         unsubscribe();
     });
-}); 
+});
+
+// Handle forgot password
+if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        errorMessage.style.display = 'none';
+
+        const email = document.getElementById('username').value.trim();
+
+        if (!email) {
+            showError('Please enter your email address first');
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showError('Please enter a valid email address');
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showSuccess('Password reset email sent! Please check your inbox and spam folder.');
+        } catch (error) {
+            console.error('Password reset error:', error);
+            let msg = 'Password reset failed. ';
+            if (error.code === 'auth/user-not-found') {
+                msg += 'Email not found.';
+            } else if (error.code === 'auth/invalid-email') {
+                msg += 'Invalid email format.';
+            } else if (error.code === 'auth/too-many-requests') {
+                msg += 'Too many requests. Please try again later.';
+            } else {
+                msg += 'Please try again.';
+            }
+            showError(msg);
+        }
+    });
+} 
