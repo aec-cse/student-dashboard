@@ -18,14 +18,7 @@
 
 ## Commit Activity
 
-<div align="center">
-
-![GitHub commit activity](https://github-readme-activity-graph.cyclic.app/graph?username=aec-cse&repo=student-dashboard&theme=react-dark)
-
-<br>
-<sub>This is a dynamic image. For more details, see the <a href="https://github.com/aec-cse/student-dashboard/graphs/commit-activity">GitHub commit activity page</a>.</sub>
-
-</div>
+> View the [GitHub commit activity page](https://github.com/aec-cse/student-dashboard/graphs/commit-activity) for a live, interactive graph.
 
 **Project ID:** ATITS-INT-PROJ-001  
 **Assigned by:** Anusaya Trading and IT Solutions  
