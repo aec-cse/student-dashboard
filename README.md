@@ -1,7 +1,5 @@
 # Student Dashboard - Educational Website Login System
 
-## GitHub Project Stats
-
 ---
 <div align="center">
 
@@ -16,9 +14,8 @@
 
 </div>
 
-## Commit Activity
-
 > View the [GitHub commit activity page](https://github.com/aec-cse/student-dashboard/graphs/commit-activity) for a live, interactive graph.
+
 
 **Project ID:** ATITS-INT-PROJ-001  
 **Assigned by:** Anusaya Trading and IT Solutions  
