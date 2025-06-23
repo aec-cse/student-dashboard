@@ -1411,6 +1411,15 @@ async function loadContent(section, studentId = null) {
                 await loadAttendanceSection();
                 content = null;
                 break;
+            case 'courses':
+                const coursesTemplate = document.getElementById('courses-template');
+                if (coursesTemplate) {
+                    content = coursesTemplate.content.cloneNode(true);
+                    setTimeout(() => {
+                        setupCoursesSection();
+                    }, 0);
+                }
+                break;
             default:
                 console.log('Unknown section:', section);
                 return;
@@ -2926,3 +2935,123 @@ function renderAttendanceList() {
   }
 })();
 // ... existing code ...
+
+// ... existing code ...
+// --- Courses CRUD Logic ---
+
+async function loadCoursesList() {
+    const coursesList = document.getElementById('courses-list');
+    if (!coursesList) return;
+    coursesList.innerHTML = '<p>Loading courses...</p>';
+    try {
+        const coursesSnapshot = await getDocs(query(collection(db, 'courses')));
+        if (coursesSnapshot.empty) {
+            coursesList.innerHTML = '<p>No courses found. Click "New Course" to add one.</p>';
+            return;
+        }
+        let html = '';
+        coursesSnapshot.forEach(docSnap => {
+            const course = docSnap.data();
+            html += `<div class="course-item" data-course-id="${docSnap.id}">
+                <div class="course-header">
+                    <h3>${course.title}</h3>
+                    <div class="course-actions">
+                        <button class="btn btn-secondary edit-course-btn" data-course-id="${docSnap.id}"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger delete-course-btn" data-course-id="${docSnap.id}"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+                <div class="course-body">
+                    <p><strong>Description:</strong> ${course.description}</p>
+                    ${course.notes ? `<p><strong>Notes:</strong> ${course.notes}</p>` : ''}
+                    ${course.youtubeLinks && course.youtubeLinks.length ? `<p><strong>YouTube Links:</strong><ul>${course.youtubeLinks.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}</ul></p>` : ''}
+                </div>
+            </div>`;
+        });
+        coursesList.innerHTML = html;
+        // Add event listeners for edit/delete
+        document.querySelectorAll('.edit-course-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const courseId = btn.getAttribute('data-course-id');
+                await showEditCourseModal(courseId);
+            });
+        });
+        document.querySelectorAll('.delete-course-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const courseId = btn.getAttribute('data-course-id');
+                if (confirm('Are you sure you want to delete this course?')) {
+                    await deleteDoc(doc(db, 'courses', courseId));
+                    utils.showMessage('Course deleted!', 'success');
+                    loadCoursesList();
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        coursesList.innerHTML = '<p>Error loading courses.</p>';
+    }
+}
+
+// Show add/edit course modal
+function showAddCourseModal() {
+    document.getElementById('course-modal-title').textContent = 'Add New Course';
+    document.getElementById('course-form').reset();
+    document.getElementById('course-modal').dataset.editing = '';
+    document.getElementById('course-modal').style.display = 'block';
+}
+
+async function showEditCourseModal(courseId) {
+    const courseDoc = await getDoc(doc(db, 'courses', courseId));
+    if (!courseDoc.exists()) return;
+    const course = courseDoc.data();
+    document.getElementById('course-modal-title').textContent = 'Edit Course';
+    document.getElementById('course-title').value = course.title || '';
+    document.getElementById('course-description').value = course.description || '';
+    document.getElementById('course-notes').value = course.notes || '';
+    document.getElementById('course-youtube-links').value = (course.youtubeLinks || []).join('\n');
+    document.getElementById('course-modal').dataset.editing = courseId;
+    document.getElementById('course-modal').style.display = 'block';
+}
+
+// Handle add/edit course form submit
+async function handleCourseFormSubmit(e) {
+    e.preventDefault();
+    const title = document.getElementById('course-title').value.trim();
+    const description = document.getElementById('course-description').value.trim();
+    const notes = document.getElementById('course-notes').value.trim();
+    const youtubeLinks = document.getElementById('course-youtube-links').value
+        .split('\n').map(link => link.trim()).filter(link => link);
+    const editingId = document.getElementById('course-modal').dataset.editing;
+    try {
+        if (editingId) {
+            await updateDoc(doc(db, 'courses', editingId), {
+                title, description, notes, youtubeLinks
+            });
+            utils.showMessage('Course updated!', 'success');
+        } else {
+            await addDoc(collection(db, 'courses'), {
+                title, description, notes, youtubeLinks, createdAt: serverTimestamp()
+            });
+            utils.showMessage('Course added!', 'success');
+        }
+        document.getElementById('course-modal').style.display = 'none';
+        loadCoursesList();
+    } catch (error) {
+        console.error('Error saving course:', error);
+        utils.showMessage('Error saving course', 'error');
+    }
+}
+
+// Hook up courses logic when section loads
+function setupCoursesSection() {
+    loadCoursesList();
+    document.getElementById('add-course-btn')?.addEventListener('click', showAddCourseModal);
+    document.getElementById('course-form')?.addEventListener('submit', handleCourseFormSubmit);
+    document.querySelectorAll('#course-modal .close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('course-modal').style.display = 'none';
+        });
+    });
+}
+// ... existing code ...
+// In loadContent, after rendering courses section:
+// setTimeout(() => { setupCoursesSection(); }, 0);

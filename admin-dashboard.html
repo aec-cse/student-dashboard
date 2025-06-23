@@ -25,6 +25,7 @@
         <h2>Admin Dashboard</h2>
         <a href="#" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a>
         <a href="#" data-section="student-management"><i class="fas fa-users"></i> Student Management</a>
+        <a href="#" data-section="courses"><i class="fas fa-book"></i> Courses</a>
         <a href="#" data-section="register-student"><i class="fas fa-user-plus"></i> Register Student</a>
         <a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a>
         <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
@@ -354,6 +355,77 @@
             </div>
             <div class="attendance-list" id="attendance-list">
                 <!-- Student attendance rows will be rendered here -->
+            </div>
+        </div>
+    </template>
+
+    <!-- Courses Section Template -->
+    <template id="courses-template">
+        <div class="courses-container">
+            <div class="courses-header">
+                <h2>Manage Courses</h2>
+                <button class="btn btn-primary" id="add-course-btn">
+                    <i class="fas fa-plus"></i> New Course
+                </button>
+            </div>
+            <div class="courses-list" id="courses-list">
+                <!-- Courses will be loaded here -->
+            </div>
+
+            <!-- Add/Edit Course Modal -->
+            <div id="course-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="course-modal-title">Add New Course</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="course-form">
+                            <div class="form-group">
+                                <label for="course-title">Title</label>
+                                <input type="text" id="course-title" name="title" required placeholder="Enter course title">
+                            </div>
+                            <div class="form-group">
+                                <label for="course-description">Description</label>
+                                <textarea id="course-description" name="description" rows="2" required placeholder="Enter course description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="course-notes">Notes</label>
+                                <textarea id="course-notes" name="notes" rows="4" placeholder="Enter text notes (optional)"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="course-youtube-links">YouTube Links</label>
+                                <textarea id="course-youtube-links" name="youtubeLinks" rows="2" placeholder="Enter YouTube links, one per line (optional)"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="hideCourseModal()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save Course</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assign Students Modal -->
+            <div id="assign-students-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Assign Students to Course</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="assign-students-form">
+                            <div class="form-group">
+                                <label for="students-select">Select Students</label>
+                                <select id="students-select" name="students" multiple style="width:100%; min-height:120px;"></select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="hideAssignStudentsModal()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Assign</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </template>
