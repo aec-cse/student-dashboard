@@ -113,12 +113,6 @@ loginForm.addEventListener('submit', async (e) => {
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
 
-        // Validate password (contact number) format
-        if (!/^[6-9]\d{9}$/.test(password)) {
-            showError('Please enter a valid 10-digit contact number starting with 6, 7, 8, or 9');
-            return;
-        }
-
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
