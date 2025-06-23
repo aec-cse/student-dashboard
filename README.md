@@ -59,27 +59,31 @@ A comprehensive web application for managing student information and administrat
 
 ```
 student-dashboard/
-├── homepage.html              # Landing page
-├── student-dashboard.html     # Student interface
-├── admin-dashboard.html       # Admin interface
-├── Studentlogin.html         # Student login
-├── AdminLogin.html           # Admin login
-├── StudentRegistration.html  # Student registration
-├── AdminRegistration.html    # Admin registration
-├── css/
-│   ├── style.css              # Main styles
-│   ├── student-dashboard.css  # Student dashboard styles
-│   ├── admin-dashboard.css    # Admin dashboard styles
-│   ├── student-login.css      # Student login styles
-│   ├── admin-login.css        # Admin login styles
-│   └── StudentRegiatration.css # Student registration styles
+├── index.html                  # Landing page
+├── student-dashboard.html      # Student dashboard
+├── admin-dashboard.html        # Admin dashboard
+├── student-login.html          # Student login
+├── admin-login.html            # Admin login
+├── student-registration.html   # Student registration
+├── studentlogin.html           # (legacy/alternate student login)
 ├── js/
-│   ├── student-dashboard.js   # Student dashboard logic
-│   ├── admin-dashboard.js     # Admin dashboard logic
-│   ├── student-login.js       # Student login logic
-│   ├── admin-login.js         # Admin login logic
-│   └── StudentRegistration.js # Student registration logic
-└── README.md                # Project documentation
+│   ├── student-dashboard.js    # Student dashboard logic
+│   ├── admin-dashboard.js      # Admin dashboard logic
+│   ├── student-login.js        # Student login logic
+│   ├── admin-login.js          # Admin login logic
+│   ├── student-registration.js # Student registration logic
+│   └── studentlogin.js         # (legacy/alternate student login logic)
+├── css/
+│   ├── admin-dashboard.css
+│   ├── student-dashboard.css
+│   ├── login.css
+│   ├── student-registration.css
+├── email-config.js
+├── firebase.json
+├── firestore.rules
+├── firestore.indexes.json
+├── Logo.png
+└── README.md
 ```
 
 ## Getting Started
@@ -99,7 +103,7 @@ student-dashboard/
    - Enable Authentication and Firestore
    - Add Firebase configuration
    - Set up security rules
-3. Open `homepage.html` with live server in your browser
+3. Open `index.html` with live server in your browser
 
 
 ## Security Features
