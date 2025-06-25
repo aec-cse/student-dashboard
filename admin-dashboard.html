@@ -45,11 +45,28 @@
         <div class="notifications-container">
             <div class="notifications-header">
                 <h2>Manage Notifications</h2>
-                <button class="btn btn-primary" id="add-notification-btn">
-                    <i class="fas fa-plus"></i> New Notification
-                </button>
             </div>
-
+            <form id="notification-form" style="margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label for="notification-title">Title</label>
+                    <input type="text" id="notification-title" name="title" required placeholder="Enter notification title">
+                </div>
+                <div class="form-group">
+                    <label for="notification-message">Message</label>
+                    <textarea id="notification-message" name="message" rows="4" required placeholder="Enter notification message"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="notification-priority">Priority</label>
+                    <select id="notification-priority" name="priority" required>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Notification</button>
+                </div>
+            </form>
             <div class="notifications-filters">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
@@ -64,45 +81,8 @@
                     </select>
                 </div>
             </div>
-
             <div class="notifications-list" id="notifications-list">
                 <!-- Notifications will be loaded here -->
-            </div>
-
-            <!-- Add/Edit Notification Modal -->
-            <div id="notification-modal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="notification-modal-title">Add New Notification</h3>
-                        <button class="close-modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="notification-form">
-                            <div class="form-group">
-                                <label for="notification-title">Title</label>
-                                <input type="text" id="notification-title" name="title" required 
-                                    placeholder="Enter notification title">
-                            </div>
-                            <div class="form-group">
-                                <label for="notification-message">Message</label>
-                                <textarea id="notification-message" name="message" rows="4" required 
-                                    placeholder="Enter notification message"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="notification-priority">Priority</label>
-                                <select id="notification-priority" name="priority" required>
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                </select>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" onclick="hideNotificationModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Save Notification</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
             </div>
         </div>
     </template>
@@ -364,71 +344,53 @@
         <div class="courses-container">
             <div class="courses-header">
                 <h2>Manage Courses</h2>
-                <button class="btn btn-primary" id="add-course-btn">
-                    <i class="fas fa-plus"></i> New Course
-                </button>
             </div>
+            <form id="course-form" style="margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label for="course-title">Title</label>
+                    <input type="text" id="course-title" name="title" required placeholder="Enter course title">
+                </div>
+                <div class="form-group">
+                    <label for="course-description">Description</label>
+                    <textarea id="course-description" name="description" rows="2" required placeholder="Enter course description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="course-notes">Notes</label>
+                    <textarea id="course-notes" name="notes" rows="4" placeholder="Enter text notes (optional)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="course-youtube-links">YouTube Links</label>
+                    <textarea id="course-youtube-links" name="youtubeLinks" rows="2" placeholder="Enter YouTube links, one per line (optional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Course</button>
+                </div>
+            </form>
             <div class="courses-list" id="courses-list">
                 <!-- Courses will be loaded here -->
             </div>
-
-            <!-- Add/Edit Course Modal -->
-            <div id="course-modal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="course-modal-title">Add New Course</h3>
-                        <button class="close-modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="course-form">
-                            <div class="form-group">
-                                <label for="course-title">Title</label>
-                                <input type="text" id="course-title" name="title" required placeholder="Enter course title">
-                            </div>
-                            <div class="form-group">
-                                <label for="course-description">Description</label>
-                                <textarea id="course-description" name="description" rows="2" required placeholder="Enter course description"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="course-notes">Notes</label>
-                                <textarea id="course-notes" name="notes" rows="4" placeholder="Enter text notes (optional)"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="course-youtube-links">YouTube Links</label>
-                                <textarea id="course-youtube-links" name="youtubeLinks" rows="2" placeholder="Enter YouTube links, one per line (optional)"></textarea>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" onclick="hideCourseModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Save Course</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Assign Students Modal -->
-            <div id="assign-students-modal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Assign Students to Course</h3>
-                        <button class="close-modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="assign-students-form">
-                            <div class="form-group">
-                                <label for="students-select">Select Students</label>
-                                <select id="students-select" name="students" multiple style="width:100%; min-height:120px;"></select>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" onclick="hideAssignStudentsModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Assign</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
     </template>
+
+    <!-- Enrollments Modal -->
+    <div id="enrollments-modal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+                <h3 id="enrollments-modal-title">Manage Enrollments</h3>
+                <button class="close-modal" id="close-enrollments-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="enrollments-form">
+                    <div id="enrollments-student-list">
+                        <!-- Student checkboxes will be rendered here -->
+                    </div>
+                    <div class="form-actions" style="margin-top:1em;">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
         function closeRegistration() {

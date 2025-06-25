@@ -720,3 +720,103 @@ body {
 .chat-panel {
   z-index: 2100 !important;
 }
+
+/* --- Enrolled Courses List UI --- */
+#enrolled-courses-list {
+    margin: 24px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.enrolled-courses-ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+.enrolled-course-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    padding: 18px 22px;
+    border: 1px solid #e5e7eb;
+    min-width: 260px;
+    max-width: 100%;
+    flex: 1 1 320px;
+    transition: box-shadow 0.2s, border 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.enrolled-course-item strong {
+    color: #2563eb;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.enrolled-course-item span {
+    color: #374151;
+    font-size: 0.98rem;
+}
+.enrolled-course-item a {
+    color: #2563eb;
+    text-decoration: underline;
+    word-break: break-all;
+}
+.enrolled-course-item a:hover {
+    color: #174ea6;
+}
+@media (max-width: 700px) {
+    .enrolled-courses-ul {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .enrolled-course-item {
+        min-width: unset;
+        padding: 12px 8px;
+    }
+}
+
+/* --- Sidebar Enrolled Courses List UI --- */
+.sidebar-courses-section {
+    margin-top: 24px;
+    padding: 0 10px 10px 10px;
+}
+.sidebar-courses-title {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+.sidebar .enrolled-courses-list {
+    gap: 10px;
+}
+.sidebar .enrolled-courses-ul {
+    flex-direction: column;
+    gap: 10px;
+}
+.sidebar .enrolled-course-item {
+    background: #34495e;
+    color: #fff;
+    border: 1px solid #22304a;
+    box-shadow: none;
+    padding: 12px 14px;
+    min-width: unset;
+    font-size: 0.97rem;
+}
+.sidebar .enrolled-course-item strong {
+    color: #4a90e2;
+}
+.sidebar .enrolled-course-item span {
+    color: #e0e7ef;
+}
+.sidebar .enrolled-course-item a {
+    color: #4a90e2;
+}
+.sidebar .enrolled-course-item a:hover {
+    color: #fff;
+    text-decoration: underline;
+}

@@ -1380,8 +1380,6 @@ async function loadContent(section, studentId = null) {
                     content = notificationsTemplate.content.cloneNode(true);
                     // Set up event listeners after content is added to DOM
                     setTimeout(() => {
-                        document.getElementById('add-notification-btn')?.addEventListener('click', () => showNotificationModal());
-                        document.querySelector('.close-modal')?.addEventListener('click', hideNotificationModal);
                         document.getElementById('notification-form')?.addEventListener('submit', handleNotificationSubmit);
                         loadNotifications();
                     }, 0);
@@ -1992,24 +1990,19 @@ function renderNotifications(notifications) {
 // Handle notification form submission
 async function handleNotificationSubmit(event) {
     event.preventDefault();
-    
     try {
-        // Verify admin status before proceeding
         const isAdmin = await checkAdminAccess();
         if (!isAdmin) {
             throw new Error('You do not have permission to create notifications');
         }
-
         const title = document.getElementById('notification-title').value.trim();
         const message = document.getElementById('notification-message').value.trim();
         const priority = document.getElementById('notification-priority').value;
         const notificationId = document.getElementById('notification-form').dataset.notificationId;
-
         if (!title || !message || !priority) {
             utils.showMessage('Please fill in all fields', 'error');
             return;
         }
-
         const notificationData = {
             title,
             message,
@@ -2017,23 +2010,21 @@ async function handleNotificationSubmit(event) {
             updatedAt: serverTimestamp(),
             updatedBy: auth.currentUser.email
         };
-
         if (notificationId) {
-            // Update existing notification
             const notificationRef = doc(db, 'notifications', notificationId);
             await updateDoc(notificationRef, notificationData);
             utils.showMessage('Notification updated successfully', 'success');
         } else {
-            // Create new notification
             notificationData.createdAt = serverTimestamp();
             notificationData.createdBy = auth.currentUser.email;
             await addDoc(collection(db, 'notifications'), notificationData);
             utils.showMessage('Notification created successfully', 'success');
         }
-
-        hideNotificationModal();
+        // Reset the form and clear edit state
+        const form = document.getElementById('notification-form');
+        form.reset();
+        form.dataset.notificationId = '';
         loadNotifications();
-
     } catch (error) {
         console.error('Error saving notification:', error);
         utils.showMessage(error.message || 'Error saving notification', 'error');
@@ -2946,7 +2937,7 @@ async function loadCoursesList() {
     try {
         const coursesSnapshot = await getDocs(query(collection(db, 'courses')));
         if (coursesSnapshot.empty) {
-            coursesList.innerHTML = '<p>No courses found. Click "New Course" to add one.</p>';
+            coursesList.innerHTML = '<p>No courses found. Add a new course above.</p>';
             return;
         }
         let html = '';
@@ -2958,21 +2949,22 @@ async function loadCoursesList() {
                     <div class="course-actions">
                         <button class="btn btn-secondary edit-course-btn" data-course-id="${docSnap.id}"><i class="fas fa-edit"></i> Edit</button>
                         <button class="btn btn-danger delete-course-btn" data-course-id="${docSnap.id}"><i class="fas fa-trash"></i> Delete</button>
+                        <button class="btn btn-primary enrollments-btn" data-course-id="${docSnap.id}" data-course-title="${course.title}"><i class="fas fa-users"></i> Manage Enrollments</button>
                     </div>
                 </div>
                 <div class="course-body">
                     <p><strong>Description:</strong> ${course.description}</p>
                     ${course.notes ? `<p><strong>Notes:</strong> ${course.notes}</p>` : ''}
-                    ${course.youtubeLinks && course.youtubeLinks.length ? `<p><strong>YouTube Links:</strong><ul>${course.youtubeLinks.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}</ul></p>` : ''}
+                    ${course.youtubeLinks && course.youtubeLinks.length ? `<p><strong>YouTube Links:</strong><ul>${course.youtubeLinks.map(link => `<li><a href=\"${link}\" target=\"_blank\">${link}</a></li>`).join('')}</ul></p>` : ''}
                 </div>
             </div>`;
         });
         coursesList.innerHTML = html;
-        // Add event listeners for edit/delete
+        // Add event listeners for edit/delete/enrollments
         document.querySelectorAll('.edit-course-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const courseId = btn.getAttribute('data-course-id');
-                await showEditCourseModal(courseId);
+                await fillCourseFormForEdit(courseId);
             });
         });
         document.querySelectorAll('.delete-course-btn').forEach(btn => {
@@ -2985,34 +2977,33 @@ async function loadCoursesList() {
                 }
             });
         });
+        document.querySelectorAll('.enrollments-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const courseId = btn.getAttribute('data-course-id');
+                const courseTitle = btn.getAttribute('data-course-title');
+                await openEnrollmentsModal(courseId, courseTitle);
+            });
+        });
     } catch (error) {
         console.error('Error loading courses:', error);
         coursesList.innerHTML = '<p>Error loading courses.</p>';
     }
 }
 
-// Show add/edit course modal
-function showAddCourseModal() {
-    document.getElementById('course-modal-title').textContent = 'Add New Course';
-    document.getElementById('course-form').reset();
-    document.getElementById('course-modal').dataset.editing = '';
-    document.getElementById('course-modal').style.display = 'block';
-}
-
-async function showEditCourseModal(courseId) {
+// Fill the inline form for editing a course
+async function fillCourseFormForEdit(courseId) {
     const courseDoc = await getDoc(doc(db, 'courses', courseId));
     if (!courseDoc.exists()) return;
     const course = courseDoc.data();
-    document.getElementById('course-modal-title').textContent = 'Edit Course';
+    const form = document.getElementById('course-form');
+    form.dataset.editing = courseId;
     document.getElementById('course-title').value = course.title || '';
     document.getElementById('course-description').value = course.description || '';
     document.getElementById('course-notes').value = course.notes || '';
     document.getElementById('course-youtube-links').value = (course.youtubeLinks || []).join('\n');
-    document.getElementById('course-modal').dataset.editing = courseId;
-    document.getElementById('course-modal').style.display = 'block';
 }
 
-// Handle add/edit course form submit
+// Handle add/edit course form submit (inline)
 async function handleCourseFormSubmit(e) {
     e.preventDefault();
     const title = document.getElementById('course-title').value.trim();
@@ -3020,7 +3011,8 @@ async function handleCourseFormSubmit(e) {
     const notes = document.getElementById('course-notes').value.trim();
     const youtubeLinks = document.getElementById('course-youtube-links').value
         .split('\n').map(link => link.trim()).filter(link => link);
-    const editingId = document.getElementById('course-modal').dataset.editing;
+    const form = document.getElementById('course-form');
+    const editingId = form.dataset.editing;
     try {
         if (editingId) {
             await updateDoc(doc(db, 'courses', editingId), {
@@ -3033,7 +3025,8 @@ async function handleCourseFormSubmit(e) {
             });
             utils.showMessage('Course added!', 'success');
         }
-        document.getElementById('course-modal').style.display = 'none';
+        form.reset();
+        form.dataset.editing = '';
         loadCoursesList();
     } catch (error) {
         console.error('Error saving course:', error);
@@ -3044,14 +3037,70 @@ async function handleCourseFormSubmit(e) {
 // Hook up courses logic when section loads
 function setupCoursesSection() {
     loadCoursesList();
-    document.getElementById('add-course-btn')?.addEventListener('click', showAddCourseModal);
     document.getElementById('course-form')?.addEventListener('submit', handleCourseFormSubmit);
-    document.querySelectorAll('#course-modal .close-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('course-modal').style.display = 'none';
-        });
-    });
 }
 // ... existing code ...
 // In loadContent, after rendering courses section:
 // setTimeout(() => { setupCoursesSection(); }, 0);
+
+// Open enrollments modal for a course
+async function openEnrollmentsModal(courseId, courseTitle) {
+    const modal = document.getElementById('enrollments-modal');
+    const title = document.getElementById('enrollments-modal-title');
+    const studentListDiv = document.getElementById('enrollments-student-list');
+    const form = document.getElementById('enrollments-form');
+    title.textContent = `Manage Enrollments: ${courseTitle}`;
+    modal.style.display = 'block';
+    modal.style.opacity = '1';
+    studentListDiv.innerHTML = '<p>Loading students...</p>';
+    // Fetch all students and current enrollments
+    const [students, enrollmentsSnapshot] = await Promise.all([
+        getAllStudents(),
+        getDocs(query(collection(db, 'enrollments'), where('courseId', '==', courseId)))
+    ]);
+    const enrolledIds = new Set(enrollmentsSnapshot.docs.map(doc => doc.data().studentId));
+    // Render checkboxes
+    let html = '<div style="max-height:350px;overflow-y:auto;">';
+    students.forEach(student => {
+        html += `<div><label><input type="checkbox" name="student" value="${student.id}" ${enrolledIds.has(student.id) ? 'checked' : ''}> ${student.fullName} (${student.email})</label></div>`;
+    });
+    html += '</div>';
+    studentListDiv.innerHTML = html;
+    // Store courseId for submit
+    form.dataset.courseId = courseId;
+}
+
+// Handle enrollments form submit
+const enrollmentsForm = document.getElementById('enrollments-form');
+if (enrollmentsForm) {
+    enrollmentsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const courseId = form.dataset.courseId;
+        const checked = Array.from(form.querySelectorAll('input[name="student"]:checked')).map(cb => cb.value);
+        // Fetch current enrollments
+        const enrollmentsSnapshot = await getDocs(query(collection(db, 'enrollments'), where('courseId', '==', courseId)));
+        const currentEnrolled = new Set(enrollmentsSnapshot.docs.map(doc => doc.data().studentId));
+        // Add new enrollments
+        for (const studentId of checked) {
+            if (!currentEnrolled.has(studentId)) {
+                await addDoc(collection(db, 'enrollments'), { courseId, studentId });
+            }
+        }
+        // Remove unchecked enrollments
+        for (const docSnap of enrollmentsSnapshot.docs) {
+            if (!checked.includes(docSnap.data().studentId)) {
+                await deleteDoc(docSnap.ref);
+            }
+        }
+        utils.showMessage('Enrollments updated!', 'success');
+        document.getElementById('enrollments-modal').style.display = 'none';
+    });
+}
+// Close enrollments modal
+const closeEnrollmentsModalBtn = document.getElementById('close-enrollments-modal');
+if (closeEnrollmentsModalBtn) {
+    closeEnrollmentsModalBtn.addEventListener('click', () => {
+        document.getElementById('enrollments-modal').style.display = 'none';
+    });
+}

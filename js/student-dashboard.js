@@ -273,11 +273,13 @@ function formatDate(timestamp) {
     }).format(date);
 }
 
-// Add navigation logic for attendance section
+// Update showSection to handle the new courses section
 function showSection(section) {
     document.getElementById('dashboard-overview-section').style.display = section === 'dashboard' ? '' : 'none';
     const gradesSection = document.getElementById('grades-section');
     if (gradesSection) gradesSection.style.display = section === 'grades' ? '' : 'none';
+    const coursesSection = document.getElementById('courses-section');
+    if (coursesSection) coursesSection.style.display = section === 'courses' ? '' : 'none';
     // Show/hide welcome header
     const studentMsg = document.getElementById('student_msg');
     if (studentMsg) studentMsg.style.display = section === 'dashboard' ? '' : 'none';
@@ -291,6 +293,10 @@ function showSection(section) {
     // Load grades if grades section
     if (section === 'grades') {
         loadStudentGrades();
+    }
+    // Load courses if courses section
+    if (section === 'courses' && window.currentStudentId) {
+        renderEnrolledCourses(window.currentStudentId);
     }
 }
 
@@ -324,20 +330,12 @@ onAuthStateChanged(auth, async (user) => {
         if (!studentData) {
             throw new Error('Student data not found');
         }
+        window.currentStudentId = studentData.userId || user.uid;
         await updateDashboard(studentData);
         showSection('dashboard');
     } catch (error) {
         console.error('Error initializing dashboard:', error);
-        // Only sign out for auth errors
-        const authErrorCodes = [
-            'permission-denied', 'unauthenticated', 'user-not-found', 'auth/user-not-found', 'auth/invalid-user-token', 'auth/user-token-expired'
-        ];
-        if (error && error.code && authErrorCodes.includes(error.code)) {
-            await signOut(auth);
-            window.location.href = 'student-login.html';
-        } else {
-            utils.showMessage('Error loading your dashboard. Please try again or contact support.', 'error');
-        }
+        utils.showMessage('Error loading dashboard', 'error');
     }
 });
 
@@ -437,6 +435,62 @@ function loadScript(src) {
     });
 }
 
+// Fetch and render enrolled courses with details
+async function renderEnrolledCourses(studentId) {
+    const listContainer = document.getElementById('enrolled-courses-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '<p>Loading courses...</p>';
+    try {
+        // Fetch enrollments for this student
+        const enrollmentsQuery = query(
+            collection(db, 'enrollments'),
+            where('studentId', '==', studentId)
+        );
+        const enrollmentsSnapshot = await getDocs(enrollmentsQuery);
+        if (enrollmentsSnapshot.empty) {
+            listContainer.innerHTML = '<p>No enrolled courses found.</p>';
+            return;
+        }
+        // Fetch course details for each enrollment
+        const courseIds = enrollmentsSnapshot.docs.map(doc => doc.data().courseId);
+        const coursePromises = courseIds.map(id => getDoc(doc(db, 'courses', id)));
+        const courseDocs = await Promise.all(coursePromises);
+        const courses = courseDocs.filter(doc => doc.exists()).map(doc => ({ id: doc.id, ...doc.data() }));
+        // Render the courses
+        let html = '<ul class="enrolled-courses-ul">';
+        courses.forEach(course => {
+            html += `<li class="enrolled-course-item">
+                <strong>${course.title}</strong><br>
+                <span>${course.description || ''}</span>`;
+            if (course.youtubeLinks && course.youtubeLinks.length) {
+                html += '<div class="course-videos" style="margin-top:8px;display:flex;flex-direction:column;gap:10px;">';
+                course.youtubeLinks.forEach(link => {
+                    const videoId = extractYouTubeId(link);
+                    if (videoId) {
+                        html += `<div class="course-video-embed"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`;
+                    } else {
+                        html += `<span><a href='${link}' target='_blank'>${link}</a></span>`;
+                    }
+                });
+                html += '</div>';
+            }
+            html += '</li>';
+        });
+        html += '</ul>';
+        listContainer.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading enrolled courses:', error);
+        listContainer.innerHTML = '<p>Error loading courses.</p>';
+    }
+}
+
+// Helper to extract YouTube video ID from a URL
+function extractYouTubeId(url) {
+    const regExp = /^.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[1].length === 11) ? match[1] : null;
+}
+
 // Update dashboard data (average grade)
 async function updateDashboard(studentData) {
     try {
@@ -464,6 +518,8 @@ async function updateDashboard(studentData) {
         if (enrolledCoursesCount) enrolledCoursesCount.textContent = courses;
         if (attendanceRate) attendanceRate.textContent = `${attendance}%`;
         if (notificationCount) notificationCount.textContent = notifications;
+        // Render enrolled courses list
+        await renderEnrolledCourses(studentData.userId);
     } catch (error) {
         console.error('Error updating dashboard:', error);
         // Don't redirect on dashboard update errors
