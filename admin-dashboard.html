@@ -21,25 +21,29 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+    <header class="mobile-header">
+        <button class="sidebar-toggle" aria-label="Open sidebar"><i class="fas fa-bars"></i></button>
+        <span class="mobile-header-title">Admin Portal</span>
+    </header>
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="Logo.png" alt="Logo" class="sidebar-logo-img">
             <span class="sidebar-logo-title">Admin Portal</span>
         </div>
         <div class="sidebar-section-label">Main</div>
-        <a href="#" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="#" data-section="dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
         <div class="sidebar-section-label">Management</div>
-        <a href="#" data-section="student-management"><i class="fas fa-users"></i> Student Management</a>
-        <a href="#" data-section="courses"><i class="fas fa-book"></i> Courses</a>
-        <a href="#" data-section="register-student"><i class="fas fa-user-plus"></i> Register Student</a>
+        <a href="#" data-section="student-management"><i class="fas fa-users"></i> <span>Student Management</span></a>
+        <a href="#" data-section="courses"><i class="fas fa-book"></i> <span>Courses</span></a>
+        <a href="#" data-section="register-student"><i class="fas fa-user-plus"></i> <span>Register Student</span></a>
         <div class="sidebar-section-label">Communication</div>
-        <a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a>
-        <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
+        <a href="#" data-section="notifications"><i class="fas fa-bell"></i> <span>Notifications</span></a>
+        <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> <span>User Enquiry</span></a>
         <div class="sidebar-section-label">Academics</div>
-        <a href="#" data-section="grades"><i class="fas fa-clipboard-list"></i> Grades</a>
-        <a href="#" data-section="attendance"><i class="fas fa-calendar-check"></i> Attendance</a>
+        <a href="#" data-section="grades"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a>
+        <a href="#" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
         <div class="sidebar-divider"></div>
-        <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
     </div>
 
     <div class="main">
@@ -285,13 +289,17 @@
             </div>
           </div>
           <div class="enquiry-table grades-table-section">
-            <div class="table-header">
-              <div class="header-cell">Test Name</div>
-              <div class="header-cell">Date</div>
-              <div class="header-cell">Max Marks</div>
-              <div class="header-cell">Actions</div>
-            </div>
-            <div id="tests-list" class="table-body"></div>
+            <table class="grades-table">
+              <thead>
+                <tr>
+                  <th>Test Name</th>
+                  <th>Date</th>
+                  <th>Max Marks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tests-list"></tbody>
+            </table>
           </div>
         </div>
         <!-- Assign Grades Section (replaces modal) -->
@@ -1779,6 +1787,30 @@ input:checked + .slider + .toggle-text {
     </div>
 
     <!-- Add floating chat bubble -->
-    <button id="floating-chat-bubble" style="position:fixed;bottom:32px;right:32px;width:60px;height:60px;border-radius:50%;background:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.18);border:none;z-index:2000;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;"><i class="fas fa-comments"></i></button>
+    <button id="floating-chat-bubble" style="position:fixed;bottom:32px;right:32px;width:60px;height:60px;border-radius:50%;background:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.18);border:none;z-index:2000;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;">
+      <i class="fas fa-comments"></i>
+      <span class="chat-unread-badge" id="chat-unread-badge" style="display:none;position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;border-radius:50%;padding:2px 7px;font-size:0.95rem;font-weight:700;min-width:22px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.13);"></span>
+    </button>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var sidebar = document.querySelector('.sidebar');
+      var toggle = document.querySelector('.sidebar-toggle');
+      function toggleSidebar() {
+        sidebar.classList.toggle('active');
+      }
+      if (toggle) {
+        toggle.addEventListener('click', toggleSidebar);
+      }
+      // Optional: close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 900 && sidebar.classList.contains('active')) {
+          if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+            sidebar.classList.remove('active');
+          }
+        }
+      });
+    });
+    </script>
 </body>
 </html>

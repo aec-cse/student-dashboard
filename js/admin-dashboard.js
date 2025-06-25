@@ -732,29 +732,16 @@ async function renderStudentManagement() {
 
 // DOM Elements
 const logoutBtn = document.getElementById('logout-btn');
-const logoutModal = document.getElementById('logout-modal');
-
-// Event Listeners for Modal
 logoutBtn.addEventListener('click', async (e) => {
     e.preventDefault();
-    await handleLogout();
-});
-
-// Handle logout confirmation
-async function handleLogout() {
-    if (isRegistrationInProgress) {
-        utils.showMessage('Cannot logout during student registration. Please wait.', 'error');
-        hideModal();
-        return;
-    }
     try {
         await signOut(auth);
-        window.location.href = 'admin-login.html';
+        window.location.href = 'login.html';
     } catch (error) {
         console.error('Error signing out:', error);
         utils.showMessage('Error signing out. Please try again.', 'error');
     }
-}
+});
 
 // Function to handle student registration
 async function handleStudentRegistration(event) {
@@ -1323,6 +1310,11 @@ async function loadContent(section, studentId = null) {
     const contentArea = document.getElementById('content-area');
     if (!contentArea) return;
 
+    // Unsubscribe from notifications if leaving notifications section
+    if (typeof unsubscribeNotifications === 'function' && section !== 'notifications') {
+        unsubscribeNotifications();
+    }
+
     try {
         // Update main content section attribute
         const mainContent = document.querySelector('.main');
@@ -1397,7 +1389,7 @@ async function loadContent(section, studentId = null) {
                     // Set up event listeners after content is added to DOM
                     setTimeout(() => {
                         document.getElementById('notification-form')?.addEventListener('submit', handleNotificationSubmit);
-                        loadNotifications();
+                        loadNotificationsRealtime();
                     }, 0);
                 }
                 break;
@@ -1584,7 +1576,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!user) {
       console.log('No authenticated user, redirecting to login...');
-      window.location.href = 'admin-login.html';
+      window.location.href = 'login.html';
       return;
     }
 
@@ -1597,7 +1589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('User is not an admin, signing out and redirecting to login...');
         utils.showMessage('Access denied. Admin privileges required.', 'error');
         await signOut(auth);
-        window.location.href = 'admin-login.html';
+        window.location.href = 'login.html';
         return;
       }
 
@@ -1624,7 +1616,7 @@ document.addEventListener('DOMContentLoaded', () => {
       utils.showMessage('Error loading dashboard. Please try again.', 'error');
       // Sign out on error
       await signOut(auth);
-      window.location.href = 'admin-login.html';
+      window.location.href = 'login.html';
     }
   });
 
@@ -1671,6 +1663,15 @@ async function viewStudentDetails(studentId) {
         }
         grades.sort((a, b) => new Date(a.testDate) - new Date(b.testDate));
 
+        // Fetch number of enrolled courses
+        let enrolledCoursesCount = 0;
+        try {
+            const enrollmentsSnapshot = await getDocs(query(collection(db, 'enrollments'), where('studentId', '==', studentId)));
+            enrolledCoursesCount = enrollmentsSnapshot.size;
+        } catch (err) {
+            console.error('Error fetching enrolled courses:', err);
+        }
+
         // Helper function to format array or string data
         const formatData = (data) => {
             if (!data) return 'Not provided';
@@ -1713,7 +1714,7 @@ async function viewStudentDetails(studentId) {
                         <div class="details-grid">
                             <div class="detail-item">
                                 <strong>Full Name</strong>
-                                <p>${student.fullName}</p>
+                                <p>${student.fullName}
                             </div>
                             <div class="detail-item">
                                 <strong>Date of Birth</strong>
@@ -1753,43 +1754,11 @@ async function viewStudentDetails(studentId) {
                             </div>
                             <div class="detail-item">
                                 <strong>Branch</strong>
-                                <p>${student.branch}</p>
+                                <p>${student.branch}
                             </div>
                             <div class="detail-item">
-                                <strong>CGPA</strong>
-                                <p>${student.gpa || 'Not provided'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="details-section">
-                        <h3><i class="fas fa-code"></i> Technical Skills</h3>
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <strong>Programming Languages</strong>
-                                <p>${formatData(student.programmingLanguages)}</p>
-                            </div>
-                            <div class="detail-item">
-                                <strong>Tools & Software</strong>
-                                <p>${formatData(student.toolsSoftware)}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="details-section">
-                        <h3><i class="fas fa-briefcase"></i> Internship Details</h3>
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <strong>Preferred Start Date</strong>
-                                <p>${student.startDate || 'Not provided'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <strong>Duration</strong>
-                                <p>${student.duration || 'Not provided'}</p>
-                            </div>
-                            <div class="detail-item">
-                                <strong>Area of Interest</strong>
-                                <p>${student.areaOfInterest || 'Not provided'}</p>
+                                <strong>Number of Enrolled Courses</strong>
+                                <p>${enrolledCoursesCount}</p>
                             </div>
                         </div>
                     </div>
@@ -1871,7 +1840,10 @@ async function viewStudentDetails(studentId) {
             // Wait for DOM to update
             setTimeout(() => {
                 const ctx = document.getElementById('student-progress-chart').getContext('2d');
-                new Chart(ctx, {
+                if (window.studentProgressChart) {
+                    window.studentProgressChart.destroy();
+                }
+                window.studentProgressChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: grades.map(g => g.testDate || g.testName),
@@ -1968,27 +1940,17 @@ function renderNotifications(notifications) {
         <div class="notification-content">
           <div class="notification-header">
             <h4>${notification.title || 'Notification'}</h4>
-            <span class="notification-date">${notification.timestamp && typeof notification.timestamp.toDate === 'function' ? notification.timestamp.toDate().toLocaleString() : 'N/A'}</span>
+            <span class="notification-date">${notification.createdAt && typeof notification.createdAt.toDate === 'function' ? notification.createdAt.toDate().toLocaleString() : 'N/A'}</span>
           </div>
           <p>${notification.message}</p>
         </div>
         <div class="notification-actions">
-          ${!notification.read ? `
-            <button class="btn-icon btn-mark-read" data-id="${notification.id}">
-              <i class="fas fa-check"></i>
-            </button>
-          ` : ''}
           <button class="btn-icon btn-delete" data-id="${notification.id}">
             <i class="fas fa-trash"></i>
           </button>
         </div>
       </div>
     `).join('');
-
-        // Add event listeners
-  notificationsList.querySelectorAll('.btn-mark-read').forEach(button => {
-    button.addEventListener('click', () => markNotificationAsRead(button.dataset.id));
-  });
 
   notificationsList.querySelectorAll('.btn-delete').forEach(button => {
     button.addEventListener('click', () => deleteNotification(button.dataset.id));
@@ -2084,18 +2046,6 @@ async function deleteNotification(notificationId) {
     }
 }
 
-// Mark notification as read
-async function markNotificationAsRead(notificationId) {
-    try {
-        const notificationRef = doc(db, 'notifications', notificationId);
-        await updateDoc(notificationRef, { read: true });
-        loadNotifications();
-    } catch (error) {
-        console.error('Error marking notification as read:', error);
-        utils.showMessage(error.message || 'Error marking notification as read', 'error');
-    }
-}
-
 // Show notification modal
 function showNotificationModal() {
     const modal = document.getElementById('notification-modal');
@@ -2187,15 +2137,15 @@ async function loadTestsAndGrades() {
         let html = '';
         testsSnapshot.forEach(doc => {
             const test = doc.data();
-            html += `<div class="table-row">
-                <div>${test.name}</div>
-                <div>${test.date}</div>
-                <div>${test.maxMarks}</div>
-                <div style="display:flex;gap:0.5rem;align-items:center;">
+            html += `<tr>
+                <td>${test.name}</td>
+                <td>${test.date}</td>
+                <td style="text-align:center;">${test.maxMarks}</td>
+                <td style="text-align:center;">
                   <button class='btn btn-secondary assign-grades-btn' data-test-id='${doc.id}' data-test-name='${test.name}' data-max-marks='${test.maxMarks}' data-test-date='${test.date}'>Assign Marks</button>
                   <button class='btn btn-danger btn-icon delete-test-btn' data-test-id='${doc.id}'><i class="fas fa-trash"></i></button>
-                </div>
-            </div>`;
+                </td>
+            </tr>`;
         });
         testsList.innerHTML = html;
         // Add event listeners for 'Assign Grades' buttons
@@ -2913,20 +2863,36 @@ function renderAttendanceList() {
     if (adminUnsubscribeChat) adminUnsubscribeChat();
     adminUnsubscribeChat = onSnapshot(
       query(collection(db, 'chats', adminChatId, 'messages'), orderBy('timestamp', 'asc')),
-      (snapshot) => {
+      async (snapshot) => {
         adminChatMessages.innerHTML = '';
-        snapshot.forEach(doc => {
-          const msg = doc.data();
+        const batch = [];
+        snapshot.forEach(docSnap => {
+          const msg = docSnap.data();
           const isMe = msg.senderId === adminId;
           const msgDiv = document.createElement('div');
           msgDiv.className = 'chat-message' + (isMe ? ' admin' : '');
           msgDiv.textContent = msg.text;
           adminChatMessages.appendChild(msgDiv);
+          // Mark as read if not sent by admin and not already read
+          if (!isMe && (!msg.readBy || !msg.readBy.includes(adminId))) {
+            batch.push({ id: docSnap.id, readBy: msg.readBy || [] });
+          }
         });
         adminChatMessages.scrollTop = adminChatMessages.scrollHeight;
+        // Batch update unread messages
+        if (batch.length) {
+          const db = getFirestore();
+          const chatRef = collection(db, 'chats', adminChatId, 'messages');
+          for (const msg of batch) {
+            const msgRef = doc(chatRef, msg.id);
+            await updateDoc(msgRef, { readBy: [...msg.readBy, adminId] });
+          }
+          // After marking as read, update the unread counter
+          updateAdminChatUnreadCount();
+        }
       }
     );
-  }
+}
 
   async function ensureChatDocument(chatId, participants) {
     const chatRef = doc(db, 'chats', chatId);
@@ -3161,3 +3127,78 @@ if (registerStudentLink) {
     });
 }
 // ... existing code ...
+
+// ... existing code ...
+// --- Chat Unread Counter ---
+const chatUnreadBadge = document.getElementById('chat-unread-badge');
+
+async function updateAdminChatUnreadCount() {
+  if (!auth.currentUser) return;
+  const adminId = auth.currentUser.uid;
+  let unreadCount = 0;
+  // Get all chats where admin is a participant
+  const chatsSnap = await getDocs(query(collection(db, 'chats')));
+  for (const chatDoc of chatsSnap.docs) {
+    const chatId = chatDoc.id;
+    // Only count chats where admin is a participant
+    const data = chatDoc.data();
+    if (!data.participants || !data.participants.includes(adminId)) continue;
+    // Get unread messages for admin
+    const messagesSnap = await getDocs(query(collection(db, 'chats', chatId, 'messages')));
+    messagesSnap.forEach(msgDoc => {
+      const msg = msgDoc.data();
+      // Unread if not sent by admin and not marked as read by admin
+      if (msg.senderId !== adminId && (!msg.readBy || !msg.readBy.includes(adminId))) {
+        unreadCount++;
+      }
+    });
+  }
+  if (unreadCount > 0) {
+    chatUnreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    chatUnreadBadge.style.display = '';
+  } else {
+    chatUnreadBadge.style.display = 'none';
+  }
+}
+
+// Update unread count on load and every 30 seconds
+onAuthStateChanged(auth, (user) => {
+  if (user) updateAdminChatUnreadCount();
+});
+setInterval(updateAdminChatUnreadCount, 30000);
+// ... existing code ...
+
+// ... existing code ...
+let unsubscribeNotifications = null;
+
+// Load notifications (real-time)
+function loadNotificationsRealtime() {
+    const notificationsList = document.getElementById('notifications-list');
+    const notificationBadge = document.getElementById('notification-badge');
+    if (!notificationsList && !notificationBadge) {
+        console.log('Notifications list or badge element not found');
+        return;
+    }
+    if (unsubscribeNotifications) unsubscribeNotifications();
+    const notificationsRef = collection(db, 'notifications');
+    unsubscribeNotifications = onSnapshot(notificationsRef, (snapshot) => {
+        const notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (notificationsList) renderNotifications(notifications);
+        // Update sidebar badge
+        if (notificationBadge) {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            if (unreadCount > 0) {
+                notificationBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                notificationBadge.style.display = '';
+            } else {
+                notificationBadge.style.display = 'none';
+            }
+        }
+    }, (error) => {
+        console.error('Error loading notifications:', error);
+        utils.showMessage('Error loading notifications', 'error');
+    });
+}
+// ... existing code ...
+// In the section loader for notifications, replace loadNotifications() with loadNotificationsRealtime()
+// Also, when leaving the notifications section, call unsubscribeNotifications() if set

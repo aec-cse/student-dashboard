@@ -1,7 +1,7 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, serverTimestamp, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, serverTimestamp, onSnapshot, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -63,7 +63,7 @@ logoutModal.addEventListener('click', (e) => {
 confirmLogoutBtn.addEventListener('click', async () => {
     try {
         await signOut(auth);
-        window.location.href = 'student-login.html';
+        window.location.href = 'login.html';
     } catch (error) {
         console.error('Error signing out:', error);
     }
@@ -235,20 +235,29 @@ function renderNotifications(notifications) {
     // Render filtered notifications
     filteredNotifications.forEach(notification => {
         const clone = template.content.cloneNode(true);
-        
         // Set notification content
         clone.querySelector('.notification-title').textContent = notification.title;
         clone.querySelector('.notification-message').textContent = notification.message;
         clone.querySelector('.notification-priority').textContent = notification.priority;
         clone.querySelector('.notification-priority').classList.add(notification.priority);
         clone.querySelector('.notification-date').textContent = formatDate(notification.createdAt);
-        // Show 'By Admin' if createdBy is missing or is 'anusayatradingsolutions@gmail.com'
         let author = 'Admin';
         if (notification.createdBy && notification.createdBy !== 'anusayatradingsolutions@gmail.com') {
             author = notification.createdBy;
         }
         clone.querySelector('.notification-author').textContent = `By ${author}`;
-
+        // Add mark as read button if unread
+        if (!notification.read) {
+            const actionsDiv = clone.querySelector('.notification-header .notification-actions');
+            if (actionsDiv) {
+                const markReadBtn = document.createElement('button');
+                markReadBtn.className = 'btn btn-icon btn-mark-read';
+                markReadBtn.title = 'Mark as Read';
+                markReadBtn.innerHTML = '<i class="fas fa-check"></i>';
+                markReadBtn.addEventListener('click', () => markNotificationAsRead(notification.id));
+                actionsDiv.appendChild(markReadBtn);
+            }
+        }
         notificationsList.appendChild(clone);
     });
 }
@@ -321,7 +330,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     if (!user) {
-        window.location.href = 'student-login.html';
+        window.location.href = 'login.html';
         return;
     }
 
@@ -558,10 +567,12 @@ const closeChatBtn = document.getElementById('close-student-chat');
 const chatMessages = document.getElementById('student-chat-messages');
 const chatInput = document.getElementById('student-chat-input');
 const chatSendBtn = document.getElementById('student-chat-send');
+const chatUnreadBadge = document.getElementById('chat-unread-badge');
 
 let adminId = null;
 let chatId = null;
 let unsubscribeChat = null;
+let unsubscribeUnread = null;
 
 // Find the first admin (assume single admin)
 async function getAdminId() {
@@ -636,17 +647,77 @@ function loadChatMessages() {
   if (unsubscribeChat) unsubscribeChat();
   unsubscribeChat = onSnapshot(
     query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc')),
-    (snapshot) => {
+    async (snapshot) => {
       chatMessages.innerHTML = '';
-      snapshot.forEach(doc => {
-        const msg = doc.data();
+      const unreadAdminMsgs = [];
+      snapshot.forEach(docSnap => {
+        const msg = docSnap.data();
         const isMe = msg.senderId === user.uid;
         const msgDiv = document.createElement('div');
         msgDiv.className = 'chat-message' + (isMe ? ' student' : '');
         msgDiv.textContent = msg.text;
         chatMessages.appendChild(msgDiv);
+        // Collect admin messages not yet read by this student
+        if (!isMe && (!msg.readBy || !msg.readBy.includes(user.uid))) {
+          unreadAdminMsgs.push(docSnap.id);
+        }
       });
       chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Mark all unread admin messages as read
+      if (unreadAdminMsgs.length) {
+        const chatRef = collection(db, 'chats', chatId, 'messages');
+        unreadAdminMsgs.forEach(async (msgId) => {
+          const msgRef = doc(chatRef, msgId);
+          await updateDoc(msgRef, { readBy: arrayUnion(user.uid) });
+        });
+      }
     }
   );
+}
+
+function setupStudentChatUnreadRealtime() {
+  const user = auth.currentUser;
+  if (!user) return;
+  getAdminId().then(adminIdVal => {
+    if (!adminIdVal) return;
+    adminId = adminIdVal;
+    const chatId = `${adminId}_${user.uid}`;
+    if (unsubscribeUnread) unsubscribeUnread();
+    unsubscribeUnread = onSnapshot(
+      collection(db, 'chats', chatId, 'messages'),
+      (snapshot) => {
+        let unreadCount = 0;
+        snapshot.forEach(msgDoc => {
+          const msg = msgDoc.data();
+          if (msg.senderId !== user.uid && (!msg.readBy || !msg.readBy.includes(user.uid))) {
+            unreadCount++;
+          }
+        });
+        if (unreadCount > 0) {
+          chatUnreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+          chatUnreadBadge.style.display = '';
+        } else {
+          chatUnreadBadge.style.display = 'none';
+        }
+      }
+    );
+  });
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (user) setupStudentChatUnreadRealtime();
+  else if (unsubscribeUnread) unsubscribeUnread();
+});
+
+// Mark notification as read (for students)
+async function markNotificationAsRead(notificationId) {
+    try {
+        const notificationRef = doc(db, 'notifications', notificationId);
+        await updateDoc(notificationRef, { read: true });
+        // Optionally reload notifications or update UI
+        await loadNotifications();
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        utils.showMessage(error.message || 'Error marking notification as read', 'error');
+    }
 } 

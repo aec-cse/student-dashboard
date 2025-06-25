@@ -14,10 +14,10 @@ body {
 
 /* Modern Sidebar Styles */
 .sidebar {
-    background: linear-gradient(135deg, #6366f1 0%, #2563eb 100%);
-    color: #fff;
-    min-width: 230px;
-    max-width: 260px;
+    background: linear-gradient(135deg, #6366f1 0%, #2563eb 100%) !important;
+    color: #fff !important;
+    min-width: 210px;
+    max-width: 240px;
     height: 100vh;
     position: fixed;
     left: 0;
@@ -26,7 +26,7 @@ body {
     z-index: 10;
     display: flex;
     flex-direction: column;
-    padding: 32px 0 24px 0;
+    padding: 28px 0 18px 0;
     border-radius: 0 18px 18px 0;
     transition: box-shadow 0.2s, background 0.3s;
 }
@@ -1516,36 +1516,163 @@ body {
 }
 
 /* Responsive Sidebar */
-@media (max-width: 1024px) {
+@media (max-width: 900px) {
     .sidebar {
-        width: 220px;
+        position: fixed;
+        left: -240px;
+        top: 0;
+        height: 100vh;
+        z-index: 100;
+        transition: left 0.3s;
+        box-shadow: 2px 0 16px rgba(44,62,80,0.13);
     }
-
-    .main {
-        margin-left: 220px;
-    }
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-    }
-
     .sidebar.active {
-        transform: translateX(0);
+        left: 0;
     }
-
     .main {
         margin-left: 0;
+        padding: 16px 6px 16px 6px;
+    }
+    .sidebar-toggle {
+        display: block !important;
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        z-index: 200;
+        background: #6366f1;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.6rem;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+        cursor: pointer;
     }
 }
+@media (max-width: 600px) {
+    .sidebar {
+        min-width: 140px;
+        max-width: 160px;
+        padding: 12px 0 8px 0;
+    }
+    .main {
+        padding: 8px 2px 8px 2px;
+    }
+    #content-area {
+        padding: 12px 4px 12px 4px;
+        min-height: 400px;
+    }
+    .cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .student-list {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 8px;
+    }
+    .stat-card, .card {
+        padding: 12px 8px;
+        font-size: 1em;
+    }
+    .sidebar h2, .sidebar-logo-title {
+        font-size: 1.1rem;
+    }
+}
+/* --- Hamburger Button (always hidden on desktop) --- */
+.sidebar-toggle {
+    display: none;
+}
 
-.student-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-    justify-content: flex-end;
+/* --- Responsive Tables --- */
+@media (max-width: 700px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    thead tr {
+        display: none;
+    }
+    tr {
+        margin-bottom: 16px;
+        border-bottom: 1px solid #eee;
+    }
+    td {
+        padding-left: 50%;
+        position: relative;
+        min-height: 36px;
+        font-size: 1em;
+    }
+    td:before {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: bold;
+        color: #6366f1;
+        content: attr(data-label);
+    }
+}
+/* --- Responsive Forms & Buttons --- */
+@media (max-width: 600px) {
+    input, select, textarea, button {
+        font-size: 1em;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    .form-group, .form-actions {
+        width: 100%;
+        margin: 0 0 12px 0;
+    }
+    .btn, .btn-primary, .btn-secondary, .btn-danger {
+        width: 100%;
+        padding: 14px 0;
+        font-size: 1.1em;
+    }
+}
+/* --- Responsive Modals & Chat --- */
+@media (max-width: 600px) {
+    .modal-content, .chat-panel {
+        width: 98vw !important;
+        min-width: 0 !important;
+        left: 1vw !important;
+        right: 1vw !important;
+        border-radius: 10px;
+        padding: 10px 4px;
+    }
+    .chat-panel {
+        bottom: 0 !important;
+        top: auto !important;
+        height: 60vh !important;
+        max-height: 80vh !important;
+    }
+}
+/* --- General Mobile Adjustments --- */
+@media (max-width: 480px) {
+    .sidebar {
+        min-width: 90px;
+        max-width: 110px;
+        padding: 4px 0 2px 0;
+    }
+    .sidebar-logo-img {
+        width: 22px;
+        height: 22px;
+    }
+    .sidebar-logo-title {
+        font-size: 0.8rem;
+    }
+    .main {
+        padding: 2px;
+    }
+    #content-area {
+        padding: 4px 2px;
+    }
+}
+/* --- Ensure scrollability --- */
+html, body, .main, #content-area {
+    overflow-x: hidden;
 }
 
 /* Admin Dashboard Styles */
@@ -1882,8 +2009,14 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 .grades-table th, .grades-table td {
-    padding: 1rem;
+    padding: 1.2em 1.1em;
     text-align: left;
+}
+.grades-table th:nth-child(3),
+.grades-table td:nth-child(3),
+.grades-table th:nth-child(4),
+.grades-table td:nth-child(4) {
+  text-align: center;
 }
 .grades-table thead {
     background: #f1f5f9;
@@ -1950,7 +2083,7 @@ body {
   background: #f8fafc;
   border-bottom: 2px solid #e2e8f0;
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1.5fr 1fr;
+  grid-template-columns: 2fr 1.5fr 110px 1fr;
   border-radius: 16px 16px 0 0;
 }
 .grades-table-section .header-cell {
@@ -1966,7 +2099,7 @@ body {
 }
 .grades-table-section .table-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1.5fr 1fr;
+  grid-template-columns: 2fr 1.5fr 110px 1fr;
   align-items: center;
   padding: 1.25rem 0;
   border-bottom: 1px solid #e2e8f0;
@@ -2571,4 +2704,345 @@ body {
     margin: 22px 24px 18px 32px;
     border-radius: 2px;
     opacity: 0.7;
+}
+
+.mobile-header {
+  display: none;
+}
+@media (max-width: 900px) {
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 54px;
+    background: linear-gradient(135deg, #6366f1 0%, #2563eb 100%);
+    color: #fff;
+    z-index: 300;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+    padding: 0 16px;
+  }
+  .mobile-header .sidebar-toggle {
+    display: block !important;
+    position: static;
+    margin-right: 16px;
+    background: none;
+    box-shadow: none;
+    color: #fff;
+    font-size: 1.7rem;
+    width: 44px;
+    height: 44px;
+  }
+  .mobile-header-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    flex: 1;
+    text-align: left;
+  }
+  .sidebar {
+    min-width: 60px;
+    max-width: 60px;
+    padding: 14px 0 10px 0;
+    border-radius: 0 12px 12px 0;
+    align-items: center;
+  }
+  .sidebar-logo-title,
+  .sidebar-section-label,
+  .sidebar a span {
+    display: none !important;
+  }
+  .sidebar-logo {
+    justify-content: center;
+  }
+  .sidebar-logo-img {
+    width: 32px;
+    height: 32px;
+  }
+  .sidebar a {
+    justify-content: center;
+    padding: 14px 0;
+    font-size: 1.3rem;
+  }
+  .main {
+    margin-left: 0;
+    padding-top: 60px;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar span,
+  .sidebar-section-label,
+  .sidebar-logo-title {
+    display: none !important;
+  }
+  .sidebar {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    align-items: center;
+  }
+  .sidebar a {
+    justify-content: center;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .sidebar i {
+    font-size: 1.5em;
+  }
+}
+
+@media (max-width: 700px) {
+  .grades-table,
+  .grades-table-section .table-header,
+  .grades-table-section .table-row {
+    display: block !important;
+    width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+  }
+  .grades-table th, .grades-table td,
+  .grades-table-section .header-cell {
+    display: block;
+    width: 100%;
+    padding: 0.6em 0.7em;
+    font-size: 0.98em;
+    text-align: left;
+    box-sizing: border-box;
+  }
+  .grades-table-section .table-row > div {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5em;
+  }
+  .grades-table-section .table-row > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    justify-content: flex-start;
+  }
+  .grade-badge, .btn {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 0.5em;
+    font-size: 1em;
+  }
+  .export-pdf-btn {
+    width: 100%;
+    margin: 0.5em 0 0 0;
+  }
+  .grades-table-section .table-header {
+    border-radius: 12px 12px 0 0;
+    padding: 0.7em 0.7em;
+  }
+  .grades-table-section .table-body {
+    padding: 0.5em 0.5em 1em 0.5em;
+  }
+  .grades-table-section .table-row {
+    border-radius: 10px;
+    margin-bottom: 1em;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+    padding: 0.7em 0.7em;
+  }
+  .grades-table-section .table-row:last-child {
+    margin-bottom: 0;
+  }
+  .grades-table-section .table-row > div:empty {
+    display: none;
+  }
+  .grades-table-section .table-header {
+    margin-bottom: 0.5em;
+  }
+  .grades-table-section .table-row > div {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.3em;
+  }
+  .grades-table-section .table-row > div:last-child {
+    border-bottom: none;
+  }
+  .grades-table-section .table-row > div label {
+    font-size: 0.98em;
+  }
+  .grades-table-section .table-row > div input,
+  .grades-table-section .table-row > div select {
+    width: 100%;
+    font-size: 1em;
+    margin-top: 0.2em;
+  }
+  .grades-table-section .table-row > div .btn {
+    margin-top: 0.3em;
+  }
+  .grades-table-section .table-row > div .btn:last-child {
+    margin-bottom: 0;
+  }
+  .grades-table-section .table-row > div .grade-badge {
+    margin-bottom: 0.3em;
+  }
+  .grades-table-section .table-row > div .export-pdf-btn {
+    margin-top: 0.3em;
+  }
+  .grades-table-section .table-header .header-cell {
+    font-size: 1em;
+    padding: 0.5em 0.7em;
+  }
+  .grades-table-section .table-header .header-cell:empty {
+    display: none;
+  }
+  .grades-table-section .table-header .header-cell:last-child {
+    border-bottom: none;
+  }
+  .grades-table-section .table-header .header-cell {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .grades-table-section .table-header .header-cell:last-child {
+    border-bottom: none;
+  }
+  .grades-table-section .table-header {
+    box-shadow: 0 1px 4px rgba(44,62,80,0.04);
+  }
+  .grades-table-section .table-header {
+    margin-bottom: 0.5em;
+  }
+  .grades-table-section .table-row {
+    margin-bottom: 1em;
+  }
+  .grades-table-section .table-row:last-child {
+    margin-bottom: 0;
+  }
+  .grades-table-section .table-row > div {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.3em;
+  }
+  .grades-table-section .table-row > div:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .grades-header .create-test-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+    width: 100%;
+  }
+  .grades-header .create-test-form input[type="text"],
+  .grades-header .create-test-form input[type="date"],
+  .grades-header .create-test-form input[type="number"],
+  .grades-header .create-test-form button {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.5em;
+    box-sizing: border-box;
+  }
+  .grades-header .create-test-form button {
+    margin-top: 0.2em;
+    margin-bottom: 0;
+  }
+}
+
+.grades-table-section .btn,
+.grades-table-section .btn-danger,
+.grades-table-section .btn-secondary {
+  min-width: unset;
+  width: auto;
+  font-size: 0.95em;
+}
+
+@media (max-width: 700px) {
+  .grades-table-section .btn,
+  .grades-table-section .btn-danger,
+  .grades-table-section .btn-secondary {
+    width: 100%;
+    min-width: 0;
+    font-size: 1em;
+  }
+}
+
+.grades-table-section .table-header > .header-cell:nth-child(3),
+.grades-table-section .table-row > div:nth-child(3) {
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
+  overflow: hidden;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.grades-table-section .table-header,
+.grades-table-section .table-row {
+  column-gap: 2.2rem;
+}
+.grades-table-section .header-cell,
+.grades-table-section .table-row > div {
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+}
+
+.grades-table td:nth-child(4) {
+  display: flex;
+  gap: 0.5em;
+  justify-content: center;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .grades-table td:nth-child(4) {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+}
+
+@media (max-width: 700px) {
+  .courses-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7em;
+    text-align: left;
+  }
+  .courses-header h2 {
+    font-size: 1.2rem;
+    width: 100%;
+    text-align: left;
+  }
+  .courses-header .btn,
+  .courses-header button {
+    width: 100%;
+    margin-top: 0.5em;
+  }
+  .course-item {
+    padding: 10px 6px;
+    font-size: 0.98rem;
+  }
+  .course-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5em;
+    margin-bottom: 8px;
+  }
+  .course-header h3 {
+    font-size: 1.05rem;
+    width: 100%;
+  }
+  .course-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5em;
+  }
+  .course-actions .btn {
+    width: 100%;
+    font-size: 1em;
+    padding: 10px 0;
+  }
+  .course-body {
+    font-size: 0.98rem;
+    margin-top: 6px;
+  }
+  .course-body a {
+    word-break: break-all;
+  }
 }

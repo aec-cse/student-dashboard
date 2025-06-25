@@ -528,28 +528,148 @@ input:focus, select:focus, textarea:focus {
     border-radius: 8px;
 }
 
-/* Responsive Design */
+/* --- Responsive Sidebar --- */
+.sidebar-toggle {
+  display: none;
+}
+
 @media (max-width: 900px) {
-    .sidebar {
-        min-width: 60px;
-        max-width: 60px;
-        padding: 14px 0 10px 0;
-    }
-    .sidebar-header h2 {
-        display: none;
-    }
-    .nav-item {
-        padding: 12px 10px 12px 10px;
-        font-size: 1.1rem;
-        justify-content: center;
-    }
-    .main-content {
-        margin-left: 60px;
-        padding: 18px 8px 18px 8px;
-    }
-    #dashboard-overview-section, .courses-section, .grades-section, .notifications-section, .attendance-trend-section {
-        padding: 14px 8px 14px 8px;
-    }
+  .sidebar-toggle {
+    display: block !important;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 200;
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.6rem;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    min-width: 140px;
+    max-width: 160px;
+    padding: 12px 0 8px 0;
+  }
+  .main-content {
+    padding: 8px 2px 8px 2px;
+  }
+  #dashboard-overview-section, .courses-section, .grades-section, .notifications-section, .attendance-trend-section {
+    padding: 12px 4px 12px 4px;
+    min-height: 400px;
+  }
+  .dashboard-overview, .courses-list, .grades-table, .notifications-list {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  .overview-card, .stat-card, .card {
+    padding: 12px 8px;
+    font-size: 1em;
+  }
+  .sidebar-header h2, .sidebar-logo-title {
+    font-size: 1.1rem;
+  }
+}
+/* --- Hamburger Button (always hidden on desktop) --- */
+.sidebar-toggle {
+  display: none;
+}
+
+/* --- Responsive Tables --- */
+@media (max-width: 700px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  thead tr {
+    display: none;
+  }
+  tr {
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+  }
+  td {
+    padding-left: 50%;
+    position: relative;
+    min-height: 36px;
+    font-size: 1em;
+  }
+  td:before {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #6366f1;
+    content: attr(data-label);
+  }
+}
+/* --- Responsive Forms & Buttons --- */
+@media (max-width: 600px) {
+  input, select, textarea, button {
+    font-size: 1em;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .form-group, .form-actions {
+    width: 100%;
+    margin: 0 0 12px 0;
+  }
+  .btn, .btn-primary, .btn-secondary, .btn-danger {
+    width: 100%;
+    padding: 14px 0;
+    font-size: 1.1em;
+  }
+}
+/* --- Responsive Modals & Chat --- */
+@media (max-width: 600px) {
+  .modal-content, .chat-panel {
+    width: 98vw !important;
+    min-width: 0 !important;
+    left: 1vw !important;
+    right: 1vw !important;
+    border-radius: 10px;
+    padding: 10px 4px;
+  }
+  .chat-panel {
+    bottom: 0 !important;
+    top: auto !important;
+    height: 60vh !important;
+    max-height: 80vh !important;
+  }
+}
+/* --- General Mobile Adjustments --- */
+@media (max-width: 480px) {
+  .sidebar {
+    min-width: 90px;
+    max-width: 110px;
+    padding: 4px 0 2px 0;
+  }
+  .sidebar-logo-img {
+    width: 22px;
+    height: 22px;
+  }
+  .sidebar-logo-title {
+    font-size: 0.8rem;
+  }
+  .main-content {
+    padding: 2px;
+  }
+  #dashboard-overview-section, .courses-section, .grades-section, .notifications-section, .attendance-trend-section {
+    padding: 4px 2px;
+  }
+}
+/* --- Ensure scrollability --- */
+html, body, .main-content, #dashboard-overview-section, .courses-section, .grades-section, .notifications-section, .attendance-trend-section {
+  overflow-x: hidden;
 }
 
 /* Grades Table Enhancements */

@@ -6,6 +6,7 @@
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 340px;
 }
 
 .login-header {
@@ -117,6 +118,7 @@
     .login-container {
         margin: 20px;
         padding: 15px;
+        min-width: unset;
     }
 
     .login-header h1 {
@@ -135,10 +137,10 @@
 
 /* Modern Login Themes with Glassmorphism */
 body.student-login-theme {
-    background: linear-gradient(135deg, #e0f7ec 0%, #a7f3d0 100%);
+    background: #5665e7;
 }
 body.admin-login-theme {
-    background: linear-gradient(135deg, #ffe0e0 0%, #fecaca 100%);
+    background: #303d4e;
 }
 
 .student-login-theme .login-container {
@@ -238,4 +240,251 @@ body.admin-login-theme {
 }
 .login-header p {
     font-size: 0.95rem;
+}
+
+/* --- Enhanced Login UI for Both Dashboards --- */
+body.student-login-theme, body.admin-login-theme {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-logo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.login-logo-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+    background: #fff;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+.login-logo-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2563eb;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(30,64,175,0.10);
+}
+
+.login-container {
+    max-width: 410px;
+    margin: 40px auto;
+    padding: 32px 28px 28px 28px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(44,62,80,0.13);
+    position: relative;
+    z-index: 1;
+}
+
+.student-login-theme .login-container {
+    border-top: 7px solid #22c55e;
+    box-shadow: 0 8px 32px 0 rgba(34, 197, 94, 0.18);
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 20px;
+    border: 1.5px solid rgba(34, 197, 94, 0.15);
+}
+.admin-login-theme .login-container {
+    border-top: 7px solid #6366f1;
+    box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.18);
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 20px;
+    border: 1.5px solid rgba(99, 102, 241, 0.15);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+.login-header h1 {
+    color: #2563eb;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.form-group label {
+    font-weight: 600;
+    color: #2563eb;
+}
+.form-group input {
+    padding: 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: border 0.18s, box-shadow 0.18s;
+}
+.form-group input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px #c7d2fe;
+    outline: none;
+}
+
+.login-btn {
+    background: linear-gradient(90deg, #6366f1 0%, #2563eb 100%);
+    color: #fff;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background 0.3s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.10);
+}
+.login-btn:hover {
+    background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
+    box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.13);
+}
+
+.student-login-theme .login-btn {
+    background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+    box-shadow: 0 2px 8px 0 rgba(34, 197, 94, 0.10);
+}
+.student-login-theme .login-btn:hover {
+    background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+    box-shadow: 0 4px 16px 0 rgba(34, 197, 94, 0.13);
+}
+
+.forgot-password-btn {
+    color: #6366f1;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.forgot-password-btn:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.student-login-theme .forgot-password-btn {
+    color: #16a34a;
+}
+.student-login-theme .forgot-password-btn:hover {
+    color: #22c55e;
+}
+
+.admin-login-theme .forgot-password-btn {
+    color: #6366f1;
+}
+.admin-login-theme .forgot-password-btn:hover {
+    color: #2563eb;
+}
+
+.error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1.5px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+    font-weight: 600;
+}
+.success-message {
+    color: #28a745;
+    background-color: #d4edda;
+    border: 1.5px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+    font-weight: 600;
+}
+
+.btn.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: #e0e7ef;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    transition: background 0.18s, color 0.18s;
+}
+.btn.btn-secondary:hover {
+    background: #c7d2fe;
+    color: #1e40af;
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        margin: 12px;
+        padding: 12px;
+    }
+    .login-header h1 {
+        font-size: 1.3em;
+    }
+    .form-group input {
+        font-size: 0.95em;
+    }
+    .login-btn {
+        padding: 10px;
+        font-size: 1em;
+    }
+}
+
+/* --- Role Toggle Styles for Merged Login --- */
+.role-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.role-btn {
+    background: #e0e7ef;
+    color: #2563eb;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.role-btn.active {
+    background: linear-gradient(90deg, #6366f1 0%, #2563eb 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.10);
+}
+.student-login-theme .role-btn.active {
+    background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px 0 rgba(34, 197, 94, 0.10);
+}
+.role-btn:focus {
+    outline: 2px solid #6366f1;
+}
+@media (max-width: 480px) {
+    .role-toggle {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .role-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
