@@ -7,7 +7,10 @@
 }
 
 body {
-    background-color: #f5f6fa;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(120deg, #f0f4f8 0%, #e0e7ef 100%);
+    min-height: 100vh;
+    color: #1a202c;
 }
 
 .dashboard-container {
@@ -17,116 +20,149 @@ body {
 
 /* Sidebar Styles */
 .sidebar {
-    width: 250px;
-    background: #2c3e50;
-    color: white;
-    padding: 20px 0;
-    position: fixed;
+    background: linear-gradient(135deg, #6366f1 0%, #2563eb 100%);
+    color: #fff;
+    min-width: 210px;
+    max-width: 240px;
     height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    box-shadow: 2px 0 16px rgba(44,62,80,0.07);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0 18px 0;
+    border-radius: 0 18px 18px 0;
+    transition: box-shadow 0.2s, background 0.3s;
 }
 
 .sidebar-header {
-    padding: 0 20px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 24px 24px;
 }
 
 .sidebar-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(30,64,175,0.08);
+    margin: 0;
+}
+
+.sidebar-section-label {
+    font-size: 0.93rem;
+    color: #c7d2fe;
     font-weight: 600;
+    margin: 14px 0 6px 24px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: linear-gradient(90deg, #c7d2fe 0%, #e0e7ef 100%);
+    margin: 16px 18px 12px 24px;
+    border-radius: 2px;
+    opacity: 0.7;
 }
 
 .sidebar-nav {
-    margin-top: 20px;
+    margin-top: 0;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
-    color: #ecf0f1;
+    gap: 12px;
+    padding: 13px 24px 13px 24px;
+    color: #e0e7ef;
+    font-size: 1.05rem;
+    font-weight: 500;
     text-decoration: none;
-    transition: background-color 0.3s;
-}
-
-.nav-item:hover {
-    background-color: #34495e;
-}
-
-.nav-item.active {
-    background-color: #3498db;
+    border-radius: 8px 0 0 8px;
+    margin-bottom: 4px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
 .nav-item i {
-    margin-right: 10px;
-    width: 20px;
+    font-size: 1.1rem;
+    min-width: 20px;
     text-align: center;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+    box-shadow: 2px 4px 16px rgba(30,64,175,0.07);
 }
 
 /* Main Content Styles */
 .main-content {
     flex: 1;
-    margin-left: 250px;
-    padding: 20px;
+    margin-left: 240px;
+    padding: 36px 36px 36px 36px;
+    min-height: 100vh;
+    background: transparent;
+    transition: background 0.3s;
 }
 
-.content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+#dashboard-overview-section, .courses-section, .grades-section, .notifications-section, .attendance-trend-section {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(44,62,80,0.07);
+    padding: 32px 28px 28px 28px;
+    margin-bottom: 32px;
+    transition: box-shadow 0.2s, background 0.3s;
 }
 
-.content-header h1 {
-    color: #2c3e50;
-    font-size: 2rem;
-}
-
-.user-info {
-    text-align: right;
-}
-
-.user-info span {
-    display: block;
-    color: #7f8c8d;
-}
-
-/* Dashboard Overview */
 .dashboard-overview {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
     margin-bottom: 30px;
 }
 
 .overview-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: #f8fafc;
+    padding: 24px 18px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.06);
     display: flex;
     align-items: center;
     gap: 15px;
+    transition: box-shadow 0.2s, transform 0.18s;
+}
+
+.overview-card:hover {
+    box-shadow: 0 6px 24px rgba(44,62,80,0.13);
+    transform: translateY(-2px) scale(1.03);
 }
 
 .overview-card i {
     font-size: 2rem;
-    color: #4a90e2;
-    background: #f0f7ff;
+    color: #6366f1;
+    background: #e0e7ef;
     padding: 15px;
     border-radius: 8px;
 }
 
 .overview-info h3 {
     margin: 0;
-    font-size: 0.9rem;
-    color: #666;
+    font-size: 1rem;
+    color: #2563eb;
+    font-weight: 600;
 }
 
 .overview-info p {
     margin: 5px 0 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #2c3e50;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 /* Notifications Section */
@@ -423,82 +459,96 @@ body {
     gap: 10px;
 }
 
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.3s;
+.btn, .btn-secondary, .btn-danger, .export-pdf-btn {
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 10px 22px;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
 .btn-secondary {
-    background-color: #95a5a6;
-    color: white;
+    background: #e0e7ef;
+    color: #2563eb;
+    border: none;
 }
 
 .btn-secondary:hover {
-    background-color: #7f8c8d;
+    background: #c7d2fe;
+    color: #1e40af;
 }
 
 .btn-danger {
-    background-color: #e74c3c;
-    color: white;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: none;
 }
 
 .btn-danger:hover {
-    background-color: #c0392b;
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.export-pdf-btn {
+    background: linear-gradient(90deg, #6366f1 0%, #2563eb 100%);
+    color: #fff;
+    border: none;
+}
+
+.export-pdf-btn:hover {
+    background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+}
+
+input, select, textarea {
+    border-radius: 7px;
+    border: 1px solid #cbd5e1;
+    padding: 10px 12px;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: border 0.18s, box-shadow 0.18s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px #c7d2fe;
+    outline: none;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    background: #e0e7ef;
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c7d2fe;
+    border-radius: 8px;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .sidebar {
-        width: 70px;
+        min-width: 60px;
+        max-width: 60px;
+        padding: 14px 0 10px 0;
     }
-
-    .sidebar-header h2,
-    .nav-item span {
+    .sidebar-header h2 {
         display: none;
     }
-
     .nav-item {
+        padding: 12px 10px 12px 10px;
+        font-size: 1.1rem;
         justify-content: center;
-        padding: 15px;
     }
-
-    .nav-item i {
-        margin: 0;
-    }
-
     .main-content {
-        margin-left: 70px;
+        margin-left: 60px;
+        padding: 18px 8px 18px 8px;
     }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .main-content {
-        margin-left: 0;
-        padding: 15px;
-    }
-
-    .dashboard-overview {
-        grid-template-columns: 1fr;
-    }
-
-    .section-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .notifications-filters {
-        flex-direction: column;
-    }
-
-    .search-box,
-    .filter-options select {
-        width: 100%;
+    #dashboard-overview-section, .courses-section, .grades-section, .notifications-section, .attendance-trend-section {
+        padding: 14px 8px 14px 8px;
     }
 }
 
@@ -819,4 +869,15 @@ body {
 .sidebar .enrolled-course-item a:hover {
     color: #fff;
     text-decoration: underline;
+}
+
+/* --- Sidebar Logo & Structure for Student Dashboard --- */
+.sidebar-logo-img {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+    background: #fff;
+    object-fit: contain;
+    margin-right: 10px;
 }

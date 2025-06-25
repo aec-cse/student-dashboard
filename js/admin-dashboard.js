@@ -294,14 +294,16 @@ async function renderDashboard() {
   try {
     const totalStudents = await getTotalStudents();
     const studentsByStatus = await getStudentsByStatus();
-
+    const totalCourses = await getTotalCourses();
+    const totalEnrolledStudents = await getTotalEnrolledStudents();
     const stats = {
       total: totalStudents,
       approved: studentsByStatus.approved.length,
       rejected: studentsByStatus.rejected.length,
-      pending: studentsByStatus.pending.length
+      pending: studentsByStatus.pending.length,
+      courses: totalCourses,
+      enrolled: totalEnrolledStudents
     };
-
     return `
             <div class="dashboard-container">
                 <div class="stats-cards">
@@ -331,6 +333,20 @@ async function renderDashboard() {
                         <div class="stat-info">
                             <h3>Rejected</h3>
                             <p>${stats.rejected}</p>
+                        </div>
+                    </div>
+                    <div class="stat-card courses">
+                        <i class="fas fa-book"></i>
+                        <div class="stat-info">
+                            <h3>Total Courses</h3>
+                            <p>${stats.courses}</p>
+                        </div>
+                    </div>
+                    <div class="stat-card enrolled">
+                        <i class="fas fa-user-graduate"></i>
+                        <div class="stat-info">
+                            <h3>Students Enrolled in Courses</h3>
+                            <p>${stats.enrolled}</p>
                         </div>
                     </div>
                 </div>
@@ -3104,3 +3120,44 @@ if (closeEnrollmentsModalBtn) {
         document.getElementById('enrollments-modal').style.display = 'none';
     });
 }
+
+// ... existing code ...
+// Helper to fetch number of courses
+async function getTotalCourses() {
+    try {
+        const querySnapshot = await getDocs(collection(db, 'courses'));
+        return querySnapshot.size;
+    } catch (error) {
+        console.error('Error fetching course count:', error);
+        return 0;
+    }
+}
+// Helper to fetch number of unique students enrolled in any course
+async function getTotalEnrolledStudents() {
+    try {
+        const enrollmentsSnapshot = await getDocs(collection(db, 'enrollments'));
+        const studentIds = new Set();
+        enrollmentsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.studentId) studentIds.add(data.studentId);
+        });
+        return studentIds.size;
+    } catch (error) {
+        console.error('Error fetching enrolled students count:', error);
+        return 0;
+    }
+}
+// ... existing code ...
+
+// ... existing code ...
+// Add event listener for Register Student link to open in new tab
+const registerStudentLink = document.querySelector('.sidebar a[data-section="register-student"]');
+if (registerStudentLink) {
+    registerStudentLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        sessionStorage.setItem('admin_dashboard_open', '1');
+        window.open('student-registration.html', '_blank');
+        setTimeout(() => sessionStorage.removeItem('admin_dashboard_open'), 2000); // Clean up after a short delay
+    });
+}
+// ... existing code ...

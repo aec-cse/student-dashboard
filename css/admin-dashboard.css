@@ -6,81 +6,81 @@
 }
 
 body {
-    display: flex;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(120deg, #f0f4f8 0%, #e0e7ef 100%);
     min-height: 100vh;
-    background-color: #f4f6f8;
+    color: #1a202c;
 }
 
 /* Modern Sidebar Styles */
 .sidebar {
-    width: 260px;
-    background: #1a1f36;
+    background: linear-gradient(135deg, #6366f1 0%, #2563eb 100%);
     color: #fff;
-    padding: 1.5rem 1rem;
-    position: fixed;
+    min-width: 230px;
+    max-width: 260px;
     height: 100vh;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    transition: all 0.3s ease;
+    position: fixed;
+    left: 0;
+    top: 0;
+    box-shadow: 2px 0 16px rgba(44,62,80,0.07);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0 24px 0;
+    border-radius: 0 18px 18px 0;
+    transition: box-shadow 0.2s, background 0.3s;
 }
 
 .sidebar h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 32px 32px;
+    letter-spacing: 1px;
     color: #fff;
-}
-
-.sidebar h2 i {
-    color: #4a90e2;
-    font-size: 1.75rem;
+    text-shadow: 0 2px 8px rgba(30,64,175,0.08);
 }
 
 .sidebar a {
     display: flex;
     align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1rem;
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-    transition: all 0.2s ease;
+    gap: 14px;
+    padding: 14px 32px 14px 32px;
+    color: #e0e7ef;
+    font-size: 1.08rem;
     font-weight: 500;
-    font-size: 0.95rem;
+    text-decoration: none;
+    border-radius: 8px 0 0 8px;
+    margin-bottom: 6px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
 .sidebar a i {
-    font-size: 1.1rem;
-    width: 1.25rem;
+    font-size: 1.2rem;
+    min-width: 22px;
     text-align: center;
-    transition: all 0.2s ease;
 }
 
-.sidebar a:hover {
-    background: rgba(255, 255, 255, 0.1);
+.sidebar a:hover, .sidebar a.active {
+    background: rgba(255,255,255,0.13);
     color: #fff;
-    transform: translateX(4px);
-}
-
-.sidebar a.active {
-    background: #4a90e2;
-    color: #fff;
-}
-
-.sidebar a.active i {
-    color: #fff;
+    box-shadow: 2px 4px 16px rgba(30,64,175,0.07);
 }
 
 .main {
     margin-left: 260px;
-    padding: 30px;
-    flex: 1;
+    padding: 36px 36px 36px 36px;
+    min-height: 100vh;
+    background: transparent;
+    transition: background 0.3s;
+}
+
+#content-area {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(44,62,80,0.07);
+    padding: 36px 32px 32px 32px;
+    min-height: 600px;
+    transition: box-shadow 0.2s, background 0.3s;
 }
 
 .main h1 {
@@ -691,65 +691,74 @@ body {
 
 /* Stats Cards */
 .stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 36px;
 }
 
 .stat-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    transition: transform 0.2s ease;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+    padding: 28px 28px 22px 28px;
+    transition: box-shadow 0.2s, transform 0.18s;
+    background: #fff;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(44,62,80,0.13);
+    transform: translateY(-2px) scale(1.03);
 }
 
 .stat-card i {
-    font-size: 2em;
-    margin-right: 15px;
-    width: 40px;
-    text-align: center;
+    font-size: 2.2rem;
+    margin-right: 10px;
 }
 
 .stat-info h3 {
-    margin: 0;
-    font-size: 0.9em;
-    color: #666;
+    font-size: 1.1rem;
+    margin: 0 0 4px 0;
+    font-weight: 600;
 }
 
 .stat-info p {
-    margin: 5px 0 0;
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #2c3e50;
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 700;
 }
 
-/* Status-specific colors */
+/* --- Colorful Stat Cards --- */
+.stat-card.total {
+    background: #fef9c3;
+    color: #b45309;
+    border-left: 5px solid #fde047;
+}
 .stat-card.total i {
-    color: #4a90e2;
+    color: #fde047;
 }
-
+.stat-card.approved {
+    background: #dcfce7;
+    color: #15803d;
+    border-left: 5px solid #22c55e;
+}
 .stat-card.approved i {
-    color: #2ecc71;
+    color: #22c55e;
 }
-
+.stat-card.pending {
+    background: #fef3c7;
+    color: #b45309;
+    border-left: 5px solid #fbbf24;
+}
 .stat-card.pending i {
-    color: #f1c40f;
+    color: #fbbf24;
 }
-
-.stat-card.waitlisted i {
-    color: #e67e22;
+.stat-card.rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-left: 5px solid #ef4444;
 }
-
 .stat-card.rejected i {
-    color: #e74c3c;
+    color: #ef4444;
 }
 
 /* Status Sections */
@@ -761,25 +770,19 @@ body {
 }
 
 .status-section {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-    overflow: hidden;
+    background: #f8fafc;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(44,62,80,0.04);
+    padding: 24px 20px 18px 20px;
+    margin-bottom: 28px;
+    transition: box-shadow 0.2s;
 }
 
 .status-section h2 {
-    color: #2c3e50;
-    font-size: 1.2em;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    align-items: center;
-}
-
-.status-section h2 i {
-    margin-right: 10px;
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 18px;
 }
 
 .status-section .student-list {
@@ -2511,4 +2514,61 @@ body {
         width: 98%;
         min-width: unset;
     }
+}
+
+/* --- Dashboard Stat Cards: Courses & Enrolled Students --- */
+.stat-card.courses {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-left: 5px solid #0ea5e9;
+}
+.stat-card.courses i {
+    color: #0ea5e9;
+}
+.stat-card.enrolled {
+    background: #f3e8ff;
+    color: #7c3aed;
+    border-left: 5px solid #a78bfa;
+}
+.stat-card.enrolled i {
+    color: #a78bfa;
+}
+
+/* --- Sidebar Logo & Structure --- */
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 28px 32px;
+}
+.sidebar-logo-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+    background: #fff;
+    object-fit: contain;
+}
+.sidebar-logo-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(30,64,175,0.10);
+}
+.sidebar-section-label {
+    font-size: 0.93rem;
+    color: #c7d2fe;
+    font-weight: 600;
+    margin: 18px 0 6px 32px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+.sidebar-divider {
+    height: 1px;
+    background: linear-gradient(90deg, #c7d2fe 0%, #e0e7ef 100%);
+    margin: 22px 24px 18px 32px;
+    border-radius: 2px;
+    opacity: 0.7;
 }

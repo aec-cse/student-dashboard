@@ -22,15 +22,23 @@
 </head>
 <body>
     <div class="sidebar">
-        <h2>Admin Dashboard</h2>
+        <div class="sidebar-logo">
+            <img src="Logo.png" alt="Logo" class="sidebar-logo-img">
+            <span class="sidebar-logo-title">Admin Portal</span>
+        </div>
+        <div class="sidebar-section-label">Main</div>
         <a href="#" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <div class="sidebar-section-label">Management</div>
         <a href="#" data-section="student-management"><i class="fas fa-users"></i> Student Management</a>
         <a href="#" data-section="courses"><i class="fas fa-book"></i> Courses</a>
         <a href="#" data-section="register-student"><i class="fas fa-user-plus"></i> Register Student</a>
+        <div class="sidebar-section-label">Communication</div>
         <a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a>
         <a href="#" data-section="user-enquiry"><i class="fas fa-envelope"></i> User Enquiry</a>
+        <div class="sidebar-section-label">Academics</div>
         <a href="#" data-section="grades"><i class="fas fa-clipboard-list"></i> Grades</a>
         <a href="#" data-section="attendance"><i class="fas fa-calendar-check"></i> Attendance</a>
+        <div class="sidebar-divider"></div>
         <a href="javascript:void(0)" data-section="logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
@@ -110,18 +118,6 @@
                     <span class="notification-date"></span>
                     <span class="notification-author"></span>
                 </div>
-            </div>
-        </div>
-    </template>
-
-    <!-- Student Registration Form Template -->
-    <template id="register-student-template">
-        <div class="registration-container">
-            <div class="registration-wrapper">
-                <button class="close-registration-btn" onclick="closeRegistration()">
-                    <i class="fas fa-times"></i>
-                </button>
-                <iframe id="registration-frame" src="student-registration.html" frameborder="0"></iframe>
             </div>
         </div>
     </template>

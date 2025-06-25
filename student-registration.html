@@ -271,6 +271,29 @@
     </div>
 
     <script type="module" src="/js/student-registration.js"></script>
+    <script>
+    // Only allow access if opened from admin dashboard
+    (function() {
+        // Option 1: Check if window.opener exists and is from the same origin
+        let allowed = false;
+        try {
+            if (window.opener && window.opener.location) {
+                // Optionally, check for a specific referrer or property
+                allowed = true;
+            }
+        } catch (e) {
+            // Cross-origin, not allowed
+            allowed = false;
+        }
+        // Option 2: Check for a sessionStorage flag set by admin dashboard
+        if (!allowed && sessionStorage.getItem('admin_dashboard_open')) {
+            allowed = true;
+        }
+        if (!allowed) {
+            document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;"><h2 style="color:#b91c1c;">Access Denied</h2><p style="color:#555;">You can only access this page via the Admin Dashboard.</p></div>';
+        }
+    })();
+    </script>
 </body>
 
 </html>
