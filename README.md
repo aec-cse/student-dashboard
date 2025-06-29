@@ -64,25 +64,35 @@ student-dashboard/
 ├── admin-dashboard.html        # Admin dashboard
 ├── student-login.html          # Student login
 ├── admin-login.html            # Admin login
-├── student-registration.html   # Student registration
+├── student-registration.html   # Student registration with file uploads
 ├── studentlogin.html           # (legacy/alternate student login)
 ├── js/
 │   ├── student-dashboard.js    # Student dashboard logic
 │   ├── admin-dashboard.js      # Admin dashboard logic
 │   ├── student-login.js        # Student login logic
 │   ├── admin-login.js          # Admin login logic
-│   ├── student-registration.js # Student registration logic
+│   ├── student-registration.js # Student registration with Cloudinary integration
 │   └── studentlogin.js         # (legacy/alternate student login logic)
 ├── css/
 │   ├── admin-dashboard.css
 │   ├── student-dashboard.css
 │   ├── login.css
-│   ├── student-registration.css
-├── email-config.js
-├── firebase.json
-├── firestore.rules
-├── firestore.indexes.json
-├── Logo.png
+│   ├── student-registration.css # Includes file upload styling
+│   └── common.css              # Shared styles
+├── config/
+│   ├── firebase-config.js      # Firebase configuration
+│   └── cloudinary-config.js    # Cloudinary settings (optional)
+├── docs/
+│   ├── CLOUDINARY_SETUP.md     # Cloudinary setup guide
+│   └── FIREBASE_SETUP.md       # Firebase setup guide
+├── assets/
+│   ├── images/
+│   │   └── Logo.png
+│   └── uploads/                # Local upload folder (if needed)
+├── firebase.json               # Firebase hosting configuration
+├── firestore.rules            # Firestore security rules
+├── firestore.indexes.json     # Firestore indexes
+├── email-config.js            # Email configuration
 └── README.md
 ```
 
@@ -104,6 +114,15 @@ student-dashboard/
    - Add Firebase configuration
    - Set up security rules
 3. Open `index.html` with live server in your browser
+
+## Cloudinary Setup
+1. Create a cloudinary Account
+2. Get cloudinary credentials
+3. Create an upload Preset
+4. Configure Security Settings
+5. Update the code (Student-registration.js)
+   - Replace: Your_CLOUD_NAME with your actual name
+   - YOUR_UPLOAD_PRESET_NAME with your preset name.
 
 
 ## Security Features
