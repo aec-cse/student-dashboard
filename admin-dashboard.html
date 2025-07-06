@@ -328,18 +328,67 @@
     <template id="attendance-template">
         <div class="attendance-container">
             <div class="attendance-header">
-                <h2>Attendance Management</h2>
-                <div class="attendance-controls">
+                <div class="attendance-controls-row">
                     <input type="date" id="attendance-date-picker" />
                     <button class="btn btn-secondary" id="mark-all-present">Mark All Present</button>
                     <button class="btn btn-secondary" id="mark-all-absent">Mark All Absent</button>
                     <button class="btn btn-secondary" id="mark-all-late">Mark All Late</button>
                     <button class="btn btn-primary" id="save-attendance">Save Attendance</button>
+                    <button class="btn btn-secondary" id="export-csv">Export CSV</button>
+                    <button class="btn btn-secondary" id="export-pdf">Export PDF</button>
+                </div>
+                <div class="attendance-summary-row" id="attendance-summary">
+                    <div class="summary-card present">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="summary-info">
+                            <span class="summary-value" id="present-count">0</span>
+                            <span class="summary-label">Present</span>
+                        </div>
+                    </div>
+                    <div class="summary-card absent">
+                        <i class="fas fa-times-circle"></i>
+                        <div class="summary-info">
+                            <span class="summary-value" id="absent-count">0</span>
+                            <span class="summary-label">Absent</span>
+                        </div>
+                    </div>
+                    <div class="summary-card late">
+                        <i class="fas fa-clock"></i>
+                        <div class="summary-info">
+                            <span class="summary-value" id="late-count">0</span>
+                            <span class="summary-label">Late</span>
+                        </div>
+                    </div>
+                    <div class="summary-card total">
+                        <i class="fas fa-users"></i>
+                        <div class="summary-info">
+                            <span class="summary-value" id="total-count">0</span>
+                            <span class="summary-label">Total</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="attendance-list" id="attendance-list">
-                <!-- Student attendance rows will be rendered here -->
+            <div class="calendar-toggle-row">
+                <button class="btn btn-secondary" id="toggle-calendar-view">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="calendar-toggle-text">Show Calendar View</span>
+                </button>
             </div>
+            <div class="calendar-view" id="calendar-view">
+                <div class="calendar-header">
+                    <button class="btn btn-icon" id="prev-month">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h3 id="calendar-month-year">Month Year</h3>
+                    <button class="btn btn-icon" id="next-month">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar will be rendered here -->
+                </div>
+            </div>
+            <div class="attendance-list" id="attendance-list"></div>
         </div>
     </template>
 

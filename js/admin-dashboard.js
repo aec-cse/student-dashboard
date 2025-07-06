@@ -2513,11 +2513,28 @@ async function loadAttendanceSection() {
     const contentArea = document.getElementById('content-area');
     const template = document.getElementById('attendance-template');
     contentArea.innerHTML = template.innerHTML;
+    
+    // Get DOM elements
     const dateInput = document.getElementById('attendance-date-picker');
     const attendanceList = document.getElementById('attendance-list');
     const markAllPresentBtn = document.getElementById('mark-all-present');
     const markAllAbsentBtn = document.getElementById('mark-all-absent');
+    const markAllLateBtn = document.getElementById('mark-all-late');
     const saveAttendanceBtn = document.getElementById('save-attendance');
+    const exportCsvBtn = document.getElementById('export-csv');
+    const exportPdfBtn = document.getElementById('export-pdf');
+    const toggleCalendarBtn = document.getElementById('toggle-calendar-view');
+    const calendarView = document.getElementById('calendar-view');
+    const calendarGrid = document.getElementById('calendar-grid');
+    const calendarMonthYear = document.getElementById('calendar-month-year');
+    const prevMonthBtn = document.getElementById('prev-month');
+    const nextMonthBtn = document.getElementById('next-month');
+    
+    // Summary elements
+    const presentCount = document.getElementById('present-count');
+    const absentCount = document.getElementById('absent-count');
+    const lateCount = document.getElementById('late-count');
+    const totalCount = document.getElementById('total-count');
 
     // Set default date to today
     const today = new Date().toISOString().split('T')[0];
@@ -2525,7 +2542,10 @@ async function loadAttendanceSection() {
 
     let students = await getAllStudents();
     let attendanceMap = {};
+    let currentCalendarDate = new Date();
+    let calendarAttendanceData = {};
 
+    // Load attendance data for a specific date
     async function loadAttendanceForDate(date) {
         attendanceMap = {};
         const attendanceSnapshot = await getDocs(query(collection(db, 'attendance'), where('date', '==', date)));
@@ -2533,8 +2553,23 @@ async function loadAttendanceSection() {
             const data = doc.data();
             attendanceMap[data.studentId] = data.status;
         });
+        updateAttendanceSummary();
     }
 
+    // Update attendance summary display
+    function updateAttendanceSummary() {
+        const present = Object.values(attendanceMap).filter(status => status === 'present').length;
+        const absent = Object.values(attendanceMap).filter(status => status === 'absent').length;
+        const late = Object.values(attendanceMap).filter(status => status === 'late').length;
+        const total = students.length;
+
+        presentCount.textContent = present;
+        absentCount.textContent = absent;
+        lateCount.textContent = late;
+        totalCount.textContent = total;
+    }
+
+    // Render attendance list table
     function renderAttendanceList() {
         let html = `<table class="grades-table"><thead><tr><th>Student Name</th><th>Email</th><th>Status</th></tr></thead><tbody>`;
         students.forEach(student => {
@@ -2543,14 +2578,245 @@ async function loadAttendanceSection() {
                 <select class="attendance-status" data-student-id="${student.id}">
                     <option value="present" ${status === 'present' ? 'selected' : ''}>Present</option>
                     <option value="absent" ${status === 'absent' ? 'selected' : ''}>Absent</option>
+                    <option value="late" ${status === 'late' ? 'selected' : ''}>Late</option>
                 </select>
             </td></tr>`;
         });
         html += '</tbody></table>';
         attendanceList.innerHTML = html;
-        // No more View Records event handlers
     }
 
+    // Calendar functionality
+    function renderCalendar() {
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        
+        // Update month/year display
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
+
+        // Get first day of month and number of days
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+
+        // Weekday names as first 7 cells
+        const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let html = '';
+        for (let i = 0; i < 7; i++) {
+            html += `<div class=\"calendar-weekday\">${weekdayNames[i]}</div>`;
+        }
+
+        // Add empty cells for days before the first day of the month
+        for (let i = 0; i < startingDay; i++) {
+            html += '<div class=\"calendar-day other-month\"></div>';
+        }
+
+        // Add days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isToday = dateStr === today;
+            const dayData = calendarAttendanceData[dateStr];
+            
+            let dayClasses = 'calendar-day';
+            if (isToday) dayClasses += ' today';
+            // Optionally: highlight selected day
+            // if (dateInput.value === dateStr) dayClasses += ' selected';
+            if (dayData && dayData.total > 0) {
+                dayClasses += ' has-attendance';
+                // Determine dominant status for color coding
+                const dominantStatus = dayData.present > dayData.absent ? 
+                    (dayData.present > dayData.late ? 'present' : 'late') :
+                    (dayData.absent > dayData.late ? 'absent' : 'late');
+                dayClasses += ` ${dominantStatus}`;
+            }
+
+            const attendanceText = dayData && dayData.total > 0 ? 
+                `${dayData.present}P ${dayData.absent}A ${dayData.late}L` : '';
+
+            html += `
+                <div class=\"${dayClasses}\" data-date=\"${dateStr}\">
+                    <div class=\"calendar-day-number\">${day}</div>
+                    ${attendanceText ? `<div class=\"calendar-day-info\">${attendanceText}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // Add empty cells for days after the last day of the month
+        const totalCells = 7 + startingDay + daysInMonth; // 7 for weekday header
+        const remainingCells = 49 - totalCells; // 7 rows * 7 days
+        for (let i = 0; i < remainingCells; i++) {
+            html += '<div class=\"calendar-day other-month\"></div>';
+        }
+
+        calendarGrid.innerHTML = `<div class=\"calendar-grid\">${html}</div>`;
+
+        // Add click handlers for calendar days
+        calendarGrid.querySelectorAll('.calendar-day[data-date]').forEach(day => {
+            day.addEventListener('click', () => {
+                const selectedDate = day.getAttribute('data-date');
+                dateInput.value = selectedDate;
+                loadAttendanceForDate(selectedDate);
+                renderAttendanceList();
+            });
+        });
+    }
+
+    // Load calendar attendance data
+    async function loadCalendarAttendanceData() {
+        calendarAttendanceData = {};
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        const startDate = new Date(year, month, 1).toISOString().split('T')[0];
+        const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+        // Get all attendance records for the month
+        const attendanceSnapshot = await getDocs(
+            query(collection(db, 'attendance'), 
+                  where('date', '>=', startDate),
+                  where('date', '<=', endDate))
+        );
+
+        attendanceSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (!calendarAttendanceData[data.date]) {
+                calendarAttendanceData[data.date] = {
+                    present: 0,
+                    absent: 0,
+                    late: 0,
+                    total: 0
+                };
+            }
+            calendarAttendanceData[data.date][data.status]++;
+            calendarAttendanceData[data.date].total++;
+        });
+
+        renderCalendar();
+    }
+
+    // Export to CSV
+    async function exportToCSV() {
+        const date = dateInput.value;
+        const csvContent = [
+            ['Student Name', 'Email', 'Status', 'Date'],
+            ...students.map(student => [
+                student.fullName,
+                student.email,
+                attendanceMap[student.id] || 'absent',
+                date
+            ])
+        ];
+
+        const csvString = csvContent.map(row => 
+            row.map(cell => `"${cell}"`).join(',')
+        ).join('\n');
+
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `attendance_${date}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Export to PDF
+    async function exportToPDF() {
+        if (typeof window.jspdf === 'undefined') {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        }
+        if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined' && !window.jspdf.jsPDF.API.autoTable) {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+        }
+        
+        const date = dateInput.value;
+        const pdf = new window.jspdf.jsPDF();
+        
+        // Calculate attendance counts
+        const present = Object.values(attendanceMap).filter(status => status === 'present').length;
+        const absent = Object.values(attendanceMap).filter(status => status === 'absent').length;
+        const late = Object.values(attendanceMap).filter(status => status === 'late').length;
+        const total = students.length;
+        
+        // Header
+        pdf.setFontSize(24);
+        pdf.setTextColor(44, 62, 80);
+        pdf.text('Attendance Report', 20, 30);
+        
+        // Date and summary
+        pdf.setFontSize(14);
+        pdf.setTextColor(70, 70, 70);
+        pdf.text(`Date: ${date}`, 20, 45);
+        pdf.text(`Total Students: ${total}`, 20, 55);
+        
+        // Attendance summary with better formatting
+        pdf.setFontSize(12);
+        pdf.setTextColor(44, 62, 80);
+        pdf.text('Attendance Summary:', 20, 70);
+        
+        pdf.setFontSize(11);
+        pdf.setTextColor(34, 197, 94); // Green for present
+        pdf.text(`Present: ${present}`, 20, 80);
+        pdf.setTextColor(239, 68, 68); // Red for absent
+        pdf.text(`Absent: ${absent}`, 20, 90);
+        pdf.setTextColor(245, 158, 11); // Orange for late
+        pdf.text(`Late: ${late}`, 20, 100);
+        
+        // Calculate percentages
+        const presentPercent = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+        const absentPercent = total > 0 ? ((absent / total) * 100).toFixed(1) : 0;
+        const latePercent = total > 0 ? ((late / total) * 100).toFixed(1) : 0;
+        
+        pdf.setTextColor(100, 100, 100);
+        pdf.setFontSize(10);
+        pdf.text(`Present Rate: ${presentPercent}%`, 20, 110);
+        pdf.text(`Absent Rate: ${absentPercent}%`, 20, 120);
+        pdf.text(`Late Rate: ${latePercent}%`, 20, 130);
+        
+        // Table
+        const tableData = [
+            ['Student Name', 'Email', 'Status']
+        ];
+        
+        students.forEach(student => {
+            tableData.push([
+                student.fullName,
+                student.email,
+                attendanceMap[student.id] || 'absent'
+            ]);
+        });
+        
+        if (pdf.autoTable) {
+            pdf.autoTable({
+                head: [tableData[0]],
+                body: tableData.slice(1),
+                startY: 150,
+                styles: { 
+                    fontSize: 10, 
+                    cellPadding: 5,
+                    cellWidth: 'auto'
+                },
+                headStyles: { 
+                    fillColor: [44, 62, 80], 
+                    textColor: 255,
+                    fontSize: 11
+                },
+                columnStyles: {
+                    0: { cellWidth: 60 }, // Student Name
+                    1: { cellWidth: 70 }, // Email
+                    2: { cellWidth: 30 }  // Status
+                }
+            });
+        }
+        
+        pdf.save(`attendance_${date}.pdf`);
+    }
+
+    // Event handlers
     async function refresh() {
         await loadAttendanceForDate(dateInput.value);
         renderAttendanceList();
@@ -2562,31 +2828,34 @@ async function loadAttendanceSection() {
     markAllPresentBtn.onclick = () => {
         students.forEach(s => attendanceMap[s.id] = 'present');
         renderAttendanceList();
+        updateAttendanceSummary();
     };
     markAllAbsentBtn.onclick = () => {
         students.forEach(s => attendanceMap[s.id] = 'absent');
         renderAttendanceList();
+        updateAttendanceSummary();
     };
-
+    markAllLateBtn.onclick = () => {
+        students.forEach(s => attendanceMap[s.id] = 'late');
+        renderAttendanceList();
+        updateAttendanceSummary();
+    };
     attendanceList.addEventListener('change', (e) => {
         if (e.target.classList.contains('attendance-status')) {
             const studentId = e.target.getAttribute('data-student-id');
             attendanceMap[studentId] = e.target.value;
+            updateAttendanceSummary();
         }
     });
-
     saveAttendanceBtn.onclick = async () => {
         const date = dateInput.value;
         for (const student of students) {
             const status = attendanceMap[student.id] || 'absent';
-            // Find if record exists for this student/date
             const q = query(collection(db, 'attendance'), where('studentId', '==', student.id), where('date', '==', date));
             const snapshot = await getDocs(q);
             if (!snapshot.empty) {
-                // Update existing
                 await updateDoc(snapshot.docs[0].ref, { status });
             } else {
-                // Add new
                 await addDoc(collection(db, 'attendance'), {
                     studentId: student.id,
                     date,
@@ -2596,7 +2865,27 @@ async function loadAttendanceSection() {
         }
         utils.showMessage('Attendance saved!', 'success');
         await refresh();
+        await loadCalendarAttendanceData();
     };
+    toggleCalendarBtn.onclick = () => {
+        const isVisible = calendarView.style.display !== 'none';
+        calendarView.style.display = isVisible ? 'none' : 'block';
+        toggleCalendarBtn.querySelector('span').textContent = isVisible ? 'Show Calendar View' : 'Hide Calendar View';
+        if (!isVisible) {
+            loadCalendarAttendanceData();
+        }
+    };
+    prevMonthBtn.onclick = () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        loadCalendarAttendanceData();
+    };
+    nextMonthBtn.onclick = () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        loadCalendarAttendanceData();
+    };
+    exportCsvBtn.onclick = exportToCSV;
+    exportPdfBtn.onclick = exportToPDF;
+    await loadCalendarAttendanceData();
 }
 
 // Add navigation for attendance section
@@ -2745,6 +3034,7 @@ function renderAttendanceList() {
             <select class="attendance-status" data-student-id="${student.id}">
                 <option value="present" ${status === 'present' ? 'selected' : ''}>Present</option>
                 <option value="absent" ${status === 'absent' ? 'selected' : ''}>Absent</option>
+                <option value="late" ${status === 'late' ? 'selected' : ''}>Late</option>
             </select>
         </td></tr>`;
     });
