@@ -289,6 +289,8 @@ function showSection(section) {
     if (gradesSection) gradesSection.style.display = section === 'grades' ? '' : 'none';
     const coursesSection = document.getElementById('courses-section');
     if (coursesSection) coursesSection.style.display = section === 'courses' ? '' : 'none';
+    const attendanceSection = document.getElementById('my-attendance-section');
+    if (attendanceSection) attendanceSection.style.display = section === 'my-attendance' ? '' : 'none';
     // Show/hide welcome header
     const studentMsg = document.getElementById('student_msg');
     if (studentMsg) studentMsg.style.display = section === 'dashboard' ? '' : 'none';
@@ -306,6 +308,10 @@ function showSection(section) {
     // Load courses if courses section
     if (section === 'courses' && window.currentStudentId) {
         renderEnrolledCourses(window.currentStudentId);
+    }
+    // Load attendance calendar if my-attendance section
+    if (section === 'my-attendance' && window.currentStudentId) {
+        loadAttendanceCalendarSection(window.currentStudentId);
     }
 }
 
@@ -720,4 +726,151 @@ async function markNotificationAsRead(notificationId) {
         console.error('Error marking notification as read:', error);
         utils.showMessage(error.message || 'Error marking notification as read', 'error');
     }
+} 
+
+// --- Attendance Calendar Functionality ---
+
+// Helper: Get month name
+function getMonthName(monthIdx) {
+    return new Date(2000, monthIdx, 1).toLocaleString('default', { month: 'long' });
+}
+
+// Helper: Get days in month
+function getDaysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+}
+
+// Helper: Get weekday (0=Sun, 6=Sat)
+function getFirstDayOfWeek(year, month) {
+    return new Date(year, month, 1).getDay();
+}
+
+// Fetch attendance data for a month
+async function fetchStudentAttendanceForMonth(studentId, year, month) {
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+    const startStr = start.toISOString().slice(0, 10);
+    const endStr = end.toISOString().slice(0, 10);
+    const q = query(
+        collection(db, 'attendance'),
+        where('studentId', '==', studentId),
+        where('date', '>=', startStr),
+        where('date', '<=', endStr)
+    );
+    const snap = await getDocs(q);
+    const data = {};
+    snap.forEach(doc => {
+        const d = doc.data();
+        data[d.date] = d.status;
+    });
+    return data;
+}
+
+// Render the calendar
+function renderAttendanceCalendar({ year, month, attendanceData }) {
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfWeek(year, month);
+    const today = new Date();
+    const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+    const calendar = document.createElement('div');
+    calendar.className = 'attendance-calendar';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'calendar-header';
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '<';
+    prevBtn.setAttribute('aria-label', 'Previous Month');
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '>';
+    nextBtn.setAttribute('aria-label', 'Next Month');
+    const monthLabel = document.createElement('span');
+    monthLabel.textContent = `${getMonthName(month)} ${year}`;
+    header.appendChild(prevBtn);
+    header.appendChild(monthLabel);
+    header.appendChild(nextBtn);
+    calendar.appendChild(header);
+
+    // Weekdays
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekdaysRow = document.createElement('div');
+    weekdaysRow.className = 'calendar-weekdays';
+    weekdays.forEach(day => {
+        const wd = document.createElement('div');
+        wd.textContent = day;
+        weekdaysRow.appendChild(wd);
+    });
+    calendar.appendChild(weekdaysRow);
+
+    // Grid
+    const grid = document.createElement('div');
+    grid.className = 'calendar-grid';
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'calendar-day status-none';
+        grid.appendChild(empty);
+    }
+    // Days
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const status = attendanceData[dateStr] || 'none';
+        const dayDiv = document.createElement('div');
+        dayDiv.className = `calendar-day status-${status}`;
+        if (isCurrentMonth && d === today.getDate()) {
+            dayDiv.classList.add('today');
+        }
+        const num = document.createElement('span');
+        num.className = 'day-number';
+        num.textContent = d;
+        dayDiv.appendChild(num);
+        // Optionally, add a status label
+        // if (status !== 'none') {
+        //     const label = document.createElement('span');
+        //     label.className = 'status-label';
+        //     label.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        //     dayDiv.appendChild(label);
+        // }
+        grid.appendChild(dayDiv);
+    }
+    calendar.appendChild(grid);
+    return { calendar, prevBtn, nextBtn };
+}
+
+// Main loader for attendance calendar
+function loadAttendanceCalendarSection(studentId) {
+    let viewYear, viewMonth;
+    const contentArea = document.getElementById('content-area');
+    if (!contentArea) return;
+    // Start with current month
+    const now = new Date();
+    viewYear = now.getFullYear();
+    viewMonth = now.getMonth();
+
+    async function render() {
+        contentArea.innerHTML = '<div style="text-align:center;padding:2em 0;">Loading attendance...</div>';
+        const attendanceData = await fetchStudentAttendanceForMonth(studentId, viewYear, viewMonth);
+        contentArea.innerHTML = '';
+        const { calendar, prevBtn, nextBtn } = renderAttendanceCalendar({ year: viewYear, month: viewMonth, attendanceData });
+        contentArea.appendChild(calendar);
+        prevBtn.onclick = () => {
+            if (viewMonth === 0) {
+                viewMonth = 11;
+                viewYear--;
+            } else {
+                viewMonth--;
+            }
+            render();
+        };
+        nextBtn.onclick = () => {
+            if (viewMonth === 11) {
+                viewMonth = 0;
+                viewYear++;
+            } else {
+                viewMonth++;
+            }
+            render();
+        };
+    }
+    render();
 } 

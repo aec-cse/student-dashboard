@@ -1001,3 +1001,102 @@ html, body, .main-content, #dashboard-overview-section, .courses-section, .grade
     object-fit: contain;
     margin-right: 10px;
 }
+
+/* Attendance Calendar Styles */
+.attendance-calendar {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+    padding: 18px 10px 24px 10px;
+    margin: 0 auto;
+    max-width: 420px;
+    width: 100%;
+}
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.calendar-header button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.calendar-header button:hover {
+    background: #1e40af;
+}
+.calendar-header span {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2563eb;
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+.calendar-day {
+    background: #f3f4f6;
+    border-radius: 6px;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #1e293b;
+    font-weight: 500;
+    position: relative;
+    transition: background 0.18s, color 0.18s;
+}
+.calendar-day.status-present {
+    background: #22c55e;
+    color: #fff;
+}
+.calendar-day.status-absent {
+    background: #ef4444;
+    color: #fff;
+}
+.calendar-day.status-late {
+    background: #f59e42;
+    color: #fff;
+}
+.calendar-day.status-none {
+    background: #e5e7eb;
+    color: #a1a1aa;
+}
+.calendar-day.today {
+    border: 2px solid #2563eb;
+}
+.calendar-day .day-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+    font-size: 0.98rem;
+    color: #64748b;
+    font-weight: 600;
+    text-align: center;
+}
+@media (max-width: 600px) {
+    .attendance-calendar {
+        max-width: 100%;
+        padding: 8px 2px 16px 2px;
+    }
+    .calendar-day {
+        min-height: 36px;
+        font-size: 0.95rem;
+    }
+    .calendar-header span {
+        font-size: 1rem;
+    }
+}
