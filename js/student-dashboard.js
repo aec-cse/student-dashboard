@@ -745,6 +745,30 @@ function getFirstDayOfWeek(year, month) {
     return new Date(year, month, 1).getDay();
 }
 
+// Helper: Fill month/year dropdowns
+function fillMonthYearDropdowns(viewYear, viewMonth) {
+    const monthSel = document.getElementById('attendance-month');
+    const yearSel = document.getElementById('attendance-year');
+    if (!monthSel || !yearSel) return;
+    monthSel.innerHTML = '';
+    yearSel.innerHTML = '';
+    for (let m = 0; m < 12; m++) {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = getMonthName(m);
+        if (m === viewMonth) opt.selected = true;
+        monthSel.appendChild(opt);
+    }
+    const thisYear = new Date().getFullYear();
+    for (let y = thisYear - 5; y <= thisYear + 1; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        if (y === viewYear) opt.selected = true;
+        yearSel.appendChild(opt);
+    }
+}
+
 // Fetch attendance data for a month
 async function fetchStudentAttendanceForMonth(studentId, year, month) {
     const start = new Date(year, month, 1);
@@ -775,22 +799,7 @@ function renderAttendanceCalendar({ year, month, attendanceData }) {
     const calendar = document.createElement('div');
     calendar.className = 'attendance-calendar';
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'calendar-header';
-    const prevBtn = document.createElement('button');
-    prevBtn.textContent = '<';
-    prevBtn.setAttribute('aria-label', 'Previous Month');
-    const nextBtn = document.createElement('button');
-    nextBtn.textContent = '>';
-    nextBtn.setAttribute('aria-label', 'Next Month');
-    const monthLabel = document.createElement('span');
-    monthLabel.textContent = `${getMonthName(month)} ${year}`;
-    header.appendChild(prevBtn);
-    header.appendChild(monthLabel);
-    header.appendChild(nextBtn);
-    calendar.appendChild(header);
-
+    // Header (removed prev/next, handled by dropdowns now)
     // Weekdays
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const weekdaysRow = document.createElement('div');
@@ -824,17 +833,130 @@ function renderAttendanceCalendar({ year, month, attendanceData }) {
         num.className = 'day-number';
         num.textContent = d;
         dayDiv.appendChild(num);
-        // Optionally, add a status label
-        // if (status !== 'none') {
-        //     const label = document.createElement('span');
-        //     label.className = 'status-label';
-        //     label.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-        //     dayDiv.appendChild(label);
-        // }
         grid.appendChild(dayDiv);
     }
     calendar.appendChild(grid);
-    return { calendar, prevBtn, nextBtn };
+    return calendar;
+}
+
+// --- Analytics, Summary, and Export ---
+function getAttendanceStats(attendanceData, year, month) {
+    const daysInMonth = getDaysInMonth(year, month);
+    let present = 0, absent = 0, late = 0, marked = 0;
+    Object.values(attendanceData).forEach(status => {
+        if (status === 'present') present++;
+        else if (status === 'absent') absent++;
+        else if (status === 'late') late++;
+    });
+    marked = present + absent + late;
+    const percent = daysInMonth ? ((present / daysInMonth) * 100).toFixed(1) : '0.0';
+    return { daysInMonth, marked, present, absent, late, percent };
+}
+
+let barChart = null, pieChart = null;
+function renderAttendanceCharts(stats) {
+    // Bar Chart
+    const barCtx = document.getElementById('attendance-bar-chart').getContext('2d');
+    if (barChart) barChart.destroy();
+    barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Present', 'Absent', 'Late'],
+            datasets: [{
+                label: 'Days',
+                data: [stats.present, stats.absent, stats.late],
+                backgroundColor: ['#22c55e', '#ef4444', '#f59e42']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+    // Pie Chart
+    const pieCtx = document.getElementById('attendance-pie-chart').getContext('2d');
+    if (pieChart) pieChart.destroy();
+    pieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Present', 'Absent', 'Late'],
+            datasets: [{
+                data: [stats.present, stats.absent, stats.late],
+                backgroundColor: ['#22c55e', '#ef4444', '#f59e42']
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+
+function renderAttendanceSummary(stats) {
+    const summaryDiv = document.getElementById('attendance-summary');
+    summaryDiv.innerHTML = `
+        <strong>Attendance Summary:</strong><br>
+        Total days in month: <b>${stats.daysInMonth}</b><br>
+        Days marked: <b>${stats.marked}</b><br>
+        Days present: <b>${stats.present}</b><br>
+        Days absent: <b>${stats.absent}</b><br>
+        Days late: <b>${stats.late}</b><br>
+        % Attendance: <b>${stats.percent}%</b>
+    `;
+}
+
+function attendanceDataToCSV(attendanceData, year, month) {
+    const daysInMonth = getDaysInMonth(year, month);
+    let csv = 'Date,Status\n';
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        csv += `${dateStr},${attendanceData[dateStr] || 'none'}\n`;
+    }
+    return csv;
+}
+
+function downloadCSV(filename, csv) {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+async function exportAttendancePDF(calendarElem, stats, year, month) {
+    // Load jsPDF and html2canvas if not present
+    if (typeof window.jspdf === 'undefined') {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    }
+    if (typeof window.html2canvas === 'undefined') {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    }
+    // Clone calendar and summary for PDF
+    const wrapper = document.createElement('div');
+    wrapper.style.background = '#fff';
+    wrapper.style.padding = '16px';
+    const title = document.createElement('h2');
+    title.textContent = `Attendance for ${getMonthName(month)} ${year}`;
+    wrapper.appendChild(title);
+    wrapper.appendChild(calendarElem.cloneNode(true));
+    const summary = document.createElement('div');
+    summary.innerHTML = `<br><strong>Attendance Summary:</strong><br>
+        Total days in month: <b>${stats.daysInMonth}</b><br>
+        Days marked: <b>${stats.marked}</b><br>
+        Days present: <b>${stats.present}</b><br>
+        Days absent: <b>${stats.absent}</b><br>
+        Days late: <b>${stats.late}</b><br>
+        % Attendance: <b>${stats.percent}%</b>`;
+    wrapper.appendChild(summary);
+    document.body.appendChild(wrapper);
+    await window.html2canvas(wrapper, { scale: 2 }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new window.jspdf.jsPDF();
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pageWidth - 20;
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
+        pdf.save(`attendance_${year}_${String(month+1).padStart(2,'0')}.pdf`);
+    });
+    document.body.removeChild(wrapper);
 }
 
 // Main loader for attendance calendar
@@ -847,29 +969,32 @@ function loadAttendanceCalendarSection(studentId) {
     viewYear = now.getFullYear();
     viewMonth = now.getMonth();
 
+    function onMonthYearChange() {
+        viewMonth = parseInt(document.getElementById('attendance-month').value);
+        viewYear = parseInt(document.getElementById('attendance-year').value);
+        render();
+    }
+
     async function render() {
+        fillMonthYearDropdowns(viewYear, viewMonth);
+        document.getElementById('attendance-month').onchange = onMonthYearChange;
+        document.getElementById('attendance-year').onchange = onMonthYearChange;
         contentArea.innerHTML = '<div style="text-align:center;padding:2em 0;">Loading attendance...</div>';
         const attendanceData = await fetchStudentAttendanceForMonth(studentId, viewYear, viewMonth);
         contentArea.innerHTML = '';
-        const { calendar, prevBtn, nextBtn } = renderAttendanceCalendar({ year: viewYear, month: viewMonth, attendanceData });
-        contentArea.appendChild(calendar);
-        prevBtn.onclick = () => {
-            if (viewMonth === 0) {
-                viewMonth = 11;
-                viewYear--;
-            } else {
-                viewMonth--;
-            }
-            render();
+        const calendarElem = renderAttendanceCalendar({ year: viewYear, month: viewMonth, attendanceData });
+        contentArea.appendChild(calendarElem);
+        // Analytics
+        const stats = getAttendanceStats(attendanceData, viewYear, viewMonth);
+        renderAttendanceCharts(stats);
+        renderAttendanceSummary(stats);
+        // Export buttons
+        document.getElementById('attendance-export-csv').onclick = () => {
+            const csv = attendanceDataToCSV(attendanceData, viewYear, viewMonth);
+            downloadCSV(`attendance_${viewYear}_${String(viewMonth+1).padStart(2,'0')}.csv`, csv);
         };
-        nextBtn.onclick = () => {
-            if (viewMonth === 11) {
-                viewMonth = 0;
-                viewYear++;
-            } else {
-                viewMonth++;
-            }
-            render();
+        document.getElementById('attendance-export-pdf').onclick = () => {
+            exportAttendancePDF(calendarElem, stats, viewYear, viewMonth);
         };
     }
     render();

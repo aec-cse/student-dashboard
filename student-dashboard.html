@@ -149,6 +149,33 @@
                 <div class="section-header">
                     <h2>My Attendance</h2>
                 </div>
+                <!-- Filters -->
+                <div class="attendance-filters" style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;">
+                    <label for="attendance-month">Month:</label>
+                    <select id="attendance-month"></select>
+                    <label for="attendance-year">Year:</label>
+                    <select id="attendance-year"></select>
+                    <button id="attendance-export-pdf" class="btn btn-secondary" style="margin-left:auto;"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                    <button id="attendance-export-csv" class="btn btn-secondary"><i class="fas fa-file-csv"></i> Export CSV</button>
+                </div>
+                <!-- Analytics Charts -->
+                <div class="attendance-analytics" style="display:flex;gap:2rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem;">
+                    <div style="flex:1;min-width:220px;">
+                        <canvas id="attendance-bar-chart" height="180"></canvas>
+                    </div>
+                    <div style="flex:1;min-width:220px;">
+                        <canvas id="attendance-pie-chart" height="180"></canvas>
+                    </div>
+                </div>
+                <!-- Attendance Summary -->
+                <div class="attendance-summary" id="attendance-summary" style="margin-bottom:1.5rem;"></div>
+                <!-- Legend -->
+                <div class="attendance-legend" style="display:flex;gap:1.5rem;align-items:center;margin-bottom:1.5rem;">
+                    <span><span style="display:inline-block;width:18px;height:18px;background:#22c55e;border-radius:4px;margin-right:6px;vertical-align:middle;"></span>Present</span>
+                    <span><span style="display:inline-block;width:18px;height:18px;background:#ef4444;border-radius:4px;margin-right:6px;vertical-align:middle;"></span>Absent</span>
+                    <span><span style="display:inline-block;width:18px;height:18px;background:#f59e42;border-radius:4px;margin-right:6px;vertical-align:middle;"></span>Late</span>
+                    <span><span style="display:inline-block;width:18px;height:18px;background:#d1d5db;border-radius:4px;margin-right:6px;vertical-align:middle;"></span>No Record</span>
+                </div>
                 <div id="content-area"></div>
             </div>
         </main>
