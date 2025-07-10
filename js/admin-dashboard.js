@@ -2536,9 +2536,22 @@ async function loadAttendanceSection() {
     const lateCount = document.getElementById('late-count');
     const totalCount = document.getElementById('total-count');
 
+    // View Attendance by Date elements
+    const viewAttendanceDate = document.getElementById('view-attendance-date');
+    const viewRecordsBtn = document.getElementById('view-records-btn');
+    const viewRecordsSummary = document.getElementById('view-records-summary');
+    const viewRecordsResults = document.getElementById('view-records-results');
+    const viewPresentCount = document.getElementById('view-present-count');
+    const viewAbsentCount = document.getElementById('view-absent-count');
+    const viewLateCount = document.getElementById('view-late-count');
+    const presentStudentsList = document.getElementById('present-students-list');
+    const absentStudentsList = document.getElementById('absent-students-list');
+    const lateStudentsList = document.getElementById('late-students-list');
+
     // Set default date to today
     const today = new Date().toISOString().split('T')[0];
     dateInput.value = today;
+    viewAttendanceDate.value = today;
 
     let students = await getAllStudents();
     let attendanceMap = {};
@@ -2584,6 +2597,110 @@ async function loadAttendanceSection() {
         });
         html += '</tbody></table>';
         attendanceList.innerHTML = html;
+    }
+
+    // View Attendance by Date functionality
+    async function viewAttendanceRecords() {
+        const selectedDate = viewAttendanceDate.value;
+        if (!selectedDate) {
+            utils.showMessage('Please select a date', 'error');
+            return;
+        }
+
+        try {
+            // Fetch all attendance records for the selected date
+            const attendanceSnapshot = await getDocs(
+                query(collection(db, 'attendance'), where('date', '==', selectedDate))
+            );
+
+            // Group students by status
+            const presentStudents = [];
+            const absentStudents = [];
+            const lateStudents = [];
+
+            // Get all students to match with attendance records
+            const allStudents = await getAllStudents();
+            const studentMap = {};
+            allStudents.forEach(student => {
+                studentMap[student.id] = student;
+            });
+
+            // Process attendance records
+            attendanceSnapshot.forEach(doc => {
+                const data = doc.data();
+                const student = studentMap[data.studentId];
+                if (student) {
+                    const studentInfo = {
+                        id: student.id,
+                        fullName: student.fullName,
+                        email: student.email,
+                        internshipId: student.internshipId
+                    };
+
+                    switch (data.status) {
+                        case 'present':
+                            presentStudents.push(studentInfo);
+                            break;
+                        case 'absent':
+                            absentStudents.push(studentInfo);
+                            break;
+                        case 'late':
+                            lateStudents.push(studentInfo);
+                            break;
+                    }
+                }
+            });
+
+            // Update summary counts
+            viewPresentCount.textContent = presentStudents.length;
+            viewAbsentCount.textContent = absentStudents.length;
+            viewLateCount.textContent = lateStudents.length;
+
+            // Render student lists
+            renderStudentListByStatus(presentStudents, presentStudentsList, 'present');
+            renderStudentListByStatus(absentStudents, absentStudentsList, 'absent');
+            renderStudentListByStatus(lateStudents, lateStudentsList, 'late');
+
+            // Show results
+            viewRecordsSummary.style.display = 'block';
+            viewRecordsResults.style.display = 'block';
+
+            utils.showMessage(`Found ${attendanceSnapshot.size} attendance records for ${selectedDate}`, 'success');
+
+        } catch (error) {
+            console.error('Error fetching attendance records:', error);
+            utils.showMessage('Error fetching attendance records', 'error');
+        }
+    }
+
+    // Render student list by status
+    function renderStudentListByStatus(students, container, status) {
+        if (students.length === 0) {
+            container.innerHTML = '<p style="color: #6b7280; font-style: italic;">No students found</p>';
+            return;
+        }
+
+        let html = '';
+        students.forEach(student => {
+            const statusColor = status === 'present' ? '#22c55e' : 
+                              status === 'absent' ? '#ef4444' : '#f59e42';
+            
+            html += `
+                <div class="student-card" style="
+                    padding: 0.75rem;
+                    margin-bottom: 0.5rem;
+                    border-radius: 6px;
+                    background: white;
+                    border-left: 4px solid ${statusColor};
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                ">
+                    <div style="font-weight: 600; color: #374151;">${student.fullName}</div>
+                    <div style="font-size: 0.875rem; color: #6b7280;">${student.email}</div>
+                    ${student.internshipId ? `<div style="font-size: 0.75rem; color: #9ca3af;">ID: ${student.internshipId}</div>` : ''}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
     }
 
     // Calendar functionality
@@ -2824,6 +2941,14 @@ async function loadAttendanceSection() {
 
     dateInput.onchange = refresh;
     await refresh();
+
+    // View Attendance by Date event handlers
+    viewRecordsBtn.onclick = viewAttendanceRecords;
+    viewAttendanceDate.onchange = () => {
+        // Hide results when date changes
+        viewRecordsSummary.style.display = 'none';
+        viewRecordsResults.style.display = 'none';
+    };
 
     markAllPresentBtn.onclick = () => {
         students.forEach(s => attendanceMap[s.id] = 'present');

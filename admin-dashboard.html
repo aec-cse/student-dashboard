@@ -368,6 +368,77 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- View Attendance by Date Section -->
+            <div class="view-attendance-section" style="margin: 2rem 0; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                <h3 style="margin-bottom: 1rem; color: #2c3e50;">
+                    <i class="fas fa-search"></i> View Attendance by Date
+                </h3>
+                <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                    <label for="view-attendance-date">Select Date:</label>
+                    <input type="date" id="view-attendance-date" />
+                    <button class="btn btn-primary" id="view-records-btn">
+                        <i class="fas fa-eye"></i> View Records
+                    </button>
+                </div>
+                
+                <!-- View Records Summary -->
+                <div id="view-records-summary" style="display: none; margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div class="summary-card present" style="flex: 1; min-width: 120px;">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="summary-info">
+                                <span class="summary-value" id="view-present-count">0</span>
+                                <span class="summary-label">Present</span>
+                            </div>
+                        </div>
+                        <div class="summary-card absent" style="flex: 1; min-width: 120px;">
+                            <i class="fas fa-times-circle"></i>
+                            <div class="summary-info">
+                                <span class="summary-value" id="view-absent-count">0</span>
+                                <span class="summary-label">Absent</span>
+                            </div>
+                        </div>
+                        <div class="summary-card late" style="flex: 1; min-width: 120px;">
+                            <i class="fas fa-clock"></i>
+                            <div class="summary-info">
+                                <span class="summary-value" id="view-late-count">0</span>
+                                <span class="summary-label">Late</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- View Records Results -->
+                <div id="view-records-results" style="display: none;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                        <!-- Present Students -->
+                        <div class="attendance-category" id="present-students-section">
+                            <h4 style="color: #22c55e; margin-bottom: 0.5rem;">
+                                <i class="fas fa-check-circle"></i> Present Students
+                            </h4>
+                            <div class="student-list" id="present-students-list"></div>
+                        </div>
+                        
+                        <!-- Absent Students -->
+                        <div class="attendance-category" id="absent-students-section">
+                            <h4 style="color: #ef4444; margin-bottom: 0.5rem;">
+                                <i class="fas fa-times-circle"></i> Absent Students
+                            </h4>
+                            <div class="student-list" id="absent-students-list"></div>
+                        </div>
+                        
+                        <!-- Late Students -->
+                        <div class="attendance-category" id="late-students-section">
+                            <h4 style="color: #f59e42; margin-bottom: 0.5rem;">
+                                <i class="fas fa-clock"></i> Late Students
+                            </h4>
+                            <div class="student-list" id="late-students-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="calendar-toggle-row">
                 <button class="btn btn-secondary" id="toggle-calendar-view">
                     <i class="fas fa-calendar-alt"></i>
