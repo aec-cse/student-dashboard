@@ -78,18 +78,23 @@ document.getElementById('signature').addEventListener('change', function() {
 
 // Helper: upload file to Cloudinary and return download URL
 async function uploadToCloudinary(file) {
-    const url = 'https://api.cloudinary.com/v1_1/deksu6n47/upload';
-    const preset = 'student_upload';
+    // Updated Cloudinary credentials
+    const url = 'https://api.cloudinary.com/v1_1/dcOndbwnl/upload';
+    const preset = 'stu-mgmt-anusaya'; // unsigned preset
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', preset);
-    const response = await fetch(url, {
-        method: 'POST',
-        body: formData
-    });
-    if (!response.ok) throw new Error('Cloudinary upload failed');
-    const data = await response.json();
-    return data.secure_url;
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) throw new Error('Cloudinary upload failed');
+        const data = await response.json();
+        return data.secure_url;
+    } catch (err) {
+        throw new Error('Cloudinary upload failed: ' + (err.message || 'Unknown error'));
+    }
 }
 
 // Helper: collect checked documents
@@ -191,8 +196,11 @@ form.addEventListener('submit', async (e) => {
         const photographFile = form.photograph.files[0];
         const signatureFile = form.signature.files[0];
         
+        // Validation for missing files
         if (!photographFile || !signatureFile) {
-            throw new Error('Photograph and signature are required.');
+            loadingOverlay.style.display = 'none';
+            alert('Photograph and signature are required.');
+            return;
         }
 
         try {
